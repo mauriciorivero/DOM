@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="encabezado">
+        <div class="encabezado__logo">Mi Sitio</div>
+        <nav class="encabezado__navegacion">
+            <a href="#" class="encabezado__enlace">Inicio</a>
+            <a href="#" class="encabezado__enlace">Servicios</a>
+            <a href="#" class="encabezado__enlace">Contacto</a>
+            <button class="encabezado__boton">Registrarse</button>
+        </nav>
+    </header>
+    <main>
+        <!-- Panel Bento Dashboard -->
+        <section class="panel-bento">
+            <div class="contenedor-bento">
+                <h2 class="titulo-panel">Panel de Control</h2>
+
+                <!-- Tarjeta Grande - Ingresos -->
+                <div class="tarjeta-bento tarjeta-bento--grande">
+                    <div class="encabezado-tarjeta">
+                        <h3 class="titulo-tarjeta">Ingresos Totales</h3>
+                        <span class="icono-tarjeta">💰</span>
+                    </div>
+                    <div class="contenido-tarjeta">
+                        <div class="estadistica">
+                            <div class="numero-estadistica">$45,230</div>
+                            <p class="cambio-estadistica cambio-positivo">↑ 12% vs mes anterior</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta - Usuarios -->
+                <div class="tarjeta-bento">
+                    <div class="encabezado-tarjeta">
+                        <h3 class="titulo-tarjeta">Usuarios Activos</h3>
+                        <span class="icono-tarjeta">👥</span>
+                    </div>
+                    <div class="contenido-tarjeta">
+                        <div class="numero-estadistica">1,285</div>
+                        <p class="texto-secundario">Este mes</p>
+                    </div>
+                </div>
+
+                <!-- Tarjeta - Conversiones -->
+                <div class="tarjeta-bento">
+                    <div class="encabezado-tarjeta">
+                        <h3 class="titulo-tarjeta">Tasa de Conversión</h3>
+                        <span class="icono-tarjeta">📊</span>
+                    </div>
+                    <div class="contenido-tarjeta">
+                        <div class="numero-estadistica">3.45%</div>
+                        <p class="cambio-estadistica cambio-negativo">↓ 0.5% vs mes anterior</p>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Grande - Actividad Reciente -->
+                <div class="tarjeta-bento tarjeta-bento--grande">
+                    <div class="encabezado-tarjeta">
+                        <h3 class="titulo-tarjeta">Actividad Reciente</h3>
+                        <span class="icono-tarjeta">⏱️</span>
+                    </div>
+                    <div class="contenido-tarjeta">
+                        <ul class="lista-actividad">
+                            <li class="item-actividad">
+                                <span class="punto-actividad"></span>
+                                Nuevo usuario registrado: María López
+                                <span class="hora-actividad">Hace 2 horas</span>
+                            </li>
+                            <li class="item-actividad">
+                                <span class="punto-actividad"></span>
+                                Venta completada: $1,250
+                                <span class="hora-actividad">Hace 4 horas</span>
+                            </li>
+                            <li class="item-actividad">
+                                <span class="punto-actividad"></span>
+                                Sistema actualizado correctamente
+                                <span class="hora-actividad">Hace 1 día</span>
+                            </li>
+                            <li class="item-actividad">
+                                <span class="punto-actividad"></span>
+                                Nuevo comentario en publicación
+                                <span class="hora-actividad">Hace 2 días</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tarjeta - Visitantes -->
+                <div class="tarjeta-bento">
+                    <div class="encabezado-tarjeta">
+                        <h3 class="titulo-tarjeta">Visitantes</h3>
+                        <span class="icono-tarjeta">🌐</span>
+                    </div>
+                    <div class="contenido-tarjeta">
+                        <div class="numero-estadistica">8,942</div>
+                        <p class="texto-secundario">Últimos 30 días</p>
+                    </div>
+                </div>
+
+                <!-- Tarjeta - Satisfacción -->
+                <div class="tarjeta-bento">
+                    <div class="encabezado-tarjeta">
+                        <h3 class="titulo-tarjeta">Satisfacción</h3>
+                        <span class="icono-tarjeta">⭐</span>
+                    </div>
+                    <div class="contenido-tarjeta">
+                        <div class="barra-progreso">
+                            <div class="barra-relleno" style="width: 88%;"></div>
+                        </div>
+                        <p class="texto-barra">88% de satisfacción</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="seccion-registro">
+            <div class="contenedor-formulario">
+                <h2 class="titulo-formulario">Registro de Usuario</h2>
+                <form class="formulario-registro">
+                    <div class="grupo-formulario">
+                        <label for="nombre" class="etiqueta-formulario">Nombre Completo</label>
+                        <input type="text" id="nombre" name="nombre" class="entrada-formulario" placeholder="Juan Pérez" required>
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="correo" class="etiqueta-formulario">Correo Electrónico</label>
+                        <input type="email" id="correo" name="correo" class="entrada-formulario" placeholder="tu@correo.com" required>
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="telefono" class="etiqueta-formulario">Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" class="entrada-formulario" placeholder="+34 123 456 789">
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="contrasena" class="etiqueta-formulario">Contraseña</label>
+                        <input type="password" id="contrasena" name="contrasena" class="entrada-formulario" placeholder="Ingresa tu contraseña" required>
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="confirmar-contrasena" class="etiqueta-formulario">Confirmar Contraseña</label>
+                        <input type="password" id="confirmar-contrasena" name="confirmar-contrasena" class="entrada-formulario" placeholder="Confirma tu contraseña" required>
+                    </div>
+
+                    <div class="grupo-formulario grupo-checkbox">
+                        <input type="checkbox" id="terminos" name="terminos" class="entrada-checkbox" required>
+                        <label for="terminos" class="etiqueta-checkbox">Acepto los términos y condiciones</label>
+                    </div>
+
+                    <button type="submit" class="boton-enviar">Registrarse</button>
+                </form>
+                <p class="texto-pie">¿Ya tienes cuenta? <a href="#" class="enlace-pie">Inicia sesión aquí</a></p>
+            </div>
+        </section>
+    </main>
+    <footer></footer>
+</body>
+</html>
