@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de flota</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 3 · Panel de renta de vehículos
+    ----------------------------------------------------------------------
+    Todo está construido y visible a propósito. Al abrir el archivo verás:
+      · el panel lateral #car-detail (con los datos del primer vehículo) y su
+        fondo oscuro #drawer-scrim tapando parte de la pantalla,
+      · el modal #modal-new-rental cubriéndolo todo.
+
+    Tarea del estudiante (JavaScript):
+      1. Al iniciar: ocultar #car-detail, #drawer-scrim y #modal-new-rental.
+      2. Clic en una tarjeta .car-card -> mostrar #car-detail y #drawer-scrim
+         y llenar el panel con los datos del vehículo. La información completa
+         vive en los atributos data-* de cada tarjeta.
+      3. Cerrar el panel (#btn-close-detail o clic en #drawer-scrim).
+      4. Botón #btn-new-rental (o #btn-rent-this-car) -> mostrar el modal con
+         el formulario de nuevo alquiler.
+      5. Cerrar / cancelar el modal y leer los datos del formulario.
+
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <svg class="sprite" aria-hidden="true">
+    <!-- Siluetas de vehículos: el color de la carrocería viene de --car -->
+    <symbol id="car-sedan" viewBox="0 0 200 78">
+      <path d="M10 56V47Q10 42 16 40.5L47 35Q53 34 57 30L73 17Q77 13 84 13H123Q131 13 137 19L152 34Q154 36 158 37L184 41Q192 43 192 49V56Q192 59 188 59H12Q10 59 10 56Z" fill="currentColor" stroke="var(--edge)" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M62 32L76 19.5Q78 18 82 18H97V32ZM103 18H122Q126 18 129 21L141 32H103Z" fill="var(--glass)"/>
+      <g fill="var(--tyre)" stroke="var(--ground)" stroke-width="3"><circle cx="48" cy="59" r="12.5"/><circle cx="154" cy="59" r="12.5"/></g>
+      <g fill="var(--rim)"><circle cx="48" cy="59" r="5"/><circle cx="154" cy="59" r="5"/></g>
+    </symbol>
+    <symbol id="car-suv" viewBox="0 0 200 78">
+      <path d="M8 59V46Q8 41 14 39.5L40 35Q44 34 47 31L60 15Q63 11 69 11H138Q146 11 150 17L162 33Q164 36 168 37L188 41Q194 43 194 49V59Q194 62 190 62H12Q8 62 8 59Z" fill="currentColor" stroke="var(--edge)" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M52 32L63 18Q65 16 69 16H92V32ZM98 16H136Q140 16 142 19L152 32H98Z" fill="var(--glass)"/>
+      <g fill="var(--tyre)" stroke="var(--ground)" stroke-width="3"><circle cx="46" cy="62" r="13"/><circle cx="158" cy="62" r="13"/></g>
+      <g fill="var(--rim)"><circle cx="46" cy="62" r="5.2"/><circle cx="158" cy="62" r="5.2"/></g>
+    </symbol>
+    <symbol id="car-pickup" viewBox="0 0 200 78">
+      <path d="M8 59V46Q8 42 13 41L38 38Q42 37 45 34L56 20Q59 16 64 16H98Q103 16 106 20L112 30H186Q193 30 193 37V59Q193 62 189 62H12Q8 62 8 59Z" fill="currentColor" stroke="var(--edge)" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M50 34L59 23Q61 21 64 21H80V34ZM85 21H97Q100 21 102 24L107 34H85Z" fill="var(--glass)"/>
+      <path d="M118 37H186" stroke="var(--edge)" stroke-width="1.2" fill="none"/>
+      <g fill="var(--tyre)" stroke="var(--ground)" stroke-width="3"><circle cx="44" cy="62" r="13"/><circle cx="158" cy="62" r="13"/></g>
+      <g fill="var(--rim)"><circle cx="44" cy="62" r="5.2"/><circle cx="158" cy="62" r="5.2"/></g>
+    </symbol>
+    <symbol id="car-van" viewBox="0 0 200 78">
+      <path d="M8 59V30Q8 18 20 18H128Q136 18 141 24L158 42Q160 44 164 45L187 48Q193 49 193 54V59Q193 62 189 62H12Q8 62 8 59Z" fill="currentColor" stroke="var(--edge)" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M16 24H58V40H16ZM64 24H96V40H64ZM102 24H126Q130 24 133 28L144 40H102Z" fill="var(--glass)"/>
+      <g fill="var(--tyre)" stroke="var(--ground)" stroke-width="3"><circle cx="46" cy="62" r="13"/><circle cx="150" cy="62" r="13"/></g>
+      <g fill="var(--rim)"><circle cx="46" cy="62" r="5.2"/><circle cx="150" cy="62" r="5.2"/></g>
+    </symbol>
+
+    <!-- Iconos -->
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  </svg>
+
+  <!-- ===================== ENCABEZADO ===================== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-mark"><svg class="icon"><use href="#i-car"/></svg></span>
+        Rodar
+      </div>
+      <nav class="nav" aria-label="Principal">
+        <a href="#" class="is-active" aria-current="page">Panel</a>
+        <a href="#">Flota</a>
+        <a href="#">Alquileres</a>
+        <a href="#">Clientes</a>
+        <a href="#">Mantenimiento</a>
+      </nav>
+      <div class="header-actions">
+        <button type="button" class="btn btn--primary" id="btn-new-rental">
+          <svg class="icon"><use href="#i-plus"/></svg><span>Nuevo alquiler</span>
+        </button>
+        <span class="avatar" aria-label="Sofía Cárdenas">SC</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <div class="page-head">
+      <div>
+        <h1>Panel de flota</h1>
+        <p>Resumen al 13 de octubre de 2026 · 24 vehículos en 4 ciudades</p>
+      </div>
+      <select class="select" id="filter-branch" aria-label="Filtrar por sede">
+        <option>Todas las sedes</option>
+        <option>Bogotá</option>
+        <option>Medellín</option>
+        <option>Cali</option>
+        <option>Cartagena</option>
+      </select>
+    </div>
+
+    <!-- ===================== INDICADORES ===================== -->
+    <section class="kpis" aria-label="Indicadores principales">
+      <article class="card kpi kpi--hero">
+        <p class="kpi-label">Ocupación de la flota</p>
+        <p class="hero-number num">62,5<small> %</small></p>
+        <div class="stacked" role="img" aria-label="15 alquilados, 7 disponibles, 2 en mantenimiento">
+          <span style="--w:15;--c:var(--s1)"></span>
+          <span style="--w:7;--c:var(--s3)"></span>
+          <span style="--w:2;--c:var(--s4)"></span>
+        </div>
+        <ul class="legend">
+          <li><span class="swatch" style="--c:var(--s1)"></span>Alquilados <strong>15</strong></li>
+          <li><span class="swatch" style="--c:var(--s3)"></span>Disponibles <strong>7</strong></li>
+          <li><span class="swatch" style="--c:var(--s4)"></span>Mantenimiento <strong>2</strong></li>
+        </ul>
+      </article>
+
+      <article class="card kpi">
+        <p class="kpi-label">Ingresos del mes</p>
+        <p class="kpi-value num">$48,6 M</p>
+        <span class="delta delta--good"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>8,2 % <span class="muted">vs. septiembre</span></span>
+        <p class="kpi-note">Octubre a la fecha</p>
+      </article>
+
+      <article class="card kpi">
+        <p class="kpi-label">Devoluciones esta semana</p>
+        <p class="kpi-value num">6</p>
+        <span class="delta delta--warn"><svg class="icon icon-sm"><use href="#i-alert"/></svg>2 <span class="muted">con riesgo de retraso</span></span>
+        <p class="kpi-note">Del 13 al 19 de octubre</p>
+      </article>
+
+      <article class="card kpi">
+        <p class="kpi-label">Calificación promedio</p>
+        <p class="kpi-value num">4,7<small> / 5</small></p>
+        <p class="kpi-note">126 reseñas · últimos 90 días</p>
+      </article>
+
+      <article class="card kpi">
+        <p class="kpi-label">Próximos mantenimientos</p>
+        <p class="kpi-value num">3</p>
+        <p class="kpi-note">En los próximos 15 días</p>
+      </article>
+    </section>
+
+    <!-- ===================== GRÁFICOS ===================== -->
+    <section class="charts" aria-label="Gráficos de desempeño">
+      <article class="card panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Ingresos por mes</h2>
+            <p class="panel-note">Millones de COP · octubre a la fecha</p>
+          </div>
+        </div>
+        <div class="col-chart" role="img" aria-label="Ingresos mensuales en millones de pesos: mayo 38,2; junio 41,5; julio 52,8; agosto 47,3; septiembre 44,9; octubre 48,6">
+          <div class="y-axis"><span>60</span><span>40</span><span>20</span><span>0</span></div>
+          <div class="plot">
+            <div class="bar" style="--v:64" title="Mayo: $38,2 M"></div>
+            <div class="bar" style="--v:69" title="Junio: $41,5 M"></div>
+            <div class="bar" style="--v:88" title="Julio: $52,8 M"><span class="bar-value">52,8</span></div>
+            <div class="bar" style="--v:79" title="Agosto: $47,3 M"></div>
+            <div class="bar" style="--v:75" title="Septiembre: $44,9 M"></div>
+            <div class="bar bar--current" style="--v:81" title="Octubre: $48,6 M"><span class="bar-value">48,6</span></div>
+          </div>
+          <div class="x-axis"><span>may</span><span>jun</span><span>jul</span><span>ago</span><span>sep</span><span>oct</span></div>
+        </div>
+      </article>
+
+      <article class="card panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Ocupación por categoría</h2>
+            <p class="panel-note">Porcentaje de días alquilados, últimos 30 días</p>
+          </div>
+        </div>
+        <ul class="hbars">
+          <li class="hbar"><span class="hbar-label">Económico</span><span class="hbar-track"><span class="hbar-fill hbar-fill--top" style="--v:78"></span></span><span class="hbar-value">78 %</span></li>
+          <li class="hbar"><span class="hbar-label">SUV</span><span class="hbar-track"><span class="hbar-fill" style="--v:71"></span></span><span class="hbar-value">71 %</span></li>
+          <li class="hbar"><span class="hbar-label">Sedán</span><span class="hbar-track"><span class="hbar-fill" style="--v:64"></span></span><span class="hbar-value">64 %</span></li>
+          <li class="hbar"><span class="hbar-label">Camioneta</span><span class="hbar-track"><span class="hbar-fill" style="--v:52"></span></span><span class="hbar-value">52 %</span></li>
+          <li class="hbar"><span class="hbar-label">Van</span><span class="hbar-track"><span class="hbar-fill" style="--v:45"></span></span><span class="hbar-value">45 %</span></li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- ===================== FLOTA ===================== -->
+    <section aria-labelledby="fleet-title">
+      <div class="fleet-head">
+        <h2 id="fleet-title">Flota <span class="num">24 vehículos</span></h2>
+        <div class="fleet-tools">
+          <div class="filters" role="group" aria-label="Filtrar por estado">
+            <button type="button" class="filter is-active" data-filter="all">Todos <span class="count">24</span></button>
+            <button type="button" class="filter" data-filter="Disponible">Disponibles <span class="count">7</span></button>
+            <button type="button" class="filter" data-filter="Alquilado">Alquilados <span class="count">15</span></button>
+            <button type="button" class="filter" data-filter="Mantenimiento">Mantenimiento <span class="count">2</span></button>
+          </div>
+          <div class="search">
+            <svg class="icon"><use href="#i-search"/></svg>
+            <input type="search" id="search-car" placeholder="Buscar vehículo" aria-label="Buscar vehículo">
+          </div>
+        </div>
+      </div>
+
+      <div class="fleet-grid" id="fleet-grid">
+
+        <article class="car-card is-selected" tabindex="0"
+                 data-id="1"
+                 data-name="Toyota Corolla Cross"
+                 data-brand="Toyota"
+                 data-model="Corolla Cross"
+                 data-year="2024"
+                 data-plate="NQK 214"
+                 data-category="SUV"
+                 data-color="Blanco perla"
+                 data-color-hex="#f4f2ec"
+                 data-body="suv"
+                 data-transmission="Automática"
+                 data-fuel="Híbrido"
+                 data-seats="5"
+                 data-bags="3"
+                 data-km="18450"
+                 data-branch="Bogotá · Chapinero"
+                 data-rate-day="180000"
+                 data-rate-week="1100000"
+                 data-rate-month="4000000"
+                 data-status="Alquilado"
+                 data-status-note="Devuelve el 16 oct"
+                 data-revenue-year="38400000"
+                 data-occupancy="70"
+                 data-rating="4.8"
+                 data-reviews="32"
+                 data-rentals="46"
+                 data-soat="2027-02-14"
+                 data-techno="2027-05-02"
+                 data-last-service="2026-08-22"
+                 data-next-service="2027-02-22"
+                 data-last-service-km="10000"
+                 data-next-service-km="20000"
+                 data-monthly="18,22,27,25,21,11">
+          <div class="car-media" style="--car:#f4f2ec">
+            <span class="status-badge status-badge--rented">Alquilado</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Toyota Corolla Cross blanco perla"><use href="#car-suv"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">SUV</span>
+            <h3 class="car-name">Toyota Corolla Cross</h3>
+            <p class="car-meta">2024 · Automática · Híbrido</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$180.000</strong> / día</span>
+              <span class="plate">NQK 214</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="car-card" tabindex="0"
+                 data-id="2"
+                 data-name="Chevrolet Onix"
+                 data-brand="Chevrolet"
+                 data-model="Onix"
+                 data-year="2023"
+                 data-plate="KLM 508"
+                 data-category="Económico"
+                 data-color="Gris"
+                 data-color-hex="#9a9a96"
+                 data-body="sedan"
+                 data-transmission="Manual"
+                 data-fuel="Gasolina"
+                 data-seats="5"
+                 data-bags="2"
+                 data-km="32100"
+                 data-branch="Medellín · El Poblado"
+                 data-rate-day="95000"
+                 data-rate-week="580000"
+                 data-rate-month="2100000"
+                 data-status="Disponible"
+                 data-status-note="Disponible en sede"
+                 data-revenue-year="24800000"
+                 data-occupancy="58"
+                 data-rating="4.5"
+                 data-reviews="51"
+                 data-rentals="78"
+                 data-soat="2026-11-03"
+                 data-techno="2027-03-18"
+                 data-last-service="2026-09-05"
+                 data-next-service="2027-03-05"
+                 data-last-service-km="30000"
+                 data-next-service-km="40000"
+                 data-monthly="15,19,24,22,17,8">
+          <div class="car-media" style="--car:#9a9a96">
+            <span class="status-badge status-badge--available">Disponible</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Chevrolet Onix gris"><use href="#car-sedan"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">Económico</span>
+            <h3 class="car-name">Chevrolet Onix</h3>
+            <p class="car-meta">2023 · Manual · Gasolina</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$95.000</strong> / día</span>
+              <span class="plate">KLM 508</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="car-card" tabindex="0"
+                 data-id="3"
+                 data-name="Mazda 3 Touring"
+                 data-brand="Mazda"
+                 data-model="3 Touring"
+                 data-year="2024"
+                 data-plate="PRT 931"
+                 data-category="Sedán"
+                 data-color="Rojo"
+                 data-color-hex="#b3262d"
+                 data-body="sedan"
+                 data-transmission="Automática"
+                 data-fuel="Gasolina"
+                 data-seats="5"
+                 data-bags="3"
+                 data-km="14800"
+                 data-branch="Bogotá · Aeropuerto"
+                 data-rate-day="140000"
+                 data-rate-week="860000"
+                 data-rate-month="3100000"
+                 data-status="Alquilado"
+                 data-status-note="Devuelve el 18 oct"
+                 data-revenue-year="31200000"
+                 data-occupancy="76"
+                 data-rating="4.9"
+                 data-reviews="28"
+                 data-rentals="39"
+                 data-soat="2027-01-21"
+                 data-techno="2027-06-11"
+                 data-last-service="2026-07-14"
+                 data-next-service="2027-01-14"
+                 data-last-service-km="10000"
+                 data-next-service-km="20000"
+                 data-monthly="20,23,28,26,22,12">
+          <div class="car-media" style="--car:#b3262d">
+            <span class="status-badge status-badge--rented">Alquilado</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Mazda 3 Touring rojo"><use href="#car-sedan"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">Sedán</span>
+            <h3 class="car-name">Mazda 3 Touring</h3>
+            <p class="car-meta">2024 · Automática · Gasolina</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$140.000</strong> / día</span>
+              <span class="plate">PRT 931</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="car-card" tabindex="0"
+                 data-id="4"
+                 data-name="Renault Duster"
+                 data-brand="Renault"
+                 data-model="Duster"
+                 data-year="2023"
+                 data-plate="HJD 377"
+                 data-category="SUV"
+                 data-color="Gris plomo"
+                 data-color-hex="#5d6168"
+                 data-body="suv"
+                 data-transmission="Automática"
+                 data-fuel="Gasolina"
+                 data-seats="5"
+                 data-bags="3"
+                 data-km="27300"
+                 data-branch="Cali · Granada"
+                 data-rate-day="150000"
+                 data-rate-week="920000"
+                 data-rate-month="3300000"
+                 data-status="Disponible"
+                 data-status-note="Disponible en sede"
+                 data-revenue-year="27900000"
+                 data-occupancy="64"
+                 data-rating="4.4"
+                 data-reviews="44"
+                 data-rentals="61"
+                 data-soat="2026-12-09"
+                 data-techno="2027-04-25"
+                 data-last-service="2026-08-30"
+                 data-next-service="2027-02-28"
+                 data-last-service-km="20000"
+                 data-next-service-km="30000"
+                 data-monthly="17,20,25,21,18,9">
+          <div class="car-media" style="--car:#5d6168">
+            <span class="status-badge status-badge--available">Disponible</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Renault Duster gris plomo"><use href="#car-suv"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">SUV</span>
+            <h3 class="car-name">Renault Duster</h3>
+            <p class="car-meta">2023 · Automática · Gasolina</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$150.000</strong> / día</span>
+              <span class="plate">HJD 377</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="car-card" tabindex="0"
+                 data-id="5"
+                 data-name="Toyota Hilux 4x4"
+                 data-brand="Toyota"
+                 data-model="Hilux 4x4"
+                 data-year="2023"
+                 data-plate="WXA 640"
+                 data-category="Camioneta"
+                 data-color="Negro"
+                 data-color-hex="#1f1f20"
+                 data-body="pickup"
+                 data-transmission="Automática"
+                 data-fuel="Diésel"
+                 data-seats="5"
+                 data-bags="5"
+                 data-km="41900"
+                 data-branch="Bogotá · Chapinero"
+                 data-rate-day="260000"
+                 data-rate-week="1600000"
+                 data-rate-month="5800000"
+                 data-status="Alquilado"
+                 data-status-note="Devuelve el 20 oct"
+                 data-revenue-year="46500000"
+                 data-occupancy="81"
+                 data-rating="4.7"
+                 data-reviews="37"
+                 data-rentals="52"
+                 data-soat="2027-03-30"
+                 data-techno="2027-08-14"
+                 data-last-service="2026-09-02"
+                 data-next-service="2027-03-02"
+                 data-last-service-km="40000"
+                 data-next-service-km="50000"
+                 data-monthly="22,25,29,27,24,12">
+          <div class="car-media" style="--car:#1f1f20">
+            <span class="status-badge status-badge--rented">Alquilado</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Toyota Hilux 4x4 negro"><use href="#car-pickup"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">Camioneta</span>
+            <h3 class="car-name">Toyota Hilux 4x4</h3>
+            <p class="car-meta">2023 · Automática · Diésel</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$260.000</strong> / día</span>
+              <span class="plate">WXA 640</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="car-card" tabindex="0"
+                 data-id="6"
+                 data-name="Kia Carnival"
+                 data-brand="Kia"
+                 data-model="Carnival"
+                 data-year="2024"
+                 data-plate="BCN 125"
+                 data-category="Van"
+                 data-color="Azul noche"
+                 data-color-hex="#1f3a5f"
+                 data-body="van"
+                 data-transmission="Automática"
+                 data-fuel="Gasolina"
+                 data-seats="7"
+                 data-bags="5"
+                 data-km="9600"
+                 data-branch="Medellín · El Poblado"
+                 data-rate-day="320000"
+                 data-rate-week="2000000"
+                 data-rate-month="7200000"
+                 data-status="Disponible"
+                 data-status-note="Disponible en sede"
+                 data-revenue-year="29700000"
+                 data-occupancy="49"
+                 data-rating="4.9"
+                 data-reviews="19"
+                 data-rentals="24"
+                 data-soat="2027-02-12"
+                 data-techno="2027-09-08"
+                 data-last-service="2026-07-15"
+                 data-next-service="2027-01-15"
+                 data-last-service-km="5000"
+                 data-next-service-km="15000"
+                 data-monthly="12,15,20,18,14,6">
+          <div class="car-media" style="--car:#1f3a5f">
+            <span class="status-badge status-badge--available">Disponible</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Kia Carnival azul noche"><use href="#car-van"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">Van</span>
+            <h3 class="car-name">Kia Carnival</h3>
+            <p class="car-meta">2024 · Automática · Gasolina</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$320.000</strong> / día</span>
+              <span class="plate">BCN 125</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="car-card" tabindex="0"
+                 data-id="7"
+                 data-name="Hyundai Accent"
+                 data-brand="Hyundai"
+                 data-model="Accent"
+                 data-year="2022"
+                 data-plate="TFV 806"
+                 data-category="Económico"
+                 data-color="Plata"
+                 data-color-hex="#c9c9c4"
+                 data-body="sedan"
+                 data-transmission="Manual"
+                 data-fuel="Gasolina"
+                 data-seats="5"
+                 data-bags="2"
+                 data-km="52700"
+                 data-branch="Cartagena · Bocagrande"
+                 data-rate-day="90000"
+                 data-rate-week="550000"
+                 data-rate-month="2000000"
+                 data-status="Mantenimiento"
+                 data-status-note="En taller hasta el 15 oct"
+                 data-revenue-year="19600000"
+                 data-occupancy="52"
+                 data-rating="4.2"
+                 data-reviews="63"
+                 data-rentals="91"
+                 data-soat="2026-11-25"
+                 data-techno="2027-01-06"
+                 data-last-service="2026-10-11"
+                 data-next-service="2027-04-11"
+                 data-last-service-km="50000"
+                 data-next-service-km="60000"
+                 data-monthly="14,16,21,19,15,3">
+          <div class="car-media" style="--car:#c9c9c4">
+            <span class="status-badge status-badge--maintenance">Mantenimiento</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Hyundai Accent plata"><use href="#car-sedan"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">Económico</span>
+            <h3 class="car-name">Hyundai Accent</h3>
+            <p class="car-meta">2022 · Manual · Gasolina</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$90.000</strong> / día</span>
+              <span class="plate">TFV 806</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="car-card" tabindex="0"
+                 data-id="8"
+                 data-name="Mazda CX-5"
+                 data-brand="Mazda"
+                 data-model="CX-5"
+                 data-year="2024"
+                 data-plate="RSD 459"
+                 data-category="SUV"
+                 data-color="Gris grafito"
+                 data-color-hex="#3d4047"
+                 data-body="suv"
+                 data-transmission="Automática"
+                 data-fuel="Gasolina"
+                 data-seats="5"
+                 data-bags="4"
+                 data-km="11200"
+                 data-branch="Cartagena · Bocagrande"
+                 data-rate-day="230000"
+                 data-rate-week="1450000"
+                 data-rate-month="5200000"
+                 data-status="Alquilado"
+                 data-status-note="Devuelve el 17 oct"
+                 data-revenue-year="35100000"
+                 data-occupancy="72"
+                 data-rating="4.8"
+                 data-reviews="23"
+                 data-rentals="33"
+                 data-soat="2027-03-05"
+                 data-techno="2027-07-19"
+                 data-last-service="2026-07-20"
+                 data-next-service="2027-01-20"
+                 data-last-service-km="10000"
+                 data-next-service-km="20000"
+                 data-monthly="19,22,26,24,21,10">
+          <div class="car-media" style="--car:#3d4047">
+            <span class="status-badge status-badge--rented">Alquilado</span>
+            <svg class="car-svg" viewBox="0 0 200 78" role="img" aria-label="Mazda CX-5 gris grafito"><use href="#car-suv"/></svg>
+          </div>
+          <div class="car-body">
+            <span class="car-cat">SUV</span>
+            <h3 class="car-name">Mazda CX-5</h3>
+            <p class="car-meta">2024 · Automática · Gasolina</p>
+            <div class="car-foot">
+              <span class="car-price"><strong>$230.000</strong> / día</span>
+              <span class="plate">RSD 459</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <p class="fleet-foot num">Mostrando 8 de 24 vehículos</p>
+    </section>
+  </main>
+
+
+  <!-- ======================================================================
+       PANEL LATERAL · DETALLE DEL VEHÍCULO
+       (los datos de abajo son de ejemplo: vehículo 1)
+       ====================================================================== -->
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+
+  <aside class="drawer" id="car-detail" aria-label="Detalle del vehículo">
+    <header class="drawer-head">
+      <h2>Detalle del vehículo</h2>
+      <button type="button" class="icon-button" id="btn-close-detail" aria-label="Cerrar detalle">
+        <svg class="icon"><use href="#i-x"/></svg>
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <div class="car-media drawer-media" id="car-media" style="--car:#f4f2ec">
+        <span class="status-badge status-badge--rented" id="car-status">Alquilado</span>
+        <svg class="car-svg" id="car-image" viewBox="0 0 200 78" role="img" aria-label="Toyota Corolla Cross"><use href="#car-suv"/></svg>
+      </div>
+
+      <div class="detail-title">
+        <span class="car-cat" id="car-category">SUV</span>
+        <h2 id="car-name">Toyota Corolla Cross 2024</h2>
+        <div class="chips">
+          <span class="plate" id="car-plate">NQK 214</span>
+          <span class="chip" id="car-status-note">Devuelve el 16 oct</span>
+          <span class="chip" id="car-branch">Bogotá · Chapinero</span>
+        </div>
+      </div>
+
+      <section class="drawer-section" aria-labelledby="rates-title">
+        <h3 id="rates-title">Tarifas</h3>
+        <div class="rates">
+          <div class="rate rate--main"><span>Por día</span><strong id="car-rate-day">$180.000</strong></div>
+          <div class="rate"><span>Por semana</span><strong id="car-rate-week">$1.100.000</strong></div>
+          <div class="rate"><span>Por mes</span><strong id="car-rate-month">$4.000.000</strong></div>
+        </div>
+      </section>
+
+      <section class="drawer-section" aria-labelledby="specs-title">
+        <h3 id="specs-title">Especificaciones</h3>
+        <dl class="spec-grid">
+          <div><dt>Año</dt><dd id="car-year">2024</dd></div>
+          <div><dt>Color</dt><dd id="car-color">Blanco perla</dd></div>
+          <div><dt>Transmisión</dt><dd id="car-transmission">Automática</dd></div>
+          <div><dt>Combustible</dt><dd id="car-fuel">Híbrido</dd></div>
+          <div><dt>Pasajeros</dt><dd id="car-seats">5 personas</dd></div>
+          <div><dt>Maletas</dt><dd id="car-bags">3 maletas</dd></div>
+          <div><dt>Kilometraje</dt><dd class="num" id="car-km">18.450 km</dd></div>
+          <div><dt>Placa</dt><dd id="car-plate-spec">NQK 214</dd></div>
+        </dl>
+      </section>
+
+      <section class="drawer-section" aria-labelledby="docs-title">
+        <h3 id="docs-title">Documentos y mantenimiento</h3>
+        <dl class="spec-grid">
+          <div><dt>SOAT vence</dt><dd id="car-soat">14 feb 2027</dd></div>
+          <div><dt>Tecnomecánica vence</dt><dd id="car-techno">2 may 2027</dd></div>
+          <div><dt>Último mantenimiento</dt><dd id="car-last-service">22 ago 2026</dd></div>
+          <div><dt>Próximo mantenimiento</dt><dd id="car-next-service">22 feb 2027</dd></div>
+        </dl>
+        <p class="service-line"><span>Servicio cada 10.000 km · faltan <strong class="num" id="car-service-left">1.550 km</strong></span><strong class="num" id="car-service-pct">85 %</strong></p>
+        <div class="meter meter--warn"><span id="car-service-bar" style="--v:85"></span></div>
+      </section>
+
+      <section class="drawer-section" aria-labelledby="perf-title">
+        <h3 id="perf-title">Rendimiento del vehículo</h3>
+        <div class="metric-grid">
+          <div class="metric"><span>Ingresos del año</span><strong id="car-revenue">$38.400.000</strong></div>
+          <div class="metric"><span>Alquileres totales</span><strong id="car-rentals">46</strong></div>
+          <div class="metric"><span>Ocupación, últimos 30 días</span><strong id="car-occupancy">70 %</strong><div class="meter"><span id="car-occupancy-bar" style="--v:70"></span></div></div>
+          <div class="metric"><span>Calificación</span><strong><span id="car-rating">4,8</span> <small>/ 5 · <span id="car-reviews">32</span> reseñas</small></strong></div>
+        </div>
+
+        <p class="panel-title" style="margin-bottom:14px;font-size:.875rem">Días alquilado por mes <span class="panel-note" style="font-weight:400">· octubre a la fecha</span></p>
+        <div class="col-chart col-chart--sm" role="img" aria-label="Días alquilado por mes: may 18, jun 22, jul 27, ago 25, sep 21, oct 11">
+          <div class="y-axis"><span>30</span><span>15</span><span>0</span></div>
+          <div class="plot">
+            <div class="bar" id="car-month-bar-1" style="--v:60"></div>
+            <div class="bar" id="car-month-bar-2" style="--v:73"></div>
+            <div class="bar" id="car-month-bar-3" style="--v:90"><span class="bar-value" id="car-month-value-3">27</span></div>
+            <div class="bar" id="car-month-bar-4" style="--v:83"></div>
+            <div class="bar" id="car-month-bar-5" style="--v:70"></div>
+            <div class="bar bar--current" id="car-month-bar-6" style="--v:37"><span class="bar-value" id="car-month-value-6">11</span></div>
+          </div>
+          <div class="x-axis"><span>may</span><span>jun</span><span>jul</span><span>ago</span><span>sep</span><span>oct</span></div>
+        </div>
+      </section>
+
+      <section class="drawer-section" aria-labelledby="history-title">
+        <h3 id="history-title">Últimos alquileres</h3>
+        <table class="history">
+          <thead><tr><th>Cliente</th><th>Fechas</th><th class="right">Días</th><th class="right">Valor</th></tr></thead>
+          <tbody id="car-history">
+            <tr><td><span class="who">Carolina Zapata</span><span class="tag">En curso</span></td><td>10 – 16 oct</td><td class="right">6</td><td class="right">$1.080.000</td></tr>
+            <tr><td><span class="who">Felipe Arango</span></td><td>28 sep – 3 oct</td><td class="right">5</td><td class="right">$900.000</td></tr>
+            <tr><td><span class="who">Mónica Henao</span></td><td>12 – 21 sep</td><td class="right">9</td><td class="right">$1.460.000</td></tr>
+            <tr><td><span class="who">Ricardo Bedoya</span></td><td>30 ago – 2 sep</td><td class="right">3</td><td class="right">$540.000</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <footer class="drawer-foot">
+      <button type="button" class="btn btn--primary btn--block" id="btn-rent-this-car">
+        <svg class="icon"><use href="#i-plus"/></svg>Nuevo alquiler con este vehículo
+      </button>
+    </footer>
+  </aside>
+
+
+  <!-- ======================================================================
+       MODAL · NUEVO ALQUILER
+       ====================================================================== -->
+  <div class="modal-overlay" id="modal-new-rental">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-rental-title">
+
+      <header class="modal-head">
+        <div>
+          <h2 id="modal-rental-title">Nuevo alquiler</h2>
+          <p>Registra los datos del cliente, el vehículo y las fechas del servicio.</p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-modal" aria-label="Cerrar formulario">
+          <svg class="icon"><use href="#i-x"/></svg>
+        </button>
+      </header>
+
+      <form id="new-rental-form" style="display:contents">
+        <div class="modal-body">
+
+          <div class="form-col">
+            <fieldset class="form-section">
+              <legend>Cliente</legend>
+              <div class="form-grid">
+                <div class="field field--full">
+                  <label for="rent-customer">Nombre completo <span class="req">*</span></label>
+                  <input class="input" type="text" id="rent-customer" name="customer" placeholder="Ej. Carolina Zapata Ríos" required>
+                </div>
+                <div class="field">
+                  <label for="rent-doc-number">Documento <span class="req">*</span></label>
+                  <div class="input-group">
+                    <select class="select" id="rent-doc-type" name="docType" aria-label="Tipo de documento">
+                      <option>CC</option>
+                      <option>CE</option>
+                      <option>Pasaporte</option>
+                    </select>
+                    <input class="input" type="text" id="rent-doc-number" name="docNumber" inputmode="numeric" placeholder="1.020.345.678" required>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="rent-phone">Teléfono <span class="req">*</span></label>
+                  <input class="input" type="tel" id="rent-phone" name="phone" placeholder="+57 300 000 0000" required>
+                </div>
+                <div class="field field--full">
+                  <label for="rent-email">Correo electrónico</label>
+                  <input class="input" type="email" id="rent-email" name="email" placeholder="nombre@correo.com">
+                </div>
+                <div class="field">
+                  <label for="rent-license">N.º de licencia de conducción <span class="req">*</span></label>
+                  <input class="input" type="text" id="rent-license" name="license" placeholder="Ej. 1020345678" required>
+                </div>
+                <div class="field">
+                  <label for="rent-license-expiry">Vencimiento de la licencia <span class="req">*</span></label>
+                  <input class="input" type="date" id="rent-license-expiry" name="licenseExpiry" required>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Vehículo y fechas</legend>
+              <div class="form-grid">
+                <div class="field field--full">
+                  <label for="rent-car">Vehículo <span class="req">*</span></label>
+                  <select class="select" id="rent-car" name="car" required>
+                    <option value="">Selecciona un vehículo</option>
+                    <option value="1" disabled>Toyota Corolla Cross 2024 · NQK 214 (alquilado)</option>
+                    <option value="2" selected>Chevrolet Onix 2023 · KLM 508 · $95.000/día</option>
+                    <option value="3" disabled>Mazda 3 Touring 2024 · PRT 931 (alquilado)</option>
+                    <option value="4">Renault Duster 2023 · HJD 377 · $150.000/día</option>
+                    <option value="5" disabled>Toyota Hilux 4x4 2023 · WXA 640 (alquilado)</option>
+                    <option value="6">Kia Carnival 2024 · BCN 125 · $320.000/día</option>
+                    <option value="7" disabled>Hyundai Accent 2022 · TFV 806 (mantenimiento)</option>
+                    <option value="8" disabled>Mazda CX-5 2024 · RSD 459 (alquilado)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="rent-start">Recogida <span class="req">*</span></label>
+                  <input class="input" type="date" id="rent-start" name="startDate" value="2026-10-14" required>
+                </div>
+                <div class="field">
+                  <label for="rent-end">Devolución <span class="req">*</span></label>
+                  <input class="input" type="date" id="rent-end" name="endDate" value="2026-10-18" required>
+                </div>
+                <div class="field">
+                  <label for="rent-pickup">Sede de recogida</label>
+                  <select class="select" id="rent-pickup" name="pickup">
+                    <option>Medellín · El Poblado</option>
+                    <option>Bogotá · Aeropuerto</option>
+                    <option>Bogotá · Chapinero</option>
+                    <option>Cali · Granada</option>
+                    <option>Cartagena · Bocagrande</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="rent-dropoff">Sede de devolución</label>
+                  <select class="select" id="rent-dropoff" name="dropoff">
+                    <option>Medellín · El Poblado</option>
+                    <option>Bogotá · Aeropuerto</option>
+                    <option>Bogotá · Chapinero</option>
+                    <option>Cali · Granada</option>
+                    <option>Cartagena · Bocagrande</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Seguro, extras y pago</legend>
+              <div class="form-grid">
+                <div class="field field--full">
+                  <span class="label" id="rent-insurance-label">Seguro</span>
+                  <div class="segmented" role="radiogroup" aria-labelledby="rent-insurance-label">
+                    <label><input type="radio" name="insurance" value="basico"><span>Básico</span></label>
+                    <label><input type="radio" name="insurance" value="completo" checked><span>Completo</span></label>
+                    <label><input type="radio" name="insurance" value="premium"><span>Premium</span></label>
+                  </div>
+                </div>
+                <div class="field field--full">
+                  <span class="label" id="rent-extras-label">Extras</span>
+                  <div class="checks" role="group" aria-labelledby="rent-extras-label">
+                    <label class="check"><input type="checkbox" name="extras" value="gps" checked>GPS<small>$8.000/día</small></label>
+                    <label class="check"><input type="checkbox" name="extras" value="baby-seat">Silla para bebé<small>$10.000/día</small></label>
+                    <label class="check"><input type="checkbox" name="extras" value="extra-driver">Conductor adicional<small>$15.000/día</small></label>
+                    <label class="check"><input type="checkbox" name="extras" value="full-tank">Tanque lleno<small>$90.000</small></label>
+                  </div>
+                </div>
+                <div class="field field--full">
+                  <label for="rent-payment">Método de pago</label>
+                  <select class="select" id="rent-payment" name="payment">
+                    <option>Tarjeta de crédito</option>
+                    <option>Tarjeta débito</option>
+                    <option>PSE</option>
+                    <option>Efectivo en sede</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+
+          <aside class="summary" aria-labelledby="summary-title">
+            <h3 id="summary-title">Resumen del alquiler</h3>
+            <div class="summary-car" style="--car:#9a9a96">
+              <div class="car-media" style="width:92px;height:56px;padding:0 6px 10px;border-radius:10px;flex:none"><svg class="car-svg" viewBox="0 0 200 78"><use href="#car-sedan"/></svg></div>
+              <div><strong id="summary-car-name">Chevrolet Onix 2023</strong><span id="summary-car-plate">KLM 508</span></div>
+            </div>
+            <dl>
+              <div><dt>Duración</dt><dd id="summary-days">4 días</dd></div>
+              <div><dt>Tarifa (4 × $95.000)</dt><dd id="summary-base">$380.000</dd></div>
+              <div><dt>Seguro completo</dt><dd id="summary-insurance">$60.000</dd></div>
+              <div><dt>Extras</dt><dd id="summary-extras">$32.000</dd></div>
+              <div class="total"><dt>Total</dt><dd id="summary-total">$472.000</dd></div>
+            </dl>
+            <p class="summary-note">Valores de ejemplo: calcúlalos con JavaScript según el vehículo, las fechas y las opciones elegidas.</p>
+          </aside>
+
+        </div>
+
+        <footer class="modal-foot">
+          <button type="button" class="btn" id="btn-cancel-rental">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btn-save-rental">Registrar alquiler</button>
+        </footer>
+      </form>
+
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barrio Supply · Productos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 5 · Admin de productos de moda urbana (estilo neo-brutalista)
+    ----------------------------------------------------------------------
+    Todo está construido y visible a propósito. Al abrir el archivo verás:
+      · el mensaje #product-empty Y la ficha #product-detail al mismo tiempo,
+      · el modal #modal-new-product cubriendo toda la pantalla.
+
+    Tarea del estudiante (JavaScript):
+      1. Al iniciar: ocultar #product-detail y #modal-new-product.
+      2. Clic en una fila .product-row -> ocultar #product-empty, mostrar
+         #product-detail y llenarlo con los data-* de esa fila.
+      3. Botón #btn-new-product -> mostrar el modal con el formulario.
+      4. Actualizar la vista previa mientras se escribe en el formulario.
+
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <svg class="sprite" aria-hidden="true">
+    <!-- Prendas -->
+    <symbol id="i-hoodie" viewBox="0 0 24 24"><path d="M8 4L3 8l2 5 3-1v9h8v-9l3 1 2-5-5-4"/><path d="M8 4c0 3 2 5 4 5s4-2 4-5"/><path d="M10 14h4"/></symbol>
+    <symbol id="i-tee" viewBox="0 0 24 24"><path d="M8 3L3 6l2 4 3-1v12h8V9l3 1 2-4-5-3c0 2-2 3-4 3S8 5 8 3z"/></symbol>
+    <symbol id="i-pants" viewBox="0 0 24 24"><path d="M6 2h12l1 20h-5l-2-12-2 12H5z"/><path d="M6 6h12"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path d="M3 15a9 8 0 0 1 18 0z"/><path d="M15 15h7"/><path d="M12 7V5"/></symbol>
+    <symbol id="i-sneaker" viewBox="0 0 24 24"><path d="M2 18V9l5 2 3-3 3 3c2 2 5 2 7 3s2 4 2 4z"/><path d="M2 21h20"/><path d="M8 13l2-1M10 15l2-1"/></symbol>
+    <symbol id="i-jacket" viewBox="0 0 24 24"><path d="M8 3L3 7v14h5M16 3l5 4v14h-5"/><path d="M8 3l4 4 4-4"/><path d="M12 7v14"/><path d="M8 21h8"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="10" rx="4"/><path d="M3 13h18"/><path d="M1 11h2M21 11h2"/></symbol>
+    <symbol id="i-socks" viewBox="0 0 24 24"><path d="M9 2h6v10l3 4a3 3 0 0 1-4 4l-5-5z"/><path d="M9 6h6"/></symbol>
+    <!-- Interfaz -->
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4"/><path d="M12 11v10"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h3l3 12h10l2-8H7"/><circle cx="10" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 4a4 4 0 0 1 0 8"/><path d="M19 14c2 1 3 3 3 7"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 3h9l9 9-9 9-9-9z"/><circle cx="8" cy="8" r="1.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M4 12h16"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M5 5l14 14"/><path d="M19 5L5 19"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7"/><path d="M15 15l7 7"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M6 10l6-6 6 6"/><path d="M4 20h16"/></symbol>
+  </svg>
+
+  <div class="app">
+
+    <!-- ===================== BARRA LATERAL ===================== -->
+    <aside class="sidebar">
+      <div class="brand">Barrio<br>Supply Co.<small>ADMIN · TIENDA ONLINE</small></div>
+      <nav class="nav" aria-label="Principal">
+        <a href="#"><svg class="icon"><use href="#i-grid"/></svg>Resumen</a>
+        <a href="#" class="is-active" aria-current="page"><svg class="icon"><use href="#i-box"/></svg>Productos</a>
+        <a href="#"><svg class="icon"><use href="#i-cart"/></svg>Pedidos</a>
+        <a href="#"><svg class="icon"><use href="#i-users"/></svg>Clientes</a>
+        <a href="#"><svg class="icon"><use href="#i-tag"/></svg>Descuentos</a>
+      </nav>
+      <div class="sidebar-card">
+        <strong>DROP 07 · NOV</strong>
+        Lanzamiento de la colección "Concreto" el 6 de noviembre.
+      </div>
+    </aside>
+
+    <!-- ===================== CONTENIDO ===================== -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Inventario de <mark>productos</mark></h1>
+          <p>// actualizado el 13.10.2026 · 8 de 64 referencias</p>
+        </div>
+        <button type="button" class="btn btn--yellow" id="btn-new-product"><svg class="icon"><use href="#i-plus"/></svg>Nuevo producto</button>
+      </header>
+
+      <section class="kpis" aria-label="Indicadores">
+        <article class="kpi"><p class="kpi-label">Ventas · 30 días</p><p class="kpi-value num">$38,4 M</p><p class="kpi-note">▲ 12 % vs. mes anterior</p></article>
+        <article class="kpi"><p class="kpi-label">Pedidos</p><p class="kpi-value num">214</p><p class="kpi-note">31 pendientes de despacho</p></article>
+        <article class="kpi"><p class="kpi-label">Ticket promedio</p><p class="kpi-value num">$179.200</p><p class="kpi-note">1,6 productos por pedido</p></article>
+        <article class="kpi"><p class="kpi-label">Alertas de stock</p><p class="kpi-value num">2</p><p class="kpi-note">1 agotado · 1 con stock bajo</p></article>
+      </section>
+
+      <div class="workspace">
+        <div>
+          <!-- ============ TABLA DE PRODUCTOS ============ -->
+          <section class="panel" aria-labelledby="products-title">
+            <div class="panel-head">
+              <h2 id="products-title">Catálogo</h2>
+              <div class="tabs" role="group" aria-label="Filtrar por estado">
+                <button type="button" class="tab is-active" data-filter="all">Todos</button>
+                <button type="button" class="tab" data-filter="Activo">Activos</button>
+                <button type="button" class="tab" data-filter="Agotado">Agotados</button>
+                <button type="button" class="tab" data-filter="Borrador">Borradores</button>
+              </div>
+            </div>
+            <div class="toolbar">
+              <input class="input" type="search" id="search-product" placeholder="Buscar por nombre o SKU" aria-label="Buscar producto">
+              <select class="select" id="filter-category" aria-label="Filtrar por categoría">
+                <option>Todas las categorías</option>
+                <option>Buzos</option>
+                <option>Camisetas</option>
+                <option>Pantalones</option>
+                <option>Chaquetas</option>
+                <option>Calzado</option>
+                <option>Accesorios</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead>
+                <tbody id="product-list">
+
+                <tr class="product-row is-selected" tabindex="0"
+                    data-id="1"
+                    data-name="Buzo Calle 13 Oversize"
+                    data-sku="BS-HD-001"
+                    data-category="Buzos"
+                    data-icon="hoodie"
+                    data-thumb="#b5f05a"
+                    data-price="189000"
+                    data-compare-price="229000"
+                    data-status="Activo"
+                    data-stock="S:4,M:12,L:9,XL:3"
+                    data-colors="Negro|Gris jaspe|Verde militar"
+                    data-color-hexes="#111111|#9b9b9b|#4b5d3a"
+                    data-sales-30d="62"
+                    data-revenue-30d="11718000"
+                    data-returns="3"
+                    data-rating="4.8"
+                    data-weekly="12,14,13,16,15,18"
+                    data-description="Buzo de felpa perchada 380 g, capota doble y bolsillo canguro. Corte oversize con hombro caído y estampado en espalda.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#b5f05a"><svg class="icon"><use href="#i-hoodie"/></svg></span><div><strong>Buzo Calle 13 Oversize</strong><span>BS-HD-001</span></div></div></td>
+                  <td>Buzos</td>
+                  <td class="price num">$189.000<s>$229.000</s></td>
+                  <td class="stock-cell num">28 u.<small>S·4  M·12  L·9  XL·3</small></td>
+                  <td><span class="tag tag--active">Activo</span></td>
+                </tr>
+
+                <tr class="product-row" tabindex="0"
+                    data-id="2"
+                    data-name="Tenis Pavimento Low"
+                    data-sku="BS-SN-014"
+                    data-category="Calzado"
+                    data-icon="sneaker"
+                    data-thumb="#6ee7f2"
+                    data-price="329000"
+                    data-compare-price="0"
+                    data-status="Activo"
+                    data-stock="38:2,39:5,40:6,41:4,42:1"
+                    data-colors="Blanco|Crema"
+                    data-color-hexes="#f5f5f5|#efe3c8"
+                    data-sales-30d="28"
+                    data-revenue-30d="9212000"
+                    data-returns="6"
+                    data-rating="4.6"
+                    data-weekly="5,6,7,6,8,7"
+                    data-description="Tenis de caña baja en cuero sintético con suela vulcanizada y plantilla acolchada. Hecho en Bucaramanga.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#6ee7f2"><svg class="icon"><use href="#i-sneaker"/></svg></span><div><strong>Tenis Pavimento Low</strong><span>BS-SN-014</span></div></div></td>
+                  <td>Calzado</td>
+                  <td class="price num">$329.000</td>
+                  <td class="stock-cell num">18 u.<small>38·2  39·5  40·6  41·4  42·1</small></td>
+                  <td><span class="tag tag--active">Activo</span></td>
+                </tr>
+
+                <tr class="product-row" tabindex="0"
+                    data-id="3"
+                    data-name="Pantalón Cargo Bodega"
+                    data-sku="BS-CG-007"
+                    data-category="Pantalones"
+                    data-icon="pants"
+                    data-thumb="#ffde59"
+                    data-price="219000"
+                    data-compare-price="0"
+                    data-status="Activo"
+                    data-stock="S:0,M:2,L:1,XL:0"
+                    data-colors="Arena|Negro"
+                    data-color-hexes="#c8b48a|#111111"
+                    data-sales-30d="25"
+                    data-revenue-30d="5475000"
+                    data-returns="4"
+                    data-rating="4.5"
+                    data-weekly="4,6,7,5,6,7"
+                    data-description="Cargo en dril pesado con seis bolsillos, cintura ajustable y bota recogida con cordón.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#ffde59"><svg class="icon"><use href="#i-pants"/></svg></span><div><strong>Pantalón Cargo Bodega</strong><span>BS-CG-007</span></div></div></td>
+                  <td>Pantalones</td>
+                  <td class="price num">$219.000</td>
+                  <td class="stock-cell num">3 u.<small>S·0  M·2  L·1  XL·0</small></td>
+                  <td><span class="tag tag--low">Stock bajo</span></td>
+                </tr>
+
+                <tr class="product-row" tabindex="0"
+                    data-id="4"
+                    data-name="Gorra Esquina 5 Paneles"
+                    data-sku="BS-CP-021"
+                    data-category="Accesorios"
+                    data-icon="cap"
+                    data-thumb="#ff8a4c"
+                    data-price="89000"
+                    data-compare-price="0"
+                    data-status="Activo"
+                    data-stock="Única:46"
+                    data-colors="Negro|Rojo"
+                    data-color-hexes="#111111|#d7263d"
+                    data-sales-30d="12"
+                    data-revenue-30d="1068000"
+                    data-returns="1"
+                    data-rating="4.7"
+                    data-weekly="2,3,4,3,2,3"
+                    data-description="Gorra de cinco paneles en nailon, visera plana y cierre de hebilla metálica.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#ff8a4c"><svg class="icon"><use href="#i-cap"/></svg></span><div><strong>Gorra Esquina 5 Paneles</strong><span>BS-CP-021</span></div></div></td>
+                  <td>Accesorios</td>
+                  <td class="price num">$89.000</td>
+                  <td class="stock-cell num">46 u.<small>Única·46</small></td>
+                  <td><span class="tag tag--active">Activo</span></td>
+                </tr>
+
+                <tr class="product-row" tabindex="0"
+                    data-id="5"
+                    data-name="Camiseta Grafiti Boxy"
+                    data-sku="BS-TS-033"
+                    data-category="Camisetas"
+                    data-icon="tee"
+                    data-thumb="#ff90e8"
+                    data-price="99000"
+                    data-compare-price="119000"
+                    data-status="Activo"
+                    data-stock="S:15,M:20,L:18,XL:7"
+                    data-colors="Blanco|Negro|Rosa"
+                    data-color-hexes="#f5f5f5|#111111|#ff90e8"
+                    data-sales-30d="70"
+                    data-revenue-30d="6930000"
+                    data-returns="2"
+                    data-rating="4.9"
+                    data-weekly="14,16,18,15,19,18"
+                    data-description="Camiseta de algodón peinado 220 g, corte boxy y estampado de grafiti en serigrafía a cuatro tintas.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#ff90e8"><svg class="icon"><use href="#i-tee"/></svg></span><div><strong>Camiseta Grafiti Boxy</strong><span>BS-TS-033</span></div></div></td>
+                  <td>Camisetas</td>
+                  <td class="price num">$99.000<s>$119.000</s></td>
+                  <td class="stock-cell num">60 u.<small>S·15  M·20  L·18  XL·7</small></td>
+                  <td><span class="tag tag--active">Activo</span></td>
+                </tr>
+
+                <tr class="product-row" tabindex="0"
+                    data-id="6"
+                    data-name="Chaqueta Bomber Nocturna"
+                    data-sku="BS-BM-005"
+                    data-category="Chaquetas"
+                    data-icon="jacket"
+                    data-thumb="#b79cff"
+                    data-price="349000"
+                    data-compare-price="0"
+                    data-status="Agotado"
+                    data-stock="S:0,M:0,L:0,XL:0"
+                    data-colors="Negro|Azul noche"
+                    data-color-hexes="#111111|#1f2a44"
+                    data-sales-30d="9"
+                    data-revenue-30d="3141000"
+                    data-returns="0"
+                    data-rating="4.8"
+                    data-weekly="3,4,3,3,3,0"
+                    data-description="Bomber acolchada con forro naranja, puños en rib y bolsillo utilitario en la manga.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#b79cff"><svg class="icon"><use href="#i-jacket"/></svg></span><div><strong>Chaqueta Bomber Nocturna</strong><span>BS-BM-005</span></div></div></td>
+                  <td>Chaquetas</td>
+                  <td class="price num">$349.000</td>
+                  <td class="stock-cell num">0 u.<small>S·0  M·0  L·0  XL·0</small></td>
+                  <td><span class="tag tag--soldout">Agotado</span></td>
+                </tr>
+
+                <tr class="product-row" tabindex="0"
+                    data-id="7"
+                    data-name="Riñonera Ruta"
+                    data-sku="BS-BG-011"
+                    data-category="Accesorios"
+                    data-icon="bag"
+                    data-thumb="#e9e6dc"
+                    data-price="119000"
+                    data-compare-price="0"
+                    data-status="Borrador"
+                    data-stock="Única:18"
+                    data-colors="Negro|Naranja"
+                    data-color-hexes="#111111|#ff8a4c"
+                    data-sales-30d="0"
+                    data-revenue-30d="0"
+                    data-returns="0"
+                    data-rating="0"
+                    data-weekly="0,0,0,0,0,0"
+                    data-description="Riñonera impermeable con dos compartimentos y correa ajustable. Lanzamiento previsto para noviembre.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#e9e6dc"><svg class="icon"><use href="#i-bag"/></svg></span><div><strong>Riñonera Ruta</strong><span>BS-BG-011</span></div></div></td>
+                  <td>Accesorios</td>
+                  <td class="price num">$119.000</td>
+                  <td class="stock-cell num">18 u.<small>Única·18</small></td>
+                  <td><span class="tag tag--draft">Borrador</span></td>
+                </tr>
+
+                <tr class="product-row" tabindex="0"
+                    data-id="8"
+                    data-name="Medias Andén Pack x3"
+                    data-sku="BS-SK-040"
+                    data-category="Accesorios"
+                    data-icon="socks"
+                    data-thumb="#ffde59"
+                    data-price="45000"
+                    data-compare-price="0"
+                    data-status="Activo"
+                    data-stock="Única:120"
+                    data-colors="Blanco|Multicolor"
+                    data-color-hexes="#f5f5f5|#6ee7f2"
+                    data-sales-30d="18"
+                    data-revenue-30d="810000"
+                    data-returns="0"
+                    data-rating="4.4"
+                    data-weekly="4,5,4,5,4,5"
+                    data-description="Paquete de tres pares de medias deportivas en algodón con logo tejido.">
+                  <td><div class="product"><span class="thumb" style="--thumb:#ffde59"><svg class="icon"><use href="#i-socks"/></svg></span><div><strong>Medias Andén Pack x3</strong><span>BS-SK-040</span></div></div></td>
+                  <td>Accesorios</td>
+                  <td class="price num">$45.000</td>
+                  <td class="stock-cell num">120 u.<small>Única·120</small></td>
+                  <td><span class="tag tag--active">Activo</span></td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-foot"><span>Mostrando 8 de 64</span><span>Página 1 / 8</span></div>
+          </section>
+
+          <section class="panel category-chart" aria-labelledby="cat-title">
+            <h2 id="cat-title">Ventas por categoría</h2>
+            <p>Millones de COP · últimos 30 días</p>
+            <ul class="hbars">
+              <li class="hbar"><span>Buzos</span><span class="hbar-track"><span class="hbar-fill hbar-fill--top" style="--v:100"></span></span><span class="hbar-value num">$11,7 M</span></li>
+              <li class="hbar"><span>Calzado</span><span class="hbar-track"><span class="hbar-fill" style="--v:79"></span></span><span class="hbar-value num">$9,2 M</span></li>
+              <li class="hbar"><span>Camisetas</span><span class="hbar-track"><span class="hbar-fill" style="--v:59"></span></span><span class="hbar-value num">$6,9 M</span></li>
+              <li class="hbar"><span>Pantalones</span><span class="hbar-track"><span class="hbar-fill" style="--v:47"></span></span><span class="hbar-value num">$5,5 M</span></li>
+              <li class="hbar"><span>Chaquetas</span><span class="hbar-track"><span class="hbar-fill" style="--v:27"></span></span><span class="hbar-value num">$3,1 M</span></li>
+              <li class="hbar"><span>Accesorios</span><span class="hbar-track"><span class="hbar-fill" style="--v:16"></span></span><span class="hbar-value num">$1,9 M</span></li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- ============ INSPECTOR DE PRODUCTO ============ -->
+        <aside class="inspector" aria-live="polite">
+          <div class="empty-state" id="product-empty">
+            <strong>← Elige un producto</strong>
+            <p>Haz clic en una fila del catálogo para ver su ficha completa.</p>
+          </div>
+
+          <article class="panel" id="product-detail">
+            <div class="inspector-head">
+              <span>Ficha de producto · <span id="detail-sku">BS-HD-001</span></span>
+              <button type="button" class="icon-button" id="btn-close-detail" aria-label="Cerrar ficha"><svg class="icon"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="hero-thumb" id="detail-thumb" style="--thumb:#b5f05a">
+              <span class="tag tag--active" id="detail-status">Activo</span>
+              <svg class="icon" id="detail-icon"><use href="#i-hoodie"/></svg>
+              <span class="sticker-price num" id="detail-price">$189.000</span>
+            </div>
+
+            <div class="section">
+              <h2 class="product-title" id="detail-name">Buzo Calle 13 Oversize</h2>
+              <div class="meta-line">
+                <span class="tag" id="detail-category">Buzos</span>
+                <span class="tag tag--low">Antes <s id="detail-compare">$229.000</s></span>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Stock por talla · <span id="detail-stock-total">28</span> unidades</h3>
+              <div class="size-stock" id="size-stock"><div class="size"><b>S</b><span class="num">4</span></div><div class="size"><b>M</b><span class="num">12</span></div><div class="size"><b>L</b><span class="num">9</span></div><div class="size"><b>XL</b><span class="num">3</span></div></div>
+            </div>
+
+            <div class="section">
+              <h3>Colores disponibles</h3>
+              <div class="colors" id="detail-colors"><span class="color-chip"><i style="--c:#111111"></i>Negro</span><span class="color-chip"><i style="--c:#9b9b9b"></i>Gris jaspe</span><span class="color-chip"><i style="--c:#4b5d3a"></i>Verde militar</span></div>
+            </div>
+
+            <div class="section">
+              <h3>Rendimiento · 30 días</h3>
+              <div class="metrics">
+                <div class="metric"><span>Unidades vendidas</span><strong class="num" id="detail-sales">62</strong></div>
+                <div class="metric"><span>Ingresos</span><strong class="num" id="detail-revenue">$11.718.000</strong></div>
+                <div class="metric"><span>Devoluciones</span><strong class="num" id="detail-returns">3 %</strong></div>
+                <div class="metric"><span>Calificación</span><strong class="num" id="detail-rating">4,8 / 5</strong></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Unidades vendidas por semana</h3>
+              <div class="col-chart" role="img" aria-label="Unidades por semana: 12, 14, 13, 16, 15, 18">
+                <div class="y-axis"><span>20</span><span>10</span><span>0</span></div>
+                <div class="plot">
+                  <div class="bar" id="week-bar-1" style="--v:60"></div>
+                  <div class="bar" id="week-bar-2" style="--v:70"></div>
+                  <div class="bar" id="week-bar-3" style="--v:65"></div>
+                  <div class="bar" id="week-bar-4" style="--v:80"></div>
+                  <div class="bar" id="week-bar-5" style="--v:75"></div>
+                  <div class="bar bar--current" id="week-bar-6" style="--v:90"><span class="bar-value" id="week-value-6">18</span></div>
+                </div>
+                <div class="x-axis"><span>S1</span><span>S2</span><span>S3</span><span>S4</span><span>S5</span><span>S6</span></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Descripción</h3>
+              <p class="description" id="detail-description">Buzo de felpa perchada 380 g, capota doble y bolsillo canguro. Corte oversize con hombro caído y estampado en espalda.</p>
+            </div>
+
+            <div class="section inspector-actions">
+              <button type="button" class="btn btn--lime" id="btn-edit-product">Editar</button>
+              <button type="button" class="btn" id="btn-duplicate-product">Duplicar</button>
+              <button type="button" class="btn btn--pink" id="btn-archive-product">Archivar</button>
+            </div>
+          </article>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+
+  <!-- ======================================================================
+       MODAL · NUEVO PRODUCTO
+       ====================================================================== -->
+  <div class="modal-overlay" id="modal-new-product">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-title">
+      <header class="modal-head">
+        <div>
+          <h2 id="modal-product-title">Nuevo producto</h2>
+          <p>// completa la ficha y publica cuando esté lista</p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-modal" aria-label="Cerrar formulario"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <form id="new-product-form" style="display:contents">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field field--full">
+              <label for="prod-name">Nombre del producto <span class="req">*</span></label>
+              <input class="input" type="text" id="prod-name" name="name" placeholder="Ej. Buzo Concreto Oversize" required>
+            </div>
+            <div class="field">
+              <label for="prod-sku">SKU <span class="req">*</span></label>
+              <input class="input mono" type="text" id="prod-sku" name="sku" placeholder="BS-HD-000" required>
+            </div>
+            <div class="field">
+              <label for="prod-category">Categoría <span class="req">*</span></label>
+              <select class="select" id="prod-category" name="category" required>
+                <option value="">Selecciona</option>
+                <option>Buzos</option>
+                <option>Camisetas</option>
+                <option>Pantalones</option>
+                <option>Chaquetas</option>
+                <option>Calzado</option>
+                <option>Accesorios</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="prod-price">Precio de venta <span class="req">*</span></label>
+              <div class="input-prefix"><span>$</span><input class="input" type="number" id="prod-price" name="price" min="0" step="1000" placeholder="189000" required></div>
+            </div>
+            <div class="field">
+              <label for="prod-compare">Precio antes (opcional)</label>
+              <div class="input-prefix"><span>$</span><input class="input" type="number" id="prod-compare" name="comparePrice" min="0" step="1000" placeholder="229000"></div>
+            </div>
+            <div class="field field--full">
+              <span class="label" id="sizes-label">Tallas</span>
+              <div class="toggle-group" role="group" aria-labelledby="sizes-label">
+                <label class="toggle"><input type="checkbox" name="sizes" value="XS"><span>XS</span></label>
+                <label class="toggle"><input type="checkbox" name="sizes" value="S" checked><span>S</span></label>
+                <label class="toggle"><input type="checkbox" name="sizes" value="M" checked><span>M</span></label>
+                <label class="toggle"><input type="checkbox" name="sizes" value="L" checked><span>L</span></label>
+                <label class="toggle"><input type="checkbox" name="sizes" value="XL"><span>XL</span></label>
+                <label class="toggle"><input type="checkbox" name="sizes" value="XXL"><span>XXL</span></label>
+              </div>
+            </div>
+            <div class="field field--full">
+              <span class="label" id="colors-label">Colores</span>
+              <div class="toggle-group" role="group" aria-labelledby="colors-label">
+                <label class="toggle"><input type="checkbox" name="colors" value="Negro" data-hex="#111111" checked><span><i style="--c:#111111"></i>Negro</span></label>
+                <label class="toggle"><input type="checkbox" name="colors" value="Blanco" data-hex="#f5f5f5"><span><i style="--c:#f5f5f5"></i>Blanco</span></label>
+                <label class="toggle"><input type="checkbox" name="colors" value="Arena" data-hex="#c8b48a"><span><i style="--c:#c8b48a"></i>Arena</span></label>
+                <label class="toggle"><input type="checkbox" name="colors" value="Rosa" data-hex="#ff90e8"><span><i style="--c:#ff90e8"></i>Rosa</span></label>
+                <label class="toggle"><input type="checkbox" name="colors" value="Verde militar" data-hex="#4b5d3a"><span><i style="--c:#4b5d3a"></i>Verde militar</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="prod-stock">Stock inicial (unidades)</label>
+              <input class="input" type="number" id="prod-stock" name="stock" min="0" placeholder="40">
+            </div>
+            <div class="field">
+              <label for="prod-image">Foto del producto</label>
+              <label class="file-drop" for="prod-image"><svg class="icon"><use href="#i-upload"/></svg>Subir imagen (JPG o PNG)</label>
+              <input type="file" id="prod-image" name="image" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px">
+            </div>
+            <div class="field field--full">
+              <label for="prod-description">Descripción</label>
+              <textarea class="textarea" id="prod-description" name="description" placeholder="Materiales, corte, detalles de diseño…"></textarea>
+            </div>
+            <div class="field">
+              <span class="label" id="status-label">Estado</span>
+              <div class="toggle-group" role="radiogroup" aria-labelledby="status-label">
+                <label class="toggle"><input type="radio" name="status" value="Borrador" checked><span>Borrador</span></label>
+                <label class="toggle"><input type="radio" name="status" value="Activo"><span>Publicar</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <span class="label">Portada</span>
+              <label class="switch"><input type="checkbox" id="prod-featured" name="featured">Destacar en la home</label>
+            </div>
+          </div>
+
+          <aside class="preview" aria-labelledby="preview-title">
+            <h3 id="preview-title">Vista previa en la tienda</h3>
+            <div class="preview-card">
+              <div class="hero-thumb" id="preview-thumb" style="--thumb:var(--pink)">
+                <span class="tag tag--draft" id="preview-status">Borrador</span>
+                <svg class="icon"><use href="#i-hoodie"/></svg>
+              </div>
+              <div class="preview-body">
+                <p id="preview-category">Buzos</p>
+                <strong id="preview-name">Buzo Concreto Oversize</strong>
+                <span class="price num" id="preview-price">$199.000</span>
+              </div>
+            </div>
+            <p class="preview-note">Ejemplo: esta tarjeta debe cambiar con JavaScript mientras llenas el formulario.</p>
+          </aside>
+        </div>
+
+        <footer class="modal-foot">
+          <button type="button" class="btn" id="btn-cancel-product">Cancelar</button>
+          <button type="submit" class="btn btn--black" id="btn-save-product">Guardar producto</button>
+        </footer>
+      </form>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

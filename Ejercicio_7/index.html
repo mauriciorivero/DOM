@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sonríe · Agenda odontológica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 7 · Agenda de clínica odontológica (estilo neumorfismo)
+    ----------------------------------------------------------------------
+    Todo está construido y visible a propósito. Al abrir el archivo verás:
+      · el mensaje #appointment-empty Y la ficha #appointment-detail juntos,
+      · el modal #modal-new-appointment cubriendo toda la pantalla.
+
+    Tarea del estudiante (JavaScript):
+      1. Al iniciar: ocultar #appointment-detail y #modal-new-appointment.
+      2. Clic en una cita .appointment -> ocultar #appointment-empty, mostrar
+         #appointment-detail y llenarla con los data-* de esa cita.
+      3. Botón #btn-new-appointment -> mostrar el formulario.
+
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-tooth" viewBox="0 0 24 24"><path d="M7 3c-3 0-4.5 2.5-4 6 .4 2.6 1.6 3.7 2 6 .5 3 1 6 2.5 6s2-3 2.5-5c.3-1 .7-1.5 2-1.5s1.7.5 2 1.5c.5 2 1 5 2.5 5s2-3 2.5-6c.4-2.3 1.6-3.4 2-6 .5-3.5-1-6-4-6-2 0-3 1-5 1S9 3 7 3z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="4"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 4a4 4 0 0 1 0 8"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="3"/><path d="M9 4V2h6v2"/><path d="M9 11h6M9 15h4"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="4"/><path d="M2 10h20M16 15h2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M5 3l14 7-6 2-2 6z"/></symbol>
+  </svg>
+
+  <div class="app">
+
+    <!-- ===================== BARRA LATERAL ===================== -->
+    <aside class="sidebar raised">
+      <div class="brand"><span class="brand-mark"><svg class="icon"><use href="#i-tooth"/></svg></span><div>Sonríe<small>Clínica odontológica · Cali</small></div></div>
+      <nav class="nav" aria-label="Principal">
+        <a href="#" class="is-active" aria-current="page"><svg class="icon"><use href="#i-calendar"/></svg>Agenda</a>
+        <a href="#"><svg class="icon"><use href="#i-users"/></svg>Pacientes</a>
+        <a href="#"><svg class="icon"><use href="#i-clipboard"/></svg>Tratamientos</a>
+        <a href="#"><svg class="icon"><use href="#i-wallet"/></svg>Facturación</a>
+        <a href="#"><svg class="icon"><use href="#i-chart"/></svg>Reportes</a>
+      </nav>
+      <div class="sidebar-help"><strong>Recepción</strong>Juliana Torres · ext. 102</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Agenda del día</h1>
+          <p>Martes 13 de octubre de 2026 · 3 consultorios</p>
+        </div>
+        <div class="date-nav">
+          <button type="button" class="icon-button" id="btn-prev-day" aria-label="Día anterior"><svg class="icon"><use href="#i-left"/></svg></button>
+          <span class="date-pill" id="current-date">13 oct 2026</span>
+          <button type="button" class="icon-button" id="btn-next-day" aria-label="Día siguiente"><svg class="icon"><use href="#i-right"/></svg></button>
+          <button type="button" class="btn btn--solid" id="btn-new-appointment"><svg class="icon"><use href="#i-plus"/></svg>Agendar cita</button>
+        </div>
+      </header>
+
+      <section class="kpis" aria-label="Indicadores">
+        <article class="kpi raised"><span class="kpi-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><div><p class="kpi-label">Citas hoy</p><p class="kpi-value num">11</p><p class="kpi-note">1 cancelada</p></div></article>
+        <article class="kpi raised"><span class="kpi-icon"><svg class="icon"><use href="#i-check"/></svg></span><div><p class="kpi-label">Confirmadas</p><p class="kpi-value num">8</p><p class="kpi-note">2 pendientes por confirmar</p></div></article>
+        <article class="kpi raised"><div class="ring" style="--v:82"><span>82%</span></div><div><p class="kpi-label">Ocupación de la agenda</p><p class="kpi-value num">7 h 20</p><p class="kpi-note">de 9 h disponibles</p></div></article>
+        <article class="kpi raised"><span class="kpi-icon"><svg class="icon"><use href="#i-wallet"/></svg></span><div><p class="kpi-label">Ingresos estimados</p><p class="kpi-value num">$2.365.000</p><p class="kpi-note">Sin contar la cita cancelada</p></div></article>
+      </section>
+
+      <div class="workspace">
+
+        <!-- ============ CALENDARIO Y ODONTÓLOGOS ============ -->
+        <div class="left-column">
+          <section class="card raised" aria-labelledby="cal-title">
+            <div class="calendar-head">
+              <button type="button" class="icon-button" aria-label="Mes anterior"><svg class="icon"><use href="#i-left"/></svg></button>
+              <h2 id="cal-title" style="font-size:1rem">Octubre 2026</h2>
+              <button type="button" class="icon-button" aria-label="Mes siguiente"><svg class="icon"><use href="#i-right"/></svg></button>
+            </div>
+            <div class="calendar" id="calendar">
+              <span class="dow">L</span><span class="dow">M</span><span class="dow">M</span><span class="dow">J</span><span class="dow">V</span><span class="dow">S</span><span class="dow">D</span>
+              <span class="day is-muted">28</span>
+              <span class="day is-muted">29</span>
+              <span class="day is-muted">30</span>
+              <button type="button" class="day has-appointments" data-date="2026-10-01">1</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-02">2</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-03">3</button>
+              <button type="button" class="day" data-date="2026-10-04">4</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-05">5</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-06">6</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-07">7</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-08">8</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-09">9</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-10">10</button>
+              <button type="button" class="day" data-date="2026-10-11">11</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-12">12</button>
+              <button type="button" class="day has-appointments is-selected" data-date="2026-10-13">13</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-14">14</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-15">15</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-16">16</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-17">17</button>
+              <button type="button" class="day" data-date="2026-10-18">18</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-19">19</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-20">20</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-21">21</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-22">22</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-23">23</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-24">24</button>
+              <button type="button" class="day" data-date="2026-10-25">25</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-26">26</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-27">27</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-28">28</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-29">29</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-30">30</button>
+              <button type="button" class="day has-appointments" data-date="2026-10-31">31</button>
+              <span class="day is-muted">1</span>
+            </div>
+          </section>
+
+          <section class="card raised" aria-labelledby="dent-title">
+            <h2 class="card-title" id="dent-title">Odontólogos</h2>
+            <div class="dentists">
+              <label class="dentist-toggle"><span class="dot" style="--c:var(--d1)"></span><span class="who">Dra. Natalia Ospina<small>Odontología general</small></span><input type="checkbox" class="switch dentist-filter" value="Dra. Natalia Ospina" checked aria-label="Mostrar citas de Dra. Natalia Ospina"></label>
+              <label class="dentist-toggle"><span class="dot" style="--c:var(--d2)"></span><span class="who">Dr. Mateo Cárdenas<small>Ortodoncia y endodoncia</small></span><input type="checkbox" class="switch dentist-filter" value="Dr. Mateo Cárdenas" checked aria-label="Mostrar citas de Dr. Mateo Cárdenas"></label>
+              <label class="dentist-toggle"><span class="dot" style="--c:var(--d3)"></span><span class="who">Dra. Paula Andrade<small>Odontopediatría</small></span><input type="checkbox" class="switch dentist-filter" value="Dra. Paula Andrade" checked aria-label="Mostrar citas de Dra. Paula Andrade"></label>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============ AGENDA ============ -->
+        <section aria-labelledby="agenda-title">
+          <div class="agenda-head">
+            <h2 id="agenda-title">Citas programadas</h2>
+            <div class="status-filter" role="group" aria-label="Filtrar por estado">
+              <button type="button" class="is-active" data-filter="all">Todas</button>
+              <button type="button" data-filter="Confirmada">Confirmadas</button>
+              <button type="button" data-filter="Pendiente">Pendientes</button>
+            </div>
+          </div>
+          <div class="timeline" id="appointment-list">
+            <p class="block-label">Mañana</p>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d1)"
+                     data-id="1"
+                     data-start="08:00"
+                     data-end="08:40"
+                     data-duration="40"
+                     data-patient="Laura Cristina Patiño"
+                     data-initials="LC"
+                     data-age="34"
+                     data-document="CC 1.143.552.718"
+                     data-phone="+57 312 448 9021"
+                     data-insurance="Plan Sonríe Plus"
+                     data-procedure="Limpieza y profilaxis"
+                     data-dentist="Dra. Natalia Ospina"
+                     data-room="Consultorio 1"
+                     data-price="120000"
+                     data-status="Atendida"
+                     data-teeth="26:filled,36:filled"
+                     data-plan="Control preventivo semestral"
+                     data-plan-done="1"
+                     data-plan-total="1"
+                     data-alert=""
+                     data-last-visit="14 abr 2026 · Limpieza"
+                     data-notes="Buena higiene oral. Próximo control en abril de 2027.">
+              <p class="time num">08:00<small>08:40</small></p>
+              <div>
+                <p class="patient">Laura Cristina Patiño</p>
+                <p class="procedure">Limpieza y profilaxis · <span class="dentist" style="--c:var(--d1)">Dra. Natalia Ospina</span></p>
+              </div>
+              <span class="status status--done">Atendida</span>
+            </article>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d2)"
+                     data-id="2"
+                     data-start="08:45"
+                     data-end="09:15"
+                     data-duration="30"
+                     data-patient="Jorge Iván Restrepo"
+                     data-initials="JI"
+                     data-age="27"
+                     data-document="CC 1.020.774.316"
+                     data-phone="+57 300 915 2207"
+                     data-insurance="Particular"
+                     data-procedure="Control de ortodoncia"
+                     data-dentist="Dr. Mateo Cárdenas"
+                     data-room="Consultorio 2"
+                     data-price="90000"
+                     data-status="Atendida"
+                     data-teeth="18:missing,28:missing,38:missing,48:missing"
+                     data-plan="Ortodoncia con brackets"
+                     data-plan-done="14"
+                     data-plan-total="24"
+                     data-alert=""
+                     data-last-visit="15 sep 2026 · Control de ortodoncia"
+                     data-notes="Cambio de arco a 0,018. Buena evolución en el apiñamiento inferior.">
+              <p class="time num">08:45<small>09:15</small></p>
+              <div>
+                <p class="patient">Jorge Iván Restrepo</p>
+                <p class="procedure">Control de ortodoncia · <span class="dentist" style="--c:var(--d2)">Dr. Mateo Cárdenas</span></p>
+              </div>
+              <span class="status status--done">Atendida</span>
+            </article>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d1)"
+                     data-id="3"
+                     data-start="09:30"
+                     data-end="10:10"
+                     data-duration="40"
+                     data-patient="Valeria Muñoz Toro"
+                     data-initials="VM"
+                     data-age="22"
+                     data-document="CC 1.007.233.904"
+                     data-phone="+57 318 220 6614"
+                     data-insurance="Póliza dental"
+                     data-procedure="Resina (obturación)"
+                     data-dentist="Dra. Natalia Ospina"
+                     data-room="Consultorio 1"
+                     data-price="180000"
+                     data-status="Atendida"
+                     data-teeth="16:filled,46:caries,47:caries"
+                     data-plan="Tratamiento de caries"
+                     data-plan-done="1"
+                     data-plan-total="3"
+                     data-alert=""
+                     data-last-visit="29 sep 2026 · Valoración"
+                     data-notes="Se obturó el 16. Pendientes 46 y 47 en próximas citas.">
+              <p class="time num">09:30<small>10:10</small></p>
+              <div>
+                <p class="patient">Valeria Muñoz Toro</p>
+                <p class="procedure">Resina (obturación) · <span class="dentist" style="--c:var(--d1)">Dra. Natalia Ospina</span></p>
+              </div>
+              <span class="status status--done">Atendida</span>
+            </article>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d3)"
+                     data-id="4"
+                     data-start="10:15"
+                     data-end="10:45"
+                     data-duration="30"
+                     data-patient="Samuel Herrera Gil"
+                     data-initials="SH"
+                     data-age="9"
+                     data-document="TI 1.031.876.402"
+                     data-phone="+57 311 607 4488 (madre)"
+                     data-insurance="Plan Sonríe Plus"
+                     data-procedure="Sellantes"
+                     data-dentist="Dra. Paula Andrade"
+                     data-room="Consultorio 3"
+                     data-price="95000"
+                     data-status="En consulta"
+                     data-teeth="16:treatment,26:treatment,36:treatment,46:treatment"
+                     data-plan="Prevención infantil"
+                     data-plan-done="2"
+                     data-plan-total="3"
+                     data-alert="Acompañante: Diana Gil (madre)"
+                     data-last-visit="10 jul 2026 · Flúor"
+                     data-notes="Paciente colaborador. Aplicar sellantes en los cuatro primeros molares.">
+              <p class="time num">10:15<small>10:45</small></p>
+              <div>
+                <p class="patient">Samuel Herrera Gil</p>
+                <p class="procedure">Sellantes · <span class="dentist" style="--c:var(--d3)">Dra. Paula Andrade</span></p>
+              </div>
+              <span class="status status--in">En consulta</span>
+            </article>
+            <p class="now-line" id="now-line">Ahora · 10:40</p>
+
+            <article class="appointment is-selected" tabindex="0" style="--c:var(--d2)"
+                     data-id="5"
+                     data-start="11:00"
+                     data-end="12:00"
+                     data-duration="60"
+                     data-patient="Gloria Inés Vásquez"
+                     data-initials="GI"
+                     data-age="58"
+                     data-document="CC 31.456.782"
+                     data-phone="+57 315 220 9031"
+                     data-insurance="Póliza dental"
+                     data-procedure="Endodoncia (2.ª sesión)"
+                     data-dentist="Dr. Mateo Cárdenas"
+                     data-room="Consultorio 2"
+                     data-price="450000"
+                     data-status="Confirmada"
+                     data-teeth="18:missing,28:missing,38:missing,48:missing,16:filled,15:filled,26:crown,36:treatment,37:caries,46:filled"
+                     data-plan="Endodoncia del molar 36"
+                     data-plan-done="2"
+                     data-plan-total="3"
+                     data-alert="Alérgica a la penicilina · Hipertensión controlada"
+                     data-last-visit="22 sep 2026 · Endodoncia (1.ª sesión)"
+                     data-notes="Refiere sensibilidad al frío en el cuadrante inferior izquierdo. Tomar radiografía de control antes de obturar conductos.">
+              <p class="time num">11:00<small>12:00</small></p>
+              <div>
+                <p class="patient">Gloria Inés Vásquez</p>
+                <p class="procedure">Endodoncia (2.ª sesión) · <span class="dentist" style="--c:var(--d2)">Dr. Mateo Cárdenas</span></p>
+              </div>
+              <span class="status status--confirmed">Confirmada</span>
+            </article>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d1)"
+                     data-id="6"
+                     data-start="11:45"
+                     data-end="12:15"
+                     data-duration="30"
+                     data-patient="Andrés Felipe Zuluaga"
+                     data-initials="AF"
+                     data-age="41"
+                     data-document="CC 71.789.240"
+                     data-phone="+57 304 118 5530"
+                     data-insurance="Particular"
+                     data-procedure="Valoración inicial"
+                     data-dentist="Dra. Natalia Ospina"
+                     data-room="Consultorio 1"
+                     data-price="60000"
+                     data-status="Confirmada"
+                     data-teeth=""
+                     data-plan="Sin plan de tratamiento"
+                     data-plan-done="0"
+                     data-plan-total="1"
+                     data-alert=""
+                     data-last-visit="Primera visita"
+                     data-notes="Paciente nuevo remitido por su empresa. Solicitar radiografía panorámica.">
+              <p class="time num">11:45<small>12:15</small></p>
+              <div>
+                <p class="patient">Andrés Felipe Zuluaga</p>
+                <p class="procedure">Valoración inicial · <span class="dentist" style="--c:var(--d1)">Dra. Natalia Ospina</span></p>
+              </div>
+              <span class="status status--confirmed">Confirmada</span>
+            </article>
+            <p class="lunch">Almuerzo · 12:30 a 2:00 p.m.</p>
+            <p class="block-label">Tarde</p>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d1)"
+                     data-id="7"
+                     data-start="14:00"
+                     data-end="15:00"
+                     data-duration="60"
+                     data-patient="Camila Andrea Rincón"
+                     data-initials="CA"
+                     data-age="30"
+                     data-document="CC 1.036.651.283"
+                     data-phone="+57 320 774 1956"
+                     data-insurance="Particular"
+                     data-procedure="Blanqueamiento"
+                     data-dentist="Dra. Natalia Ospina"
+                     data-room="Consultorio 1"
+                     data-price="650000"
+                     data-status="Confirmada"
+                     data-teeth="11:filled"
+                     data-plan="Estética dental"
+                     data-plan-done="1"
+                     data-plan-total="2"
+                     data-alert=""
+                     data-last-visit="29 sep 2026 · Limpieza"
+                     data-notes="Blanqueamiento en consultorio. Evitar café y vino durante 48 horas.">
+              <p class="time num">14:00<small>15:00</small></p>
+              <div>
+                <p class="patient">Camila Andrea Rincón</p>
+                <p class="procedure">Blanqueamiento · <span class="dentist" style="--c:var(--d1)">Dra. Natalia Ospina</span></p>
+              </div>
+              <span class="status status--confirmed">Confirmada</span>
+            </article>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d2)"
+                     data-id="8"
+                     data-start="14:45"
+                     data-end="15:30"
+                     data-duration="45"
+                     data-patient="Héctor Fabio Lozano"
+                     data-initials="HF"
+                     data-age="24"
+                     data-document="CC 1.152.300.847"
+                     data-phone="+57 313 650 2289"
+                     data-insurance="Póliza dental"
+                     data-procedure="Extracción de cordal"
+                     data-dentist="Dr. Mateo Cárdenas"
+                     data-room="Consultorio 2"
+                     data-price="280000"
+                     data-status="Pendiente"
+                     data-teeth="38:treatment,48:treatment"
+                     data-plan="Cirugía de cordales"
+                     data-plan-done="0"
+                     data-plan-total="2"
+                     data-alert="Debe venir en ayunas de 2 horas"
+                     data-last-visit="1 oct 2026 · Valoración"
+                     data-notes="Cordal 38 semiincluido. Enviar recordatorio por WhatsApp para confirmar.">
+              <p class="time num">14:45<small>15:30</small></p>
+              <div>
+                <p class="patient">Héctor Fabio Lozano</p>
+                <p class="procedure">Extracción de cordal · <span class="dentist" style="--c:var(--d2)">Dr. Mateo Cárdenas</span></p>
+              </div>
+              <span class="status status--pending">Pendiente</span>
+            </article>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d2)"
+                     data-id="9"
+                     data-start="15:30"
+                     data-end="16:00"
+                     data-duration="30"
+                     data-patient="Isabella Gómez Arango"
+                     data-initials="IG"
+                     data-age="12"
+                     data-document="TI 1.028.411.765"
+                     data-phone="+57 317 902 3348 (padre)"
+                     data-insurance="Plan Sonríe Plus"
+                     data-procedure="Control de ortodoncia"
+                     data-dentist="Dr. Mateo Cárdenas"
+                     data-room="Consultorio 2"
+                     data-price="90000"
+                     data-status="Confirmada"
+                     data-teeth=""
+                     data-plan="Ortodoncia interceptiva"
+                     data-plan-done="6"
+                     data-plan-total="12"
+                     data-alert="Acompañante: Carlos Gómez (padre)"
+                     data-last-visit="15 sep 2026 · Control"
+                     data-notes="Activar el expansor dos vueltas por semana.">
+              <p class="time num">15:30<small>16:00</small></p>
+              <div>
+                <p class="patient">Isabella Gómez Arango</p>
+                <p class="procedure">Control de ortodoncia · <span class="dentist" style="--c:var(--d2)">Dr. Mateo Cárdenas</span></p>
+              </div>
+              <span class="status status--confirmed">Confirmada</span>
+            </article>
+
+            <article class="appointment" tabindex="0" style="--c:var(--d1)"
+                     data-id="10"
+                     data-start="16:15"
+                     data-end="17:00"
+                     data-duration="45"
+                     data-patient="Martha Lucía Peña"
+                     data-initials="ML"
+                     data-age="66"
+                     data-document="CC 29.873.115"
+                     data-phone="+57 316 405 7712"
+                     data-insurance="Póliza dental"
+                     data-procedure="Prótesis: prueba"
+                     data-dentist="Dra. Natalia Ospina"
+                     data-room="Consultorio 1"
+                     data-price="350000"
+                     data-status="Pendiente"
+                     data-teeth="14:missing,15:missing,24:missing,25:missing,36:missing,46:missing,17:crown,27:crown"
+                     data-plan="Prótesis parcial removible"
+                     data-plan-done="2"
+                     data-plan-total="4"
+                     data-alert="Diabetes tipo 2"
+                     data-last-visit="30 sep 2026 · Toma de impresiones"
+                     data-notes="Prueba de la estructura metálica superior.">
+              <p class="time num">16:15<small>17:00</small></p>
+              <div>
+                <p class="patient">Martha Lucía Peña</p>
+                <p class="procedure">Prótesis: prueba · <span class="dentist" style="--c:var(--d1)">Dra. Natalia Ospina</span></p>
+              </div>
+              <span class="status status--pending">Pendiente</span>
+            </article>
+
+            <article class="appointment is-cancelled" tabindex="0" style="--c:var(--d3)"
+                     data-id="11"
+                     data-start="17:00"
+                     data-end="17:40"
+                     data-duration="40"
+                     data-patient="Ricardo Ospina Mejía"
+                     data-initials="RO"
+                     data-age="45"
+                     data-document="CC 98.552.006"
+                     data-phone="+57 301 228 4470"
+                     data-insurance="Particular"
+                     data-procedure="Limpieza y profilaxis"
+                     data-dentist="Dra. Paula Andrade"
+                     data-room="Consultorio 3"
+                     data-price="120000"
+                     data-status="Cancelada"
+                     data-teeth="37:filled"
+                     data-plan="Control preventivo semestral"
+                     data-plan-done="0"
+                     data-plan-total="1"
+                     data-alert=""
+                     data-last-visit="12 mar 2026 · Limpieza"
+                     data-notes="Canceló por viaje de trabajo. Reprogramar la próxima semana.">
+              <p class="time num">17:00<small>17:40</small></p>
+              <div>
+                <p class="patient">Ricardo Ospina Mejía</p>
+                <p class="procedure">Limpieza y profilaxis · <span class="dentist" style="--c:var(--d3)">Dra. Paula Andrade</span></p>
+              </div>
+              <span class="status status--cancelled">Cancelada</span>
+            </article>
+          </div>
+        </section>
+
+        <!-- ============ FICHA DE LA CITA ============ -->
+        <aside class="detail-column" aria-live="polite">
+          <div class="empty-state" id="appointment-empty">
+            <svg class="icon"><use href="#i-hand"/></svg>
+            <strong>Selecciona una cita</strong>
+            <p>Haz clic en cualquier cita de la agenda para ver la ficha del paciente.</p>
+          </div>
+
+          <article class="detail raised" id="appointment-detail">
+            <div class="detail-head">
+              <span class="avatar" id="detail-initials">GI</span>
+              <div>
+                <h2 id="detail-patient">Gloria Inés Vásquez</h2>
+                <p><span id="detail-age">58</span> años · <span id="detail-document">CC 31.456.782</span></p>
+              </div>
+              <button type="button" class="icon-button" id="btn-close-detail" aria-label="Cerrar ficha"><svg class="icon"><use href="#i-x"/></svg></button>
+            </div>
+
+            <p class="alert" id="detail-alert"><svg class="icon"><use href="#i-alert"/></svg><span id="detail-alert-text">Alérgica a la penicilina · Hipertensión controlada</span></p>
+
+            <span class="status status--confirmed" id="detail-status">Confirmada</span>
+
+            <div class="detail-section">
+              <h3>Cita</h3>
+              <dl class="info-grid">
+                <div class="info-item wide"><dt>Procedimiento</dt><dd id="detail-procedure">Endodoncia (2.ª sesión)</dd></div>
+                <div class="info-item"><dt>Hora</dt><dd class="num" id="detail-time">11:00 – 12:00</dd></div>
+                <div class="info-item"><dt>Duración</dt><dd id="detail-duration">60 min</dd></div>
+                <div class="info-item"><dt>Odontólogo</dt><dd id="detail-dentist">Dr. Mateo Cárdenas</dd></div>
+                <div class="info-item"><dt>Consultorio</dt><dd id="detail-room">Consultorio 2</dd></div>
+                <div class="info-item"><dt>Convenio</dt><dd id="detail-insurance">Póliza dental</dd></div>
+                <div class="info-item"><dt>Valor</dt><dd class="num" id="detail-price">$450.000</dd></div>
+                <div class="info-item wide"><dt>Teléfono</dt><dd id="detail-phone">+57 315 220 9031</dd></div>
+              </dl>
+            </div>
+
+            <div class="detail-section">
+              <h3>Odontograma</h3>
+              <div class="odontogram" id="odontogram">
+                <div class="jaw jaw--upper"><span class="tooth tooth--missing" data-tooth="18">18</span><span class="tooth" data-tooth="17">17</span><span class="tooth tooth--filled" data-tooth="16">16</span><span class="tooth tooth--filled" data-tooth="15">15</span><span class="tooth" data-tooth="14">14</span><span class="tooth" data-tooth="13">13</span><span class="tooth" data-tooth="12">12</span><span class="tooth" data-tooth="11">11</span><span class="tooth" data-tooth="21">21</span><span class="tooth" data-tooth="22">22</span><span class="tooth" data-tooth="23">23</span><span class="tooth" data-tooth="24">24</span><span class="tooth" data-tooth="25">25</span><span class="tooth tooth--crown" data-tooth="26">26</span><span class="tooth" data-tooth="27">27</span><span class="tooth tooth--missing" data-tooth="28">28</span></div>
+                <div class="jaw jaw--lower"><span class="tooth tooth--missing" data-tooth="48">48</span><span class="tooth" data-tooth="47">47</span><span class="tooth tooth--filled" data-tooth="46">46</span><span class="tooth" data-tooth="45">45</span><span class="tooth" data-tooth="44">44</span><span class="tooth" data-tooth="43">43</span><span class="tooth" data-tooth="42">42</span><span class="tooth" data-tooth="41">41</span><span class="tooth" data-tooth="31">31</span><span class="tooth" data-tooth="32">32</span><span class="tooth" data-tooth="33">33</span><span class="tooth" data-tooth="34">34</span><span class="tooth" data-tooth="35">35</span><span class="tooth tooth--treatment" data-tooth="36">36</span><span class="tooth tooth--caries" data-tooth="37">37</span><span class="tooth tooth--missing" data-tooth="38">38</span></div>
+              </div>
+              <p class="tooth-legend">
+                <span><i style="--c:#f3c9c4"></i>Caries</span>
+                <span><i style="--c:#c9d8f6"></i>Obturado</span>
+                <span><i style="--c:#f1dfae"></i>Corona</span>
+                <span><i style="--c:#bfe6e0"></i>En tratamiento</span>
+                <span><i style="--c:#d3dae4"></i>Ausente</span>
+              </p>
+            </div>
+
+            <div class="detail-section">
+              <h3>Plan de tratamiento</h3>
+              <p class="plan-line"><span id="detail-plan">Endodoncia del molar 36</span><span class="num"><span id="detail-plan-done">2</span> de <span id="detail-plan-total">3</span> sesiones</span></p>
+              <div class="meter"><span id="detail-plan-bar" style="--v:67"></span></div>
+            </div>
+
+            <div class="detail-section">
+              <h3>Notas clínicas</h3>
+              <p class="notes" id="detail-notes">Refiere sensibilidad al frío en el cuadrante inferior izquierdo. Tomar radiografía de control antes de obturar conductos.</p>
+              <p style="margin-top:10px;font-size:.8125rem;font-weight:700;color:var(--ink-3)">Última visita: <span id="detail-last-visit">22 sep 2026 · Endodoncia (1.ª sesión)</span></p>
+            </div>
+
+            <div class="detail-actions">
+              <button type="button" class="btn btn--solid" id="btn-check-in"><svg class="icon"><use href="#i-check"/></svg>Registrar llegada</button>
+              <button type="button" class="btn" id="btn-reschedule"><svg class="icon"><use href="#i-clock"/></svg>Reprogramar</button>
+              <button type="button" class="btn" id="btn-cancel-appointment" style="color:var(--bad)">Cancelar cita</button>
+            </div>
+          </article>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+
+  <!-- ======================================================================
+       MODAL · AGENDAR CITA
+       ====================================================================== -->
+  <div class="modal-overlay" id="modal-new-appointment">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="new-title">
+      <header class="modal-head">
+        <span class="brand-mark"><svg class="icon"><use href="#i-calendar"/></svg></span>
+        <div>
+          <h2 id="new-title">Agendar cita</h2>
+          <p>Registra al paciente y elige odontólogo, procedimiento y horario.</p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-modal" aria-label="Cerrar formulario"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <form id="new-appointment-form" style="display:contents">
+        <div class="modal-body">
+          <div>
+            <div class="form-section">
+              <h3>Paciente</h3>
+              <div class="form-grid">
+                <div class="field field--full">
+                  <label for="apt-patient">Nombre completo <span class="req">*</span></label>
+                  <input class="input" type="text" id="apt-patient" name="patient" placeholder="Ej. Gloria Inés Vásquez" required>
+                </div>
+                <div class="field">
+                  <label for="apt-document">Documento <span class="req">*</span></label>
+                  <input class="input" type="text" id="apt-document" name="document" placeholder="CC 31.456.782" required>
+                </div>
+                <div class="field">
+                  <label for="apt-birth">Fecha de nacimiento</label>
+                  <input class="input" type="date" id="apt-birth" name="birthDate">
+                </div>
+                <div class="field">
+                  <label for="apt-phone">Celular (WhatsApp) <span class="req">*</span></label>
+                  <input class="input" type="tel" id="apt-phone" name="phone" placeholder="+57 300 000 0000" required>
+                </div>
+                <div class="field">
+                  <label for="apt-insurance">Convenio</label>
+                  <select class="select" id="apt-insurance" name="insurance">
+                    <option>Particular</option>
+                    <option>Plan Sonríe Plus</option>
+                    <option>Póliza dental</option>
+                  </select>
+                </div>
+                <div class="field field--full">
+                  <label class="check"><input type="checkbox" class="switch" id="apt-new-patient" name="newPatient"> Es paciente nuevo (abrir historia clínica)</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Cita</h3>
+              <div class="form-grid">
+                <div class="field field--full">
+                  <span class="label" id="apt-dentist-label">Odontólogo</span>
+                  <div class="option-cards" role="radiogroup" aria-labelledby="apt-dentist-label">
+                    <label class="option-card"><input type="radio" name="dentist" value="Dra. Natalia Ospina" checked><span><span class="mini-avatar" style="--c:var(--d1)">N</span>Dra. Natalia Ospina<small>Odontología general</small></span></label>
+                    <label class="option-card"><input type="radio" name="dentist" value="Dr. Mateo Cárdenas"><span><span class="mini-avatar" style="--c:var(--d2)">M</span>Dr. Mateo Cárdenas<small>Ortodoncia y endodoncia</small></span></label>
+                    <label class="option-card"><input type="radio" name="dentist" value="Dra. Paula Andrade"><span><span class="mini-avatar" style="--c:var(--d3)">P</span>Dra. Paula Andrade<small>Odontopediatría</small></span></label>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="apt-procedure">Procedimiento <span class="req">*</span></label>
+                  <select class="select" id="apt-procedure" name="procedure" required>
+                    <option value="valoracion" data-duration="30" data-price="60000">Valoración inicial</option>
+                    <option value="limpieza" data-duration="40" data-price="120000" selected>Limpieza y profilaxis</option>
+                    <option value="resina" data-duration="40" data-price="180000">Resina (obturación)</option>
+                    <option value="endodoncia" data-duration="60" data-price="450000">Endodoncia</option>
+                    <option value="extraccion" data-duration="45" data-price="280000">Extracción</option>
+                    <option value="blanqueamiento" data-duration="60" data-price="650000">Blanqueamiento</option>
+                    <option value="ortodoncia" data-duration="30" data-price="90000">Control de ortodoncia</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="apt-date">Fecha <span class="req">*</span></label>
+                  <input class="input" type="date" id="apt-date" name="date" value="2026-10-14" required>
+                </div>
+                <div class="field field--full">
+                  <span class="label" id="apt-slot-label">Horarios disponibles · miércoles 14 de octubre</span>
+                  <div class="slots" role="radiogroup" aria-labelledby="apt-slot-label">
+                    <label class="slot"><input type="radio" name="slot" value="08:00"><span>08:00</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="08:45" disabled><span>08:45</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="09:30" checked><span>09:30</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="10:15"><span>10:15</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="11:00" disabled><span>11:00</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="14:00"><span>14:00</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="14:45"><span>14:45</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="15:30" disabled><span>15:30</span></label>
+                    <label class="slot"><input type="radio" name="slot" value="16:15"><span>16:15</span></label>
+                  </div>
+                </div>
+                <div class="field field--full">
+                  <label for="apt-notes">Motivo de consulta / notas</label>
+                  <textarea class="textarea" id="apt-notes" name="notes" placeholder="Ej. dolor en molar inferior izquierdo desde hace una semana"></textarea>
+                </div>
+                <div class="field field--full">
+                  <label class="check"><input type="checkbox" class="switch" id="apt-reminder" name="reminder" checked> Enviar recordatorio por WhatsApp el día anterior</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="summary raised" aria-labelledby="summary-title">
+            <h3 id="summary-title">Resumen</h3>
+            <dl>
+              <div><dt>Odontólogo</dt><dd id="summary-dentist">Dra. Natalia Ospina</dd></div>
+              <div><dt>Procedimiento</dt><dd id="summary-procedure">Limpieza y profilaxis</dd></div>
+              <div><dt>Fecha y hora</dt><dd id="summary-when">Mié 14 oct · 09:30</dd></div>
+              <div><dt>Duración</dt><dd id="summary-duration">40 min</dd></div>
+              <div class="price"><dt>Valor</dt><dd class="num" id="summary-price">$120.000</dd></div>
+            </dl>
+            <p class="summary-note">Ejemplo: el resumen debe cambiar con JavaScript según lo que elijas.</p>
+          </aside>
+        </div>
+
+        <footer class="modal-foot">
+          <button type="button" class="btn" id="btn-cancel-modal">Cancelar</button>
+          <button type="submit" class="btn btn--solid" id="btn-save-appointment"><svg class="icon"><use href="#i-check"/></svg>Agendar</button>
+        </footer>
+      </form>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

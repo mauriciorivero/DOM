@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestión de personal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 2 · Gestión de personal (Recursos Humanos)
+    ----------------------------------------------------------------------
+    Todo está construido y visible a propósito. Al abrir el archivo verás:
+      · el panel #employee-empty ("Selecciona un empleado") Y el panel
+        #employee-detail (con los datos de la primera empleada) al mismo tiempo,
+      · el modal #modal-new-employee cubriendo toda la pantalla.
+
+    Tarea del estudiante (JavaScript):
+      1. Al iniciar: ocultar #employee-detail y #modal-new-employee.
+      2. Clic en una fila .employee-row -> ocultar #employee-empty, mostrar
+         #employee-detail y llenarlo con los datos de esa fila. Los datos
+         completos viven en los atributos data-* de cada <tr>.
+      3. Botón #btn-new-employee -> mostrar el modal con el formulario.
+      4. Cerrar / cancelar el modal y leer los datos del formulario.
+
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-logo" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 0 1 0 5.6"/><path d="M18 14.3c1.8.8 3 2.6 3 4.7"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18.5 13.9c1.9.9 3 2.8 3 5.1"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M16 15h2"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="3"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></symbol>
+    <symbol id="i-pointer" viewBox="0 0 24 24"><path d="M5 3l14 7-6 2-2 6z"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></symbol>
+  </svg>
+
+  <div class="app">
+
+    <!-- ===================== BARRA LATERAL ===================== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark"><svg class="icon"><use href="#i-logo"/></svg></span>
+        <span class="brand-text">Talenta</span>
+      </div>
+
+      <nav class="nav" aria-label="Principal">
+        <p class="nav-label">Gestión</p>
+        <a class="nav-link" href="#"><svg class="icon"><use href="#i-home"/></svg><span class="nav-text">Resumen</span></a>
+        <a class="nav-link is-active" href="#" aria-current="page"><svg class="icon"><use href="#i-users"/></svg><span class="nav-text">Empleados</span></a>
+        <a class="nav-link" href="#"><svg class="icon"><use href="#i-wallet"/></svg><span class="nav-text">Nómina</span></a>
+        <a class="nav-link" href="#"><svg class="icon"><use href="#i-calendar"/></svg><span class="nav-text">Vacaciones</span></a>
+        <a class="nav-link" href="#"><svg class="icon"><use href="#i-briefcase"/></svg><span class="nav-text">Reclutamiento</span></a>
+        <a class="nav-link" href="#"><svg class="icon"><use href="#i-star"/></svg><span class="nav-text">Evaluaciones</span></a>
+        <a class="nav-link" href="#"><svg class="icon"><use href="#i-chart"/></svg><span class="nav-text">Reportes</span></a>
+      </nav>
+
+      <div class="sidebar-user">
+        <span class="avatar avatar--5">MT</span>
+        <div>
+          <strong>Mariana Torres</strong>
+          <span>Talento Humano</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===================== CONTENIDO ===================== -->
+    <main class="main">
+
+      <header class="topbar">
+        <div>
+          <h1>Empleados</h1>
+          <p>Directorio y desempeño del equipo · 13 de octubre de 2026</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="btn btn--primary" id="btn-new-employee">
+            <svg class="icon"><use href="#i-plus"/></svg>
+            Nuevo empleado
+          </button>
+        </div>
+      </header>
+
+      <!-- KPIs -->
+      <section class="kpis" aria-label="Indicadores de personal">
+        <article class="card kpi">
+          <p class="kpi-label">Total de empleados</p>
+          <p class="kpi-value num">128</p>
+          <span class="delta delta--good"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>6 <span class="muted">este trimestre</span></span>
+        </article>
+        <article class="card kpi">
+          <p class="kpi-label">Rotación anual</p>
+          <p class="kpi-value num">6,8<small> %</small></p>
+          <span class="delta delta--good"><svg class="icon icon-sm"><use href="#i-arrow-down"/></svg>1,2 pp <span class="muted">vs. 2025</span></span>
+        </article>
+        <article class="card kpi">
+          <p class="kpi-label">Desempeño promedio</p>
+          <p class="kpi-value num">4,2<small> / 5</small></p>
+          <span class="delta delta--good"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>0,1 <span class="muted">vs. trimestre anterior</span></span>
+        </article>
+        <article class="card headcount">
+          <div class="headcount-head">
+            <p class="kpi-label">Empleados por departamento</p>
+            <p class="kpi-label num">128 en total</p>
+          </div>
+          <div class="stacked" role="img" aria-label="Tecnología 38, Comercial 34, Operaciones 31, Administración 25">
+            <span style="--w:38;--c:var(--s1)"></span>
+            <span style="--w:34;--c:var(--s2)"></span>
+            <span style="--w:31;--c:var(--s3)"></span>
+            <span style="--w:25;--c:var(--s4)"></span>
+          </div>
+          <ul class="legend">
+            <li><span class="swatch" style="--c:var(--s1)"></span>Tecnología <strong>38</strong></li>
+            <li><span class="swatch" style="--c:var(--s2)"></span>Comercial <strong>34</strong></li>
+            <li><span class="swatch" style="--c:var(--s3)"></span>Operaciones <strong>31</strong></li>
+            <li><span class="swatch" style="--c:var(--s4)"></span>Administración <strong>25</strong></li>
+          </ul>
+        </article>
+      </section>
+
+      <div class="workspace">
+
+        <!-- ============ LISTA DE EMPLEADOS ============ -->
+        <section class="card list-card" aria-labelledby="list-title">
+          <div class="list-head">
+            <h2 id="list-title">Equipo <span class="num">128</span></h2>
+            <div class="toolbar">
+              <div class="field-search">
+                <svg class="icon"><use href="#i-search"/></svg>
+                <input type="search" id="search-employee" placeholder="Buscar empleado" aria-label="Buscar empleado">
+              </div>
+              <select class="select" id="filter-department" aria-label="Filtrar por departamento">
+                <option>Todos los departamentos</option>
+                <option>Tecnología</option>
+                <option>Comercial</option>
+                <option>Operaciones</option>
+                <option>Administración</option>
+              </select>
+              <select class="select" id="filter-status" aria-label="Filtrar por estado">
+                <option>Todos los estados</option>
+                <option>Activo</option>
+                <option>Vacaciones</option>
+                <option>Incapacidad</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table" id="employee-table">
+              <thead>
+                <tr>
+                  <th scope="col">Empleado</th>
+                  <th scope="col">Departamento</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Desempeño</th>
+                </tr>
+              </thead>
+              <tbody id="employee-list">
+
+                <tr class="employee-row is-selected" tabindex="0"
+                    data-id="1"
+                    data-name="Valentina Ospina Duarte"
+                    data-initials="VO"
+                    data-role="Desarrolladora Senior"
+                    data-department="Tecnología"
+                    data-status="Activo"
+                    data-email="valentina.ospina@talenta-demo.co"
+                    data-phone="+57 300 412 7788"
+                    data-document="CC 1.037.612.884"
+                    data-city="Medellín"
+                    data-hired="2021-03-15"
+                    data-tenure="5 años, 6 meses"
+                    data-contract="Indefinido"
+                    data-salary="9800000"
+                    data-manager="Andrés Mejía"
+                    data-mode="Híbrido"
+                    data-score="4.6"
+                    data-quarters="4.1,4.3,4.5,4.6"
+                    data-skills="88,92,85,95"
+                    data-goals-done="7"
+                    data-goals-total="8"
+                    data-review="Lidera la migración a microservicios con resultados sobresalientes. Mentora activa del equipo junior; se recomienda para el rol de Líder Técnica."
+                    data-review-author="Andrés Mejía"
+                    data-review-date="15 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--5">VO</span><div><strong>Valentina Ospina Duarte</strong><span>Desarrolladora Senior</span></div></div></td>
+                  <td>Tecnología</td>
+                  <td><span class="badge badge--active">Activo</span></td>
+                  <td><div class="score"><strong class="num">4,6</strong><div class="meter"><span style="--v:92"></span></div></div></td>
+                </tr>
+
+                <tr class="employee-row" tabindex="0"
+                    data-id="2"
+                    data-name="Santiago Herrera Pineda"
+                    data-initials="SH"
+                    data-role="Ejecutivo Comercial"
+                    data-department="Comercial"
+                    data-status="Activo"
+                    data-email="santiago.herrera@talenta-demo.co"
+                    data-phone="+57 311 220 4519"
+                    data-document="CC 1.018.447.302"
+                    data-city="Bogotá"
+                    data-hired="2022-08-01"
+                    data-tenure="4 años, 2 meses"
+                    data-contract="Indefinido"
+                    data-salary="5200000"
+                    data-manager="Paola Restrepo"
+                    data-mode="Presencial"
+                    data-score="3.9"
+                    data-quarters="3.6,3.7,3.8,3.9"
+                    data-skills="70,85,80,78"
+                    data-goals-done="5"
+                    data-goals-total="8"
+                    data-review="Cumple las metas de ventas del trimestre. Debe fortalecer el seguimiento a clientes y el uso del CRM."
+                    data-review-author="Paola Restrepo"
+                    data-review-date="12 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--2">SH</span><div><strong>Santiago Herrera Pineda</strong><span>Ejecutivo Comercial</span></div></div></td>
+                  <td>Comercial</td>
+                  <td><span class="badge badge--active">Activo</span></td>
+                  <td><div class="score"><strong class="num">3,9</strong><div class="meter"><span style="--v:78"></span></div></div></td>
+                </tr>
+
+                <tr class="employee-row" tabindex="0"
+                    data-id="3"
+                    data-name="Camila Rojas Giraldo"
+                    data-initials="CR"
+                    data-role="Analista de Nómina"
+                    data-department="Administración"
+                    data-status="Activo"
+                    data-email="camila.rojas@talenta-demo.co"
+                    data-phone="+57 315 908 2210"
+                    data-document="CC 52.884.119"
+                    data-city="Bogotá"
+                    data-hired="2020-01-20"
+                    data-tenure="6 años, 8 meses"
+                    data-contract="Indefinido"
+                    data-salary="4100000"
+                    data-manager="Luis Fernando Cardona"
+                    data-mode="Presencial"
+                    data-score="4.4"
+                    data-quarters="4.2,4.3,4.4,4.4"
+                    data-skills="72,80,90,98"
+                    data-goals-done="8"
+                    data-goals-total="9"
+                    data-review="Precisión impecable en la liquidación de nómina y cero errores en el último semestre. Puede asumir mayor interacción con las demás áreas."
+                    data-review-author="Luis Fernando Cardona"
+                    data-review-date="10 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--3">CR</span><div><strong>Camila Rojas Giraldo</strong><span>Analista de Nómina</span></div></div></td>
+                  <td>Administración</td>
+                  <td><span class="badge badge--active">Activo</span></td>
+                  <td><div class="score"><strong class="num">4,4</strong><div class="meter"><span style="--v:88"></span></div></div></td>
+                </tr>
+
+                <tr class="employee-row" tabindex="0"
+                    data-id="4"
+                    data-name="Juan David Martínez Soto"
+                    data-initials="JM"
+                    data-role="Coordinador de Logística"
+                    data-department="Operaciones"
+                    data-status="Activo"
+                    data-email="juan.martinez@talenta-demo.co"
+                    data-phone="+57 304 773 9051"
+                    data-document="CC 1.045.220.781"
+                    data-city="Barranquilla"
+                    data-hired="2019-06-10"
+                    data-tenure="7 años, 4 meses"
+                    data-contract="Indefinido"
+                    data-salary="6300000"
+                    data-manager="Gloria Patiño"
+                    data-mode="Presencial"
+                    data-score="4.1"
+                    data-quarters="3.9,4.0,4.0,4.1"
+                    data-skills="84,76,82,90"
+                    data-goals-done="6"
+                    data-goals-total="8"
+                    data-review="Redujo 12 % los tiempos de despacho. Se sugiere reforzar la comunicación de cambios de ruta con el equipo comercial."
+                    data-review-author="Gloria Patiño"
+                    data-review-date="14 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--4">JM</span><div><strong>Juan David Martínez Soto</strong><span>Coordinador de Logística</span></div></div></td>
+                  <td>Operaciones</td>
+                  <td><span class="badge badge--active">Activo</span></td>
+                  <td><div class="score"><strong class="num">4,1</strong><div class="meter"><span style="--v:82"></span></div></div></td>
+                </tr>
+
+                <tr class="employee-row" tabindex="0"
+                    data-id="5"
+                    data-name="Laura Mendoza Castaño"
+                    data-initials="LM"
+                    data-role="Diseñadora UX"
+                    data-department="Tecnología"
+                    data-status="Vacaciones"
+                    data-email="laura.mendoza@talenta-demo.co"
+                    data-phone="+57 320 614 3382"
+                    data-document="CC 1.144.067.923"
+                    data-city="Cali"
+                    data-hired="2023-02-06"
+                    data-tenure="3 años, 8 meses"
+                    data-contract="Término fijo"
+                    data-salary="5600000"
+                    data-manager="Andrés Mejía"
+                    data-mode="Remoto"
+                    data-score="4.3"
+                    data-quarters="4.0,4.1,4.2,4.3"
+                    data-skills="68,88,92,86"
+                    data-goals-done="5"
+                    data-goals-total="6"
+                    data-review="Su rediseño del flujo de registro elevó la conversión 18 %. Excelente colaboración con producto y desarrollo."
+                    data-review-author="Andrés Mejía"
+                    data-review-date="15 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--1">LM</span><div><strong>Laura Mendoza Castaño</strong><span>Diseñadora UX</span></div></div></td>
+                  <td>Tecnología</td>
+                  <td><span class="badge badge--vacation">Vacaciones</span></td>
+                  <td><div class="score"><strong class="num">4,3</strong><div class="meter"><span style="--v:86"></span></div></div></td>
+                </tr>
+
+                <tr class="employee-row" tabindex="0"
+                    data-id="6"
+                    data-name="Andrés Felipe Vargas Ruiz"
+                    data-initials="AV"
+                    data-role="Analista de Datos"
+                    data-department="Tecnología"
+                    data-status="Activo"
+                    data-email="andres.vargas@talenta-demo.co"
+                    data-phone="+57 301 556 7740"
+                    data-document="CC 1.020.771.455"
+                    data-city="Medellín"
+                    data-hired="2024-04-22"
+                    data-tenure="2 años, 5 meses"
+                    data-contract="Indefinido"
+                    data-salary="6100000"
+                    data-manager="Andrés Mejía"
+                    data-mode="Híbrido"
+                    data-score="3.5"
+                    data-quarters="3.2,3.3,3.4,3.5"
+                    data-skills="60,72,78,81"
+                    data-goals-done="3"
+                    data-goals-total="6"
+                    data-review="Buen dominio técnico de SQL y Python; necesita priorizar mejor sus entregas y documentar sus análisis."
+                    data-review-author="Andrés Mejía"
+                    data-review-date="15 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--5">AV</span><div><strong>Andrés Felipe Vargas Ruiz</strong><span>Analista de Datos</span></div></div></td>
+                  <td>Tecnología</td>
+                  <td><span class="badge badge--active">Activo</span></td>
+                  <td><div class="score"><strong class="num">3,5</strong><div class="meter"><span style="--v:70"></span></div></div></td>
+                </tr>
+
+                <tr class="employee-row" tabindex="0"
+                    data-id="7"
+                    data-name="Paola Restrepo Lozano"
+                    data-initials="PR"
+                    data-role="Gerente Comercial"
+                    data-department="Comercial"
+                    data-status="Activo"
+                    data-email="paola.restrepo@talenta-demo.co"
+                    data-phone="+57 310 998 1126"
+                    data-document="CC 43.215.870"
+                    data-city="Bogotá"
+                    data-hired="2018-09-03"
+                    data-tenure="8 años, 1 mes"
+                    data-contract="Indefinido"
+                    data-salary="14500000"
+                    data-manager="Dirección General"
+                    data-mode="Presencial"
+                    data-score="4.7"
+                    data-quarters="4.5,4.6,4.6,4.7"
+                    data-skills="96,91,89,94"
+                    data-goals-done="9"
+                    data-goals-total="9"
+                    data-review="Superó la meta anual de ventas en 14 %. Referente de liderazgo para el área; ideal para el programa de sucesión."
+                    data-review-author="Dirección General"
+                    data-review-date="8 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--2">PR</span><div><strong>Paola Restrepo Lozano</strong><span>Gerente Comercial</span></div></div></td>
+                  <td>Comercial</td>
+                  <td><span class="badge badge--active">Activo</span></td>
+                  <td><div class="score"><strong class="num">4,7</strong><div class="meter"><span style="--v:94"></span></div></div></td>
+                </tr>
+
+                <tr class="employee-row" tabindex="0"
+                    data-id="8"
+                    data-name="Daniel Cárdenas Muñoz"
+                    data-initials="DC"
+                    data-role="Auxiliar de Bodega"
+                    data-department="Operaciones"
+                    data-status="Incapacidad"
+                    data-email="daniel.cardenas@talenta-demo.co"
+                    data-phone="+57 316 340 8875"
+                    data-document="CC 1.113.560.274"
+                    data-city="Cali"
+                    data-hired="2022-10-17"
+                    data-tenure="3 años, 11 meses"
+                    data-contract="Indefinido"
+                    data-salary="1750000"
+                    data-manager="Juan David Martínez"
+                    data-mode="Presencial"
+                    data-score="3.8"
+                    data-quarters="3.7,3.7,3.8,3.8"
+                    data-skills="74,70,85,88"
+                    data-goals-done="4"
+                    data-goals-total="5"
+                    data-review="Puntual y cuidadoso con el inventario. Completó la certificación en manejo seguro de montacargas."
+                    data-review-author="Juan David Martínez"
+                    data-review-date="9 sep 2026">
+                  <td><div class="person"><span class="avatar avatar--1">DC</span><div><strong>Daniel Cárdenas Muñoz</strong><span>Auxiliar de Bodega</span></div></div></td>
+                  <td>Operaciones</td>
+                  <td><span class="badge badge--leave">Incapacidad</span></td>
+                  <td><div class="score"><strong class="num">3,8</strong><div class="meter"><span style="--v:76"></span></div></div></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class="list-foot">
+            <span class="num">Mostrando 8 de 128 empleados</span>
+            <div class="pager">
+              <button type="button" class="btn">Anterior</button>
+              <button type="button" class="btn">Siguiente</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ PANEL DE DETALLE ============ -->
+        <aside class="employee-panel" aria-live="polite">
+
+          <!-- Estado vacío: se muestra mientras no hay empleado seleccionado -->
+          <div class="empty-state" id="employee-empty">
+            <span class="empty-icon"><svg class="icon"><use href="#i-pointer"/></svg></span>
+            <h2>Selecciona un empleado</h2>
+            <p>Haz clic en cualquier fila de la tabla para ver su información completa y su desempeño.</p>
+          </div>
+
+          <!-- Detalle del empleado: los datos de abajo son de ejemplo (fila 1) -->
+          <article class="card" id="employee-detail">
+
+            <header class="detail-head">
+              <span class="avatar avatar--xl avatar--5" id="detail-avatar">VO</span>
+              <div>
+                <h2 id="detail-name">Valentina Ospina Duarte</h2>
+                <p class="role" id="detail-role">Desarrolladora Senior</p>
+                <div class="chips">
+                  <span class="chip" id="detail-department">Tecnología</span>
+                  <span class="badge badge--active" id="detail-status">Activo</span>
+                </div>
+              </div>
+              <button type="button" class="icon-button" id="btn-close-detail" aria-label="Cerrar detalle del empleado">
+                <svg class="icon"><use href="#i-x"/></svg>
+              </button>
+            </header>
+
+            <section class="detail-section" aria-labelledby="info-title">
+              <h3 id="info-title">Información del empleado</h3>
+              <dl class="info-grid">
+                <div><dt>Documento</dt><dd id="detail-document">CC 1.037.612.884</dd></div>
+                <div><dt>Ciudad</dt><dd id="detail-city">Medellín</dd></div>
+                <div class="wide"><dt>Correo</dt><dd id="detail-email">valentina.ospina@talenta-demo.co</dd></div>
+                <div><dt>Teléfono</dt><dd id="detail-phone">+57 300 412 7788</dd></div>
+                <div><dt>Modalidad</dt><dd id="detail-mode">Híbrido</dd></div>
+                <div><dt>Fecha de ingreso</dt><dd id="detail-hired">15 mar 2021</dd></div>
+                <div><dt>Antigüedad</dt><dd id="detail-tenure">5 años, 6 meses</dd></div>
+                <div><dt>Tipo de contrato</dt><dd id="detail-contract">Indefinido</dd></div>
+                <div><dt>Salario mensual</dt><dd class="num" id="detail-salary">$9.800.000</dd></div>
+                <div class="wide"><dt>Jefe directo</dt><dd id="detail-manager">Andrés Mejía</dd></div>
+              </dl>
+            </section>
+
+            <section class="detail-section" aria-labelledby="perf-title">
+              <h3 id="perf-title">Desempeño</h3>
+
+              <div class="perf-summary">
+                <p class="perf-score num"><span id="detail-score">4,6</span> <small>/ 5</small></p>
+                <p class="perf-label" id="detail-rating">Sobresaliente</p>
+                <span class="delta delta--good" id="detail-score-delta"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>0,1 <span class="muted">vs. trimestre anterior</span></span>
+              </div>
+
+              <div class="perf-block">
+                <h4>Evolución trimestral <span>Calificación de 0 a 5</span></h4>
+                <div class="col-chart" role="img" aria-label="Calificación por trimestre: 4,1; 4,3; 4,5 y 4,6">
+                  <div class="y-axis"><span>5</span><span>2,5</span><span>0</span></div>
+                  <div class="plot">
+                    <div class="bar" id="quarter-bar-1" style="--v:82"><span class="bar-value" id="quarter-value-1">4,1</span></div>
+                    <div class="bar" id="quarter-bar-2" style="--v:86"><span class="bar-value" id="quarter-value-2">4,3</span></div>
+                    <div class="bar" id="quarter-bar-3" style="--v:90"><span class="bar-value" id="quarter-value-3">4,5</span></div>
+                    <div class="bar bar--current" id="quarter-bar-4" style="--v:92"><span class="bar-value" id="quarter-value-4">4,6</span></div>
+                  </div>
+                  <div class="x-axis"><span>T4 2025</span><span>T1 2026</span><span>T2 2026</span><span>T3 2026</span></div>
+                </div>
+              </div>
+
+              <div class="perf-block">
+                <h4>Competencias <span>Porcentaje de dominio</span></h4>
+                <div class="skills">
+                  <div class="skill"><span class="skill-name">Liderazgo</span><div class="meter"><span id="skill-bar-1" style="--v:88"></span></div><span class="skill-value" id="skill-value-1">88</span></div>
+                  <div class="skill"><span class="skill-name">Comunicación</span><div class="meter"><span id="skill-bar-2" style="--v:92"></span></div><span class="skill-value" id="skill-value-2">92</span></div>
+                  <div class="skill"><span class="skill-name">Trabajo en equipo</span><div class="meter"><span id="skill-bar-3" style="--v:85"></span></div><span class="skill-value" id="skill-value-3">85</span></div>
+                  <div class="skill"><span class="skill-name">Cumplimiento</span><div class="meter"><span id="skill-bar-4" style="--v:95"></span></div><span class="skill-value" id="skill-value-4">95</span></div>
+                </div>
+              </div>
+
+              <div class="perf-block">
+                <h4>Objetivos del año</h4>
+                <p class="goals-line"><span><strong id="detail-goals-done">7</strong> de <span id="detail-goals-total">8</span> objetivos cumplidos</span><strong class="num" id="detail-goals-pct">88 %</strong></p>
+                <div class="meter meter--s3"><span id="detail-goals-bar" style="--v:88"></span></div>
+              </div>
+
+              <div class="perf-block">
+                <h4>Última evaluación</h4>
+                <blockquote class="review" id="detail-review">Lidera la migración a microservicios con resultados sobresalientes. Mentora activa del equipo junior; se recomienda para el rol de Líder Técnica.</blockquote>
+                <p class="review-meta"><span id="detail-review-author">Andrés Mejía</span> · <span id="detail-review-date">15 sep 2026</span></p>
+              </div>
+            </section>
+          </article>
+        </aside>
+
+      </div>
+    </main>
+  </div>
+
+
+  <!-- ======================================================================
+       MODAL · NUEVO EMPLEADO
+       ====================================================================== -->
+  <div class="modal-overlay" id="modal-new-employee">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-new-title">
+
+      <header class="modal-head">
+        <div>
+          <h2 id="modal-new-title">Nuevo empleado</h2>
+          <p>Completa los datos para registrar a una nueva persona en el equipo.</p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-modal" aria-label="Cerrar formulario">
+          <svg class="icon"><use href="#i-x"/></svg>
+        </button>
+      </header>
+
+      <form id="new-employee-form" style="display:contents">
+        <div class="modal-body">
+
+          <fieldset class="form-section">
+            <legend>Datos personales</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="emp-first-name">Nombres <span class="req">*</span></label>
+                <input class="input" type="text" id="emp-first-name" name="firstName" placeholder="Ej. María Fernanda" required>
+              </div>
+              <div class="field">
+                <label for="emp-last-name">Apellidos <span class="req">*</span></label>
+                <input class="input" type="text" id="emp-last-name" name="lastName" placeholder="Ej. Gómez Ramírez" required>
+              </div>
+              <div class="field">
+                <label for="emp-doc-number">Documento de identidad <span class="req">*</span></label>
+                <div class="input-group">
+                  <select class="select" id="emp-doc-type" name="docType" aria-label="Tipo de documento">
+                    <option>CC</option>
+                    <option>CE</option>
+                    <option>PPT</option>
+                    <option>Pasaporte</option>
+                  </select>
+                  <input class="input" type="text" id="emp-doc-number" name="docNumber" inputmode="numeric" placeholder="1.020.345.678" required>
+                </div>
+              </div>
+              <div class="field">
+                <label for="emp-birth">Fecha de nacimiento</label>
+                <input class="input" type="date" id="emp-birth" name="birthDate">
+              </div>
+              <div class="field">
+                <label for="emp-email">Correo electrónico <span class="req">*</span></label>
+                <input class="input" type="email" id="emp-email" name="email" placeholder="nombre.apellido@empresa.co" required>
+              </div>
+              <div class="field">
+                <label for="emp-phone">Teléfono</label>
+                <input class="input" type="tel" id="emp-phone" name="phone" placeholder="+57 300 000 0000">
+              </div>
+              <div class="field field--full">
+                <label for="emp-city">Ciudad de residencia</label>
+                <select class="select" id="emp-city" name="city">
+                  <option value="">Selecciona una ciudad</option>
+                  <option>Bogotá</option>
+                  <option>Medellín</option>
+                  <option>Cali</option>
+                  <option>Barranquilla</option>
+                  <option>Cartagena</option>
+                  <option>Bucaramanga</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section">
+            <legend>Datos laborales</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="emp-role">Cargo <span class="req">*</span></label>
+                <input class="input" type="text" id="emp-role" name="role" placeholder="Ej. Analista de Datos" required>
+              </div>
+              <div class="field">
+                <label for="emp-department">Departamento <span class="req">*</span></label>
+                <select class="select" id="emp-department" name="department" required>
+                  <option value="">Selecciona un departamento</option>
+                  <option>Tecnología</option>
+                  <option>Comercial</option>
+                  <option>Operaciones</option>
+                  <option>Administración</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="emp-manager">Jefe directo</label>
+                <select class="select" id="emp-manager" name="manager">
+                  <option value="">Selecciona una persona</option>
+                  <option>Andrés Mejía</option>
+                  <option>Paola Restrepo</option>
+                  <option>Gloria Patiño</option>
+                  <option>Luis Fernando Cardona</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="emp-hire-date">Fecha de ingreso <span class="req">*</span></label>
+                <input class="input" type="date" id="emp-hire-date" name="hireDate" required>
+              </div>
+              <div class="field">
+                <label for="emp-contract">Tipo de contrato</label>
+                <select class="select" id="emp-contract" name="contract">
+                  <option>Indefinido</option>
+                  <option>Término fijo</option>
+                  <option>Obra o labor</option>
+                  <option>Prestación de servicios</option>
+                  <option>Aprendizaje SENA</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="emp-salary">Salario mensual (COP)</label>
+                <input class="input" type="number" id="emp-salary" name="salary" min="0" step="50000" placeholder="3500000">
+              </div>
+              <div class="field field--full">
+                <span class="label" id="emp-mode-label">Modalidad de trabajo</span>
+                <div class="segmented" role="radiogroup" aria-labelledby="emp-mode-label">
+                  <label><input type="radio" name="mode" value="Presencial" checked><span>Presencial</span></label>
+                  <label><input type="radio" name="mode" value="Híbrido"><span>Híbrido</span></label>
+                  <label><input type="radio" name="mode" value="Remoto"><span>Remoto</span></label>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+
+        <footer class="modal-foot">
+          <button type="button" class="btn" id="btn-cancel-employee">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btn-save-employee">Guardar empleado</button>
+        </footer>
+      </form>
+
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

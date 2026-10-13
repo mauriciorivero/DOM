@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rumbo Viajes · Reservas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 8 · Reservas de agencia de viajes (estilo Material Design 3)
+    ----------------------------------------------------------------------
+    Todo está construido y visible a propósito. Al abrir el archivo verás:
+      · el diálogo #package-detail con sus TRES paneles de pestaña
+        (#tab-summary, #tab-itinerary, #tab-departures) visibles a la vez,
+      · el diálogo #modal-new-booking encima de todo.
+
+    Tarea del estudiante (JavaScript):
+      1. Al iniciar: ocultar #package-detail y #modal-new-booking.
+      2. Clic en una tarjeta .package-card -> mostrar #package-detail con los
+         datos del paquete (data-*).
+      3. Pestañas .tab -> mostrar solo el panel elegido.
+      4. FAB #btn-new-booking (o #btn-book-package) -> mostrar el formulario.
+
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="scene-beach" viewBox="0 0 240 140"><circle cx="182" cy="42" r="18" fill="currentColor" opacity=".9"/><path d="M0 108 Q30 98 60 108 T120 108 T180 108 T240 108 V140 H0Z" fill="currentColor" opacity=".45"/><path d="M0 122 Q30 114 60 122 T120 122 T180 122 T240 122 V140 H0Z" fill="currentColor" opacity=".7"/><path d="M54 112 Q58 82 50 58" stroke="currentColor" stroke-width="4" fill="none"/><path d="M50 58 Q36 50 22 58 M50 58 Q62 46 78 52 M50 58 Q44 42 30 40 M50 58 Q60 40 72 38" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="scene-mountain" viewBox="0 0 240 140"><circle cx="58" cy="38" r="14" fill="currentColor" opacity=".9"/><path d="M0 140 L72 58 L110 98 L160 36 L240 140Z" fill="currentColor" opacity=".5"/><path d="M148 52 L160 36 L173 53 L165 49 L159 56 L153 49Z" fill="#fff" opacity=".9"/><path d="M0 140 L52 104 L92 124 L142 92 L240 140Z" fill="currentColor" opacity=".8"/></symbol>
+    <symbol id="scene-city" viewBox="0 0 240 140"><circle cx="196" cy="34" r="14" fill="currentColor" opacity=".9"/><g fill="currentColor" opacity=".55"><rect x="8" y="78" width="26" height="62"/><rect x="40" y="58" width="22" height="82"/><rect x="68" y="88" width="30" height="52"/><rect x="104" y="44" width="20" height="96"/><rect x="130" y="70" width="28" height="70"/><rect x="164" y="54" width="22" height="86"/><rect x="192" y="82" width="40" height="58"/></g><path d="M114 44 V30" stroke="currentColor" stroke-width="3" opacity=".55"/><path d="M0 128 H240 V140 H0Z" fill="currentColor" opacity=".85"/></symbol>
+    <symbol id="scene-nature" viewBox="0 0 240 140"><circle cx="190" cy="38" r="16" fill="currentColor" opacity=".9"/><path d="M0 100 Q60 70 120 100 T240 94 V140H0Z" fill="currentColor" opacity=".5"/><path d="M0 120 Q80 96 160 118 T240 112 V140H0Z" fill="currentColor" opacity=".8"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity=".85"><path d="M60 104 V58"/><path d="M60 60 q-12 -4 -18 4 M60 60 q12 -6 18 2 M60 60 q-4 -12 -14 -14 M60 60 q6 -12 16 -12"/><path d="M92 98 V66"/><path d="M92 68 q-10 -4 -14 3 M92 68 q10 -5 14 2 M92 68 q-3 -10 -11 -11 M92 68 q5 -10 13 -10"/></g></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
+    <symbol id="i-luggage" viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V4h6v3"/><path d="M9 11v5M15 11v5"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 2)"/><path d="M13 6v12" stroke-dasharray="2 2"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 4a4 4 0 0 1 0 8M19 14c2 1 3 3 3 7"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path d="M2 16l20-6-3-3-7 3-5-5-2 1 3 6-4 2-2-1-1 1z"/></symbol>
+    <symbol id="i-money" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-7 7-12a7 7 0 0 0-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </svg>
+
+  <div class="app">
+
+    <!-- ===================== RIEL DE NAVEGACIÓN ===================== -->
+    <nav class="rail" aria-label="Principal">
+      <button type="button" class="fab" id="btn-new-booking" aria-label="Nueva reserva"><svg class="icon"><use href="#i-edit"/></svg></button>
+      <a href="#" class="rail-item"><span class="rail-indicator"><svg class="icon"><use href="#i-home"/></svg></span>Inicio</a>
+      <a href="#" class="rail-item is-active" aria-current="page"><span class="rail-indicator"><svg class="icon"><use href="#i-luggage"/></svg></span>Paquetes</a>
+      <a href="#" class="rail-item"><span class="rail-indicator"><svg class="icon"><use href="#i-ticket"/></svg></span>Reservas</a>
+      <a href="#" class="rail-item"><span class="rail-indicator"><svg class="icon"><use href="#i-people"/></svg></span>Clientes</a>
+      <a href="#" class="rail-item"><span class="rail-indicator"><svg class="icon"><use href="#i-chart"/></svg></span>Reportes</a>
+    </nav>
+
+    <main class="main">
+      <header class="top-app-bar">
+        <div>
+          <h1>Paquetes turísticos</h1>
+          <p class="body-small">Rumbo Viajes · temporada octubre – diciembre 2026</p>
+        </div>
+        <label class="search-bar">
+          <svg class="icon"><use href="#i-search"/></svg>
+          <input type="search" id="search-package" placeholder="Buscar destino o paquete" aria-label="Buscar paquete">
+        </label>
+        <span class="avatar" aria-label="Diana Salazar">DS</span>
+      </header>
+
+      <div class="chips" role="group" aria-label="Filtrar paquetes">
+        <button type="button" class="chip is-selected" data-filter="all"><svg class="icon"><use href="#i-check"/></svg>Todos</button>
+        <button type="button" class="chip" data-filter="Nacional"><svg class="icon"><use href="#i-check"/></svg>Nacionales</button>
+        <button type="button" class="chip" data-filter="Internacional"><svg class="icon"><use href="#i-check"/></svg>Internacionales</button>
+        <button type="button" class="chip" data-filter="Playa"><svg class="icon"><use href="#i-check"/></svg>Playa</button>
+        <button type="button" class="chip" data-filter="Naturaleza"><svg class="icon"><use href="#i-check"/></svg>Naturaleza</button>
+        <button type="button" class="chip" data-filter="Montaña"><svg class="icon"><use href="#i-check"/></svg>Montaña</button>
+        <button type="button" class="chip" data-filter="Ciudad"><svg class="icon"><use href="#i-check"/></svg>Ciudad</button>
+      </div>
+
+      <section class="kpis" aria-label="Indicadores">
+        <article class="kpi"><span class="kpi-icon"><svg class="icon"><use href="#i-ticket"/></svg></span><div><p class="body-small">Reservas de octubre</p><p class="kpi-value num">86</p><p class="body-small">▲ 9 % vs. septiembre</p></div></article>
+        <article class="kpi"><span class="kpi-icon"><svg class="icon"><use href="#i-money"/></svg></span><div><p class="body-small">Ingresos vendidos</p><p class="kpi-value num">$412,6 M</p><p class="body-small">Pagos confirmados</p></div></article>
+        <article class="kpi"><span class="kpi-icon"><svg class="icon"><use href="#i-trend"/></svg></span><div><p class="body-small">Ocupación de salidas</p><p class="kpi-value num">74 %</p><p class="body-small">Próximos 60 días</p></div></article>
+        <article class="kpi"><span class="kpi-icon"><svg class="icon"><use href="#i-pin"/></svg></span><div><p class="body-small">Destino más vendido</p><p class="kpi-value">Cartagena</p><p class="body-small">21 reservas este mes</p></div></article>
+      </section>
+
+      <div class="content">
+        <section aria-labelledby="packages-title">
+          <div class="section-head">
+            <h2 class="title-large" id="packages-title">Catálogo de paquetes</h2>
+            <span class="body-small">8 paquetes activos</span>
+          </div>
+          <div class="packages" id="package-list">
+
+            <article class="package-card is-selected" tabindex="0"
+                     data-id="1"
+                     data-name="Cartagena Amurallada"
+                     data-destination="Cartagena, Bolívar"
+                     data-type="Nacional"
+                     data-category="Playa"
+                     data-nights="4"
+                     data-price="1890000"
+                     data-child-price="1323000"
+                     data-rating="4.8"
+                     data-reviews="312"
+                     data-scene="beach"
+                     data-media="linear-gradient(160deg, #ff8a65, #c2185b)"
+                     data-includes="Vuelo ida y regreso desde Bogotá|Hotel 4★ en Getsemaní|Desayunos diarios|Traslados aeropuerto–hotel|Tour por la ciudad amurallada|Excursión a Islas del Rosario"
+                     data-itinerary="Llegada a Cartagena, traslado al hotel en Getsemaní y noche libre.|Tour por la ciudad amurallada y el Castillo de San Felipe con cena típica.|Día de playa en Islas del Rosario con almuerzo incluido.|Mañana libre y atardecer sobre las murallas.|Desayuno y traslado al aeropuerto."
+                     data-departures="2026-10-23:24:30|2026-11-06:16:30|2026-11-20:8:30|2026-12-04:30:30">
+              <div class="media" style="--media:linear-gradient(160deg, #ff8a65, #c2185b)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-beach"/></svg>
+                <span class="badge badge--warn">Últimos 6 cupos</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Nacional · Playa · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,8</span></p>
+                <h3 class="title-medium">Cartagena Amurallada</h3>
+                <p class="body-small">Cartagena, Bolívar · 4 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$1.890.000</strong> por persona</p>
+              </div>
+            </article>
+
+            <article class="package-card" tabindex="0"
+                     data-id="2"
+                     data-name="San Andrés Todo Incluido"
+                     data-destination="San Andrés Islas"
+                     data-type="Nacional"
+                     data-category="Playa"
+                     data-nights="5"
+                     data-price="2450000"
+                     data-child-price="1715000"
+                     data-rating="4.7"
+                     data-reviews="468"
+                     data-scene="beach"
+                     data-media="linear-gradient(160deg, #26c6da, #1565c0)"
+                     data-includes="Vuelo ida y regreso desde Bogotá|Hotel todo incluido frente al mar|Tarjeta de turismo|Vuelta a la isla en chiva|Tour a Johnny Cay y el Acuario"
+                     data-itinerary="Llegada, check-in y tarde de playa.|Vuelta a la isla en chiva.|Tour a Johnny Cay y el Acuario.|Día libre con snorkel opcional.|Tarde de compras en el centro.|Traslado al aeropuerto."
+                     data-departures="2026-10-30:36:40|2026-11-13:22:40|2026-11-27:12:40">
+              <div class="media" style="--media:linear-gradient(160deg, #26c6da, #1565c0)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-beach"/></svg>
+                <span class="badge badge--warn">Últimos 4 cupos</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Nacional · Playa · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,7</span></p>
+                <h3 class="title-medium">San Andrés Todo Incluido</h3>
+                <p class="body-small">San Andrés Islas · 5 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$2.450.000</strong> por persona</p>
+              </div>
+            </article>
+
+            <article class="package-card" tabindex="0"
+                     data-id="3"
+                     data-name="Eje Cafetero y Cocora"
+                     data-destination="Salento, Quindío"
+                     data-type="Nacional"
+                     data-category="Naturaleza"
+                     data-nights="3"
+                     data-price="1290000"
+                     data-child-price="903000"
+                     data-rating="4.9"
+                     data-reviews="205"
+                     data-scene="nature"
+                     data-media="linear-gradient(160deg, #9ccc65, #2e7d32)"
+                     data-includes="Transporte terrestre desde Pereira|Hotel campestre en Salento|Desayunos y una cena|Tour de café en finca|Caminata al Valle del Cocora"
+                     data-itinerary="Llegada a Pereira y traslado a Salento.|Caminata por el Valle del Cocora entre palmas de cera.|Tour de café con cata en finca tradicional.|Regreso a Pereira."
+                     data-departures="2026-10-24:10:20|2026-11-07:6:20|2026-11-21:2:20">
+              <div class="media" style="--media:linear-gradient(160deg, #9ccc65, #2e7d32)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-nature"/></svg>
+                <span class="badge">Próxima salida 24 oct</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Nacional · Naturaleza · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,9</span></p>
+                <h3 class="title-medium">Eje Cafetero y Cocora</h3>
+                <p class="body-small">Salento, Quindío · 3 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$1.290.000</strong> por persona</p>
+              </div>
+            </article>
+
+            <article class="package-card" tabindex="0"
+                     data-id="4"
+                     data-name="Cusco y Machu Picchu"
+                     data-destination="Cusco, Perú"
+                     data-type="Internacional"
+                     data-category="Montaña"
+                     data-nights="6"
+                     data-price="5980000"
+                     data-child-price="4186000"
+                     data-rating="4.9"
+                     data-reviews="156"
+                     data-scene="mountain"
+                     data-media="linear-gradient(160deg, #a1887f, #4e342e)"
+                     data-includes="Vuelos Bogotá–Lima–Cusco|Hoteles 3★ superior|Tren a Aguas Calientes|Entrada a Machu Picchu|Guía en español"
+                     data-itinerary="Llegada a Cusco y aclimatación.|City tour por Cusco y Sacsayhuamán.|Valle Sagrado de los Incas.|Tren a Aguas Calientes.|Visita guiada a Machu Picchu.|Día libre en Cusco.|Vuelo de regreso."
+                     data-departures="2026-11-02:18:24|2026-11-30:9:24">
+              <div class="media" style="--media:linear-gradient(160deg, #a1887f, #4e342e)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-mountain"/></svg>
+                <span class="badge badge--warn">Últimos 6 cupos</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Internacional · Montaña · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,9</span></p>
+                <h3 class="title-medium">Cusco y Machu Picchu</h3>
+                <p class="body-small">Cusco, Perú · 6 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$5.980.000</strong> por persona</p>
+              </div>
+            </article>
+
+            <article class="package-card" tabindex="0"
+                     data-id="5"
+                     data-name="Cancún y Riviera Maya"
+                     data-destination="Cancún, México"
+                     data-type="Internacional"
+                     data-category="Playa"
+                     data-nights="7"
+                     data-price="6450000"
+                     data-child-price="4515000"
+                     data-rating="4.6"
+                     data-reviews="389"
+                     data-scene="beach"
+                     data-media="linear-gradient(160deg, #4dd0e1, #00838f)"
+                     data-includes="Vuelo directo desde Bogotá|Resort todo incluido|Traslados|Excursión a Chichén Itzá|Tour por cenotes"
+                     data-itinerary="Llegada y check-in en el resort.|Día de playa.|Excursión a Chichén Itzá.|Tour por cenotes.|Día libre en Playa del Carmen.|Isla Mujeres en catamarán.|Día libre.|Traslado al aeropuerto."
+                     data-departures="2026-11-14:27:32|2026-12-12:30:32">
+              <div class="media" style="--media:linear-gradient(160deg, #4dd0e1, #00838f)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-beach"/></svg>
+                <span class="badge badge--warn">Últimos 5 cupos</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Internacional · Playa · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,6</span></p>
+                <h3 class="title-medium">Cancún y Riviera Maya</h3>
+                <p class="body-small">Cancún, México · 7 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$6.450.000</strong> por persona</p>
+              </div>
+            </article>
+
+            <article class="package-card" tabindex="0"
+                     data-id="6"
+                     data-name="Buenos Aires: Tango y Vino"
+                     data-destination="Buenos Aires, Argentina"
+                     data-type="Internacional"
+                     data-category="Ciudad"
+                     data-nights="5"
+                     data-price="4780000"
+                     data-child-price="3346000"
+                     data-rating="4.7"
+                     data-reviews="121"
+                     data-scene="city"
+                     data-media="linear-gradient(160deg, #7986cb, #283593)"
+                     data-includes="Vuelo ida y regreso|Hotel 4★ en Palermo|Show de tango con cena|City tour|Cata de vinos"
+                     data-itinerary="Llegada y noche libre en Palermo.|City tour: La Boca, San Telmo y Recoleta.|Delta del Tigre.|Cata de vinos y show de tango.|Día libre de compras.|Regreso."
+                     data-departures="2026-11-09:12:20|2026-12-07:4:20">
+              <div class="media" style="--media:linear-gradient(160deg, #7986cb, #283593)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-city"/></svg>
+                <span class="badge">Próxima salida 9 nov</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Internacional · Ciudad · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,7</span></p>
+                <h3 class="title-medium">Buenos Aires: Tango y Vino</h3>
+                <p class="body-small">Buenos Aires, Argentina · 5 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$4.780.000</strong> por persona</p>
+              </div>
+            </article>
+
+            <article class="package-card" tabindex="0"
+                     data-id="7"
+                     data-name="Desierto de la Tatacoa"
+                     data-destination="Villavieja, Huila"
+                     data-type="Nacional"
+                     data-category="Naturaleza"
+                     data-nights="2"
+                     data-price="890000"
+                     data-child-price="623000"
+                     data-rating="4.5"
+                     data-reviews="98"
+                     data-scene="nature"
+                     data-media="linear-gradient(160deg, #ffb74d, #e65100)"
+                     data-includes="Transporte desde Neiva|Glamping en el desierto|Alimentación completa|Observación astronómica guiada"
+                     data-itinerary="Traslado desde Neiva y recorrido por el desierto rojo.|Desierto gris, piscina natural y observatorio de noche.|Regreso a Neiva."
+                     data-departures="2026-10-31:14:16|2026-11-14:5:16">
+              <div class="media" style="--media:linear-gradient(160deg, #ffb74d, #e65100)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-nature"/></svg>
+                <span class="badge badge--warn">Últimos 2 cupos</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Nacional · Naturaleza · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,5</span></p>
+                <h3 class="title-medium">Desierto de la Tatacoa</h3>
+                <p class="body-small">Villavieja, Huila · 2 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$890.000</strong> por persona</p>
+              </div>
+            </article>
+
+            <article class="package-card" tabindex="0"
+                     data-id="8"
+                     data-name="Madrid y Barcelona"
+                     data-destination="España"
+                     data-type="Internacional"
+                     data-category="Ciudad"
+                     data-nights="9"
+                     data-price="11900000"
+                     data-child-price="8330000"
+                     data-rating="4.8"
+                     data-reviews="74"
+                     data-scene="city"
+                     data-media="linear-gradient(160deg, #e57373, #8e24aa)"
+                     data-includes="Vuelos Bogotá–Madrid y Barcelona–Bogotá|Tren AVE Madrid–Barcelona|Hoteles 4★ céntricos|Desayunos|Tours guiados en ambas ciudades"
+                     data-itinerary="Llegada a Madrid.|Tour por el Madrid de los Austrias.|Museo del Prado y Retiro.|Excursión a Toledo.|Tren AVE a Barcelona.|Sagrada Familia y Park Güell.|Barrio Gótico.|Montserrat.|Día libre.|Regreso."
+                     data-departures="2026-11-20:8:24|2027-01-15:3:24">
+              <div class="media" style="--media:linear-gradient(160deg, #e57373, #8e24aa)">
+                <svg viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-city"/></svg>
+                <span class="badge">Próxima salida 20 nov</span>
+              </div>
+              <div class="card-body">
+                <p class="card-meta">Internacional · Ciudad · <span class="rating"><svg class="icon"><use href="#i-star"/></svg>4,8</span></p>
+                <h3 class="title-medium">Madrid y Barcelona</h3>
+                <p class="body-small">España · 9 noches</p>
+                <p class="price-line body-small">Desde <strong class="num" style="color:var(--on-surface)">$11.900.000</strong> por persona</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <aside class="side">
+          <section class="card" aria-labelledby="recent-title">
+            <h2 class="title-medium" id="recent-title">Reservas recientes</h2>
+            <ul id="recent-bookings">
+              <li class="list-item"><span class="list-avatar">MC</span><div><p>Mariana Cárdenas</p><p class="body-small">RV-2041 · Cartagena · 2 adultos</p></div><span class="status status--ok">Confirmada</span></li>
+              <li class="list-item"><span class="list-avatar">FO</span><div><p>Familia Ortiz</p><p class="body-small">RV-2040 · San Andrés · 2 + 2 niños</p></div><span class="status status--pending">Pago pendiente</span></li>
+              <li class="list-item"><span class="list-avatar">JM</span><div><p>Julián Morales</p><p class="body-small">RV-2039 · Cusco · 1 adulto</p></div><span class="status status--ok">Confirmada</span></li>
+              <li class="list-item"><span class="list-avatar">TR</span><div><p>Tatiana Rueda</p><p class="body-small">RV-2038 · Eje Cafetero · 2 adultos</p></div><span class="status status--ok">Confirmada</span></li>
+              <li class="list-item"><span class="list-avatar">AT</span><div><p>Andina Tech S.A.S.</p><p class="body-small">RV-2037 · Madrid · 6 adultos</p></div><span class="status status--quote">Cotización</span></li>
+            </ul>
+          </section>
+          <section class="card card--outlined" aria-labelledby="dest-title">
+            <h2 class="title-medium" id="dest-title">Reservas por destino</h2>
+            <p class="body-small" style="margin-bottom:16px">Octubre 2026 · 86 reservas</p>
+            <ul class="hbars">
+              <li class="hbar"><span>Cartagena</span><span class="hbar-track"><span class="hbar-fill hbar-fill--top" style="--v:100"></span></span><span class="hbar-value num">21</span></li>
+              <li class="hbar"><span>San Andrés</span><span class="hbar-track"><span class="hbar-fill" style="--v:81"></span></span><span class="hbar-value num">17</span></li>
+              <li class="hbar"><span>Eje Cafetero</span><span class="hbar-track"><span class="hbar-fill" style="--v:62"></span></span><span class="hbar-value num">13</span></li>
+              <li class="hbar"><span>Cancún</span><span class="hbar-track"><span class="hbar-fill" style="--v:52"></span></span><span class="hbar-value num">11</span></li>
+              <li class="hbar"><span>Cusco</span><span class="hbar-track"><span class="hbar-fill" style="--v:43"></span></span><span class="hbar-value num">9</span></li>
+              <li class="hbar"><span>Otros</span><span class="hbar-track"><span class="hbar-fill" style="--v:71"></span></span><span class="hbar-value num">15</span></li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+
+  <!-- ======================================================================
+       DIÁLOGO · DETALLE DEL PAQUETE (datos de ejemplo: paquete 1)
+       ====================================================================== -->
+  <div class="scrim" id="package-detail">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="detail-name">
+      <header class="dialog-hero" id="detail-hero" style="--media:linear-gradient(160deg, #ff8a65, #c2185b)">
+        <svg class="scene" id="detail-scene" viewBox="0 0 240 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><use href="#scene-beach"/></svg>
+        <div>
+          <p id="detail-type">Nacional · Playa</p>
+          <h2 id="detail-name">Cartagena Amurallada</h2>
+          <p><span id="detail-destination">Cartagena, Bolívar</span> · <span id="detail-rating">★ 4,8 (312 reseñas)</span></p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-detail" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="Información del paquete">
+        <button type="button" class="tab is-active" role="tab" data-tab="tab-summary" aria-selected="true">Resumen</button>
+        <button type="button" class="tab" role="tab" data-tab="tab-itinerary" aria-selected="false">Itinerario</button>
+        <button type="button" class="tab" role="tab" data-tab="tab-departures" aria-selected="false">Salidas</button>
+      </div>
+
+      <div class="dialog-scroll">
+        <div class="tab-panel" id="tab-summary" role="tabpanel">
+          <dl class="facts">
+            <div class="fact"><dt>Duración</dt><dd id="detail-duration">4 noches · 5 días</dd></div>
+            <div class="fact"><dt>Precio adulto</dt><dd class="num" id="detail-price">$1.890.000</dd></div>
+            <div class="fact"><dt>Precio niño</dt><dd class="num" id="detail-child-price">$1.323.000</dd></div>
+            <div class="fact"><dt>Salidas</dt><dd id="detail-departure-count">4 programadas</dd></div>
+          </dl>
+          <p class="panel-label">El paquete incluye</p>
+          <ul class="includes" id="detail-includes">
+            <li><svg class="icon"><use href="#i-check"/></svg>Vuelo ida y regreso desde Bogotá</li>
+            <li><svg class="icon"><use href="#i-check"/></svg>Hotel 4★ en Getsemaní</li>
+            <li><svg class="icon"><use href="#i-check"/></svg>Desayunos diarios</li>
+            <li><svg class="icon"><use href="#i-check"/></svg>Traslados aeropuerto–hotel</li>
+            <li><svg class="icon"><use href="#i-check"/></svg>Tour por la ciudad amurallada</li>
+            <li><svg class="icon"><use href="#i-check"/></svg>Excursión a Islas del Rosario</li>
+          </ul>
+        </div>
+
+        <div class="tab-panel" id="tab-itinerary" role="tabpanel">
+          <p class="panel-label">Itinerario día a día</p>
+          <ol class="itinerary" id="detail-itinerary">
+            <li><span class="day-dot">D1</span><p>Llegada a Cartagena, traslado al hotel en Getsemaní y noche libre.</p></li>
+            <li><span class="day-dot">D2</span><p>Tour por la ciudad amurallada y el Castillo de San Felipe con cena típica.</p></li>
+            <li><span class="day-dot">D3</span><p>Día de playa en Islas del Rosario con almuerzo incluido.</p></li>
+            <li><span class="day-dot">D4</span><p>Mañana libre y atardecer sobre las murallas.</p></li>
+            <li><span class="day-dot">D5</span><p>Desayuno y traslado al aeropuerto.</p></li>
+          </ol>
+        </div>
+
+        <div class="tab-panel" id="tab-departures" role="tabpanel">
+          <p class="panel-label">Próximas salidas y cupos</p>
+          <div class="departures" id="detail-departures">
+                <div class="departure" data-date="2026-10-23">
+                  <p class="departure-date">23 oct 2026<small>vie · 4 noches</small></p>
+                  <div class="progress"><span style="--v:80"></span></div>
+                  <p class="departure-seats num">6 cupos</p>
+                </div>
+                <div class="departure" data-date="2026-11-06">
+                  <p class="departure-date">6 nov 2026<small>vie · 4 noches</small></p>
+                  <div class="progress"><span style="--v:53"></span></div>
+                  <p class="departure-seats num">14 cupos</p>
+                </div>
+                <div class="departure" data-date="2026-11-20">
+                  <p class="departure-date">20 nov 2026<small>vie · 4 noches</small></p>
+                  <div class="progress"><span style="--v:27"></span></div>
+                  <p class="departure-seats num">22 cupos</p>
+                </div>
+                <div class="departure" data-date="2026-12-04">
+                  <p class="departure-date">4 dic 2026<small>vie · 4 noches</small></p>
+                  <div class="progress progress--full"><span style="--v:100"></span></div>
+                  <p class="departure-seats num">Agotado</p>
+                </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="dialog-actions">
+        <p class="total body-small">Desde<strong class="num" id="detail-price-footer">$1.890.000</strong>por persona</p>
+        <button type="button" class="btn btn--outlined" id="btn-share-package">Compartir cotización</button>
+        <button type="button" class="btn btn--filled" id="btn-book-package"><svg class="icon"><use href="#i-plane"/></svg>Reservar este paquete</button>
+      </footer>
+    </section>
+  </div>
+
+
+  <!-- ======================================================================
+       DIÁLOGO · NUEVA RESERVA
+       ====================================================================== -->
+  <div class="scrim" id="modal-new-booking">
+    <section class="dialog dialog--form" role="dialog" aria-modal="true" aria-labelledby="booking-title">
+      <header class="dialog-head">
+        <div>
+          <h2 class="headline-small" id="booking-title">Nueva reserva</h2>
+          <p class="body-small">Completa los datos del titular y elige la salida.</p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-booking" aria-label="Cerrar formulario"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <form id="new-booking-form" style="display:contents">
+        <div class="form-body">
+          <div class="form-grid">
+            <div class="text-field full">
+              <label for="bk-name">Nombre del titular *</label>
+              <input class="input" type="text" id="bk-name" name="name" placeholder="Ej. Mariana Cárdenas" required>
+            </div>
+            <div class="text-field">
+              <label for="bk-document">Documento o pasaporte *</label>
+              <input class="input" type="text" id="bk-document" name="document" required>
+            </div>
+            <div class="text-field">
+              <label for="bk-phone">Celular *</label>
+              <input class="input" type="tel" id="bk-phone" name="phone" placeholder="+57 300 000 0000" required>
+            </div>
+            <div class="text-field full">
+              <label for="bk-email">Correo electrónico *</label>
+              <input class="input" type="email" id="bk-email" name="email" placeholder="nombre@correo.com" required>
+              <p class="supporting">Aquí enviaremos los vouchers y el itinerario.</p>
+            </div>
+            <div class="text-field">
+              <label for="bk-package">Paquete *</label>
+              <select class="select" id="bk-package" name="package" required>
+                <option value="1" selected>Cartagena Amurallada</option>
+                <option value="2">San Andrés Todo Incluido</option>
+                <option value="3">Eje Cafetero y Cocora</option>
+                <option value="4">Cusco y Machu Picchu</option>
+                <option value="5">Cancún y Riviera Maya</option>
+                <option value="6">Buenos Aires: Tango y Vino</option>
+                <option value="7">Desierto de la Tatacoa</option>
+                <option value="8">Madrid y Barcelona</option>
+              </select>
+            </div>
+            <div class="text-field">
+              <label for="bk-departure">Fecha de salida *</label>
+              <select class="select" id="bk-departure" name="departure" required>
+                <option value="2026-10-23">vie 23 oct 2026 · 6 cupos</option>
+                <option value="2026-11-06" selected>vie 6 nov 2026 · 14 cupos</option>
+                <option value="2026-11-20">vie 20 nov 2026 · 22 cupos</option>
+                <option value="2026-12-04" disabled>vie 4 dic 2026 (agotado)</option>
+              </select>
+            </div>
+            <div>
+              <p class="group-label">Viajeros</p>
+              <div class="stepper"><span>Adultos</span><div class="controls"><button type="button" class="icon-button" id="bk-adults-minus" aria-label="Quitar adulto"><svg class="icon icon-sm"><use href="#i-minus"/></svg></button><input type="number" id="bk-adults" name="adults" value="2" min="1" max="9" aria-label="Adultos"><button type="button" class="icon-button" id="bk-adults-plus" aria-label="Agregar adulto"><svg class="icon icon-sm"><use href="#i-plus"/></svg></button></div></div>
+            </div>
+            <div>
+              <p class="group-label">&nbsp;</p>
+              <div class="stepper"><span>Niños (2–11)</span><div class="controls"><button type="button" class="icon-button" id="bk-children-minus" aria-label="Quitar niño"><svg class="icon icon-sm"><use href="#i-minus"/></svg></button><input type="number" id="bk-children" name="children" value="1" min="0" max="6" aria-label="Niños"><button type="button" class="icon-button" id="bk-children-plus" aria-label="Agregar niño"><svg class="icon icon-sm"><use href="#i-plus"/></svg></button></div></div>
+            </div>
+            <div class="full">
+              <p class="group-label" id="bk-room-label">Tipo de habitación</p>
+              <div class="segmented" role="radiogroup" aria-labelledby="bk-room-label">
+                <label><input type="radio" name="room" value="Doble"><span><svg class="icon"><use href="#i-check"/></svg>Doble</span></label>
+                <label><input type="radio" name="room" value="Triple"><span><svg class="icon"><use href="#i-check"/></svg>Triple</span></label>
+                <label><input type="radio" name="room" value="Familiar" checked><span><svg class="icon"><use href="#i-check"/></svg>Familiar</span></label>
+              </div>
+            </div>
+            <div class="full switch-row">
+              <div>Seguro de viaje con asistencia médica<small>$85.000 por viajero</small></div>
+              <input type="checkbox" class="switch" id="bk-insurance" name="insurance" checked aria-label="Agregar seguro de viaje">
+            </div>
+            <div class="full">
+              <p class="group-label">Método de pago</p>
+              <div class="radio-list">
+                <label><input type="radio" name="payment" value="card" checked>Tarjeta de crédito (hasta 24 cuotas)</label>
+                <label><input type="radio" name="payment" value="pse">PSE · débito bancario</label>
+                <label><input type="radio" name="payment" value="layaway">Plan separe (30 % ahora)</label>
+              </div>
+            </div>
+            <div class="text-field full">
+              <label for="bk-notes">Observaciones</label>
+              <textarea class="textarea" id="bk-notes" name="notes" placeholder="Alimentación especial, celebraciones, asistencia en aeropuerto…"></textarea>
+            </div>
+          </div>
+
+          <aside class="price-card" aria-labelledby="price-title">
+            <h3 class="title-medium" id="price-title">Resumen de pago</h3>
+            <dl>
+              <div><dt>Paquete</dt><dd id="sum-package">Cartagena Amurallada</dd></div>
+              <div><dt>Salida</dt><dd id="sum-departure">vie 6 nov 2026</dd></div>
+              <div><dt>Adultos (2 × $1.890.000)</dt><dd class="num" id="sum-adults">$3.780.000</dd></div>
+              <div><dt>Niños (1 × $1.323.000)</dt><dd class="num" id="sum-children">$1.323.000</dd></div>
+              <div><dt>Seguro (3 viajeros)</dt><dd class="num" id="sum-insurance">$255.000</dd></div>
+              <div class="total"><dt>Total</dt><dd class="num" id="sum-total">$5.358.000</dd></div>
+            </dl>
+            <p class="body-small" style="margin-top:12px">Valores de ejemplo: recalcúlalos con JavaScript.</p>
+          </aside>
+        </div>
+
+        <footer class="dialog-actions">
+          <button type="button" class="btn" id="btn-cancel-booking">Cancelar</button>
+          <button type="submit" class="btn btn--filled" id="btn-save-booking">Confirmar reserva</button>
+        </footer>
+      </form>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

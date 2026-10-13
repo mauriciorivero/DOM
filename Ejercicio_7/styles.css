@@ -1,0 +1,1360 @@
+/* ==========================================================================
+   Ejercicio 7 · Sonríe — Agenda de clínica odontológica
+   Estilo: NEUMORFISMO (todo sale del mismo fondo; el volumen se logra con
+   dos sombras suaves —una clara arriba a la izquierda y una oscura abajo a
+   la derecha—; lo "presionado" usa sombras internas).
+   Índice: 1 Tokens · 2 Base · 3 Layout · 4 Indicadores · 5 Calendario y filtros
+           6 Agenda · 7 Ficha del paciente · 8 Modal de cita · 9 Utilidades
+           10 Responsive
+   ========================================================================== */
+
+/* ---------- 1. Tokens ---------- */
+:root {
+  --bg: #e4e9f0;
+  --light: #ffffff;
+  --dark: #b8c3d3;
+  --ink: #2f3b4c;
+  --ink-2: #566377;
+  --ink-3: #6f7b8e;
+  --accent: #0f8f82;
+  --accent-soft: #d5ece9;
+
+  --d1: #0f8f82; /* Dra. Natalia Ospina */
+  --d2: #4f7fe0; /* Dr. Mateo Cárdenas */
+  --d3: #d6608c; /* Dra. Paula Andrade */
+
+  --good: #1e8e5a;
+  --warn: #b7791f;
+  --bad: #c2453d;
+  --info: #3b6fd8;
+
+  --raised: 8px 8px 18px var(--dark), -8px -8px 18px var(--light);
+  --raised-sm: 4px 4px 10px var(--dark), -4px -4px 10px var(--light);
+  --pressed: inset 5px 5px 10px var(--dark), inset -5px -5px 10px var(--light);
+  --pressed-sm: inset 3px 3px 6px var(--dark), inset -3px -3px 6px var(--light);
+
+  --radius-lg: 26px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --font: "Nunito", system-ui, sans-serif;
+}
+
+/* ---------- 2. Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.45;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--raised-sm);
+  font-weight: 700;
+  color: var(--ink);
+  transition: box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.btn:hover {
+  color: var(--accent);
+}
+
+.btn:active {
+  box-shadow: var(--pressed-sm);
+}
+
+.btn--accent {
+  color: var(--accent);
+}
+
+.btn--solid {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 5px 5px 12px var(--dark), -5px -5px 12px var(--light), inset 2px 2px 4px rgba(255, 255, 255, 0.25);
+}
+
+.btn--solid:hover {
+  color: #fff;
+  background: #0c7d72;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: var(--raised-sm);
+  color: var(--ink-2);
+  flex: none;
+}
+
+.icon-button:hover {
+  color: var(--accent);
+}
+
+.icon-button:active {
+  box-shadow: var(--pressed-sm);
+}
+
+.raised {
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: var(--raised);
+}
+
+.pressed {
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  box-shadow: var(--pressed);
+}
+
+/* ---------- 3. Layout ---------- */
+.app {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 28px;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.sidebar {
+  position: sticky;
+  top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  height: calc(100vh - 56px);
+  padding: 26px 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 6px;
+  font-size: 1.375rem;
+  font-weight: 800;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: var(--raised-sm);
+  color: var(--accent);
+}
+
+.brand small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.nav {
+  display: grid;
+  gap: 12px;
+}
+
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-2);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: var(--accent);
+}
+
+.nav a.is-active {
+  box-shadow: var(--pressed-sm);
+  color: var(--accent);
+}
+
+.sidebar-help {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--pressed-sm);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+.sidebar-help strong {
+  display: block;
+  color: var(--ink);
+}
+
+.main {
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.topbar h1 {
+  font-size: 1.875rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.topbar p {
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.date-pill {
+  padding: 12px 20px;
+  border-radius: 999px;
+  box-shadow: var(--pressed-sm);
+  font-weight: 700;
+}
+
+/* ---------- 4. Indicadores ---------- */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.kpi {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+}
+
+.kpi-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  box-shadow: var(--pressed-sm);
+  color: var(--accent);
+  flex: none;
+}
+
+.kpi-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.kpi-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.kpi-note {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.ring {
+  --v: 50;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) calc(var(--v) * 1%), transparent 0);
+  box-shadow: var(--raised-sm);
+  flex: none;
+}
+
+.ring::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: var(--pressed-sm);
+}
+
+.ring span {
+  position: relative;
+  z-index: 1;
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+
+/* ---------- 5. Calendario y filtros ---------- */
+.workspace {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr) 400px;
+  gap: 28px;
+  align-items: start;
+}
+
+.left-column {
+  display: grid;
+  gap: 28px;
+}
+
+.card {
+  padding: 22px;
+}
+
+.card-title {
+  margin-bottom: 16px;
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-weight: 800;
+}
+
+.calendar-head .icon-button {
+  width: 34px;
+  height: 34px;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+.calendar .dow {
+  padding-bottom: 6px;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+.day {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-weight: 700;
+}
+
+.day:hover {
+  box-shadow: var(--raised-sm);
+}
+
+.day.is-muted {
+  color: #a3adbb;
+}
+
+.day.has-appointments {
+  position: relative;
+}
+
+.day.has-appointments::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.day.is-selected {
+  box-shadow: var(--pressed-sm);
+  color: var(--accent);
+}
+
+.dentists {
+  display: grid;
+  gap: 14px;
+}
+
+.dentist-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.dentist-toggle .who {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.dentist-toggle .who small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 0 4px var(--bg), 2px 2px 6px var(--dark);
+  flex: none;
+}
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  margin: 0;
+  border-radius: 999px;
+  box-shadow: var(--pressed-sm);
+  appearance: none;
+  background: var(--bg);
+  cursor: pointer;
+  flex: none;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 2px 2px 5px var(--dark), -2px -2px 5px var(--light);
+  transition: left 0.2s ease, background 0.2s ease;
+}
+
+.switch:checked::after {
+  left: 26px;
+  background: var(--accent);
+}
+
+/* ---------- 6. Agenda ---------- */
+.agenda-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.agenda-head h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.status-filter {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  box-shadow: var(--pressed-sm);
+}
+
+.status-filter button {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.status-filter button.is-active {
+  box-shadow: var(--raised-sm);
+  color: var(--accent);
+}
+
+.timeline {
+  display: grid;
+  gap: 16px;
+}
+
+.block-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.block-label::after {
+  content: "";
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  box-shadow: var(--pressed-sm);
+}
+
+.now-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--bad);
+}
+
+.now-line::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--bad);
+  opacity: 0.6;
+}
+
+.appointment {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  box-shadow: var(--raised-sm);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.appointment:hover {
+  box-shadow: 6px 6px 14px var(--dark), -6px -6px 14px var(--light);
+}
+
+.appointment.is-selected {
+  box-shadow: var(--pressed);
+}
+
+.appointment.is-cancelled {
+  opacity: 0.6;
+}
+
+.appointment.is-cancelled .patient {
+  text-decoration: line-through;
+}
+
+.time {
+  padding-right: 14px;
+  border-right: 3px solid var(--c, var(--accent));
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.time small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.patient {
+  font-weight: 800;
+}
+
+.procedure {
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+
+.procedure .dentist {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  font-weight: 700;
+}
+
+.procedure .dentist::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: var(--pressed-sm);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--st);
+}
+
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status--done {
+  --st: var(--ink-3);
+}
+
+.status--in {
+  --st: var(--info);
+}
+
+.status--confirmed {
+  --st: var(--good);
+}
+
+.status--pending {
+  --st: var(--warn);
+}
+
+.status--cancelled {
+  --st: var(--bad);
+}
+
+.lunch {
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--pressed-sm);
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+/* ---------- 7. Ficha del paciente ---------- */
+.detail-column {
+  position: sticky;
+  top: 28px;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  padding: 6px 14px 20px 6px;
+  margin: -6px -14px 0 -6px;
+}
+
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-bottom: 26px;
+  padding: 30px 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--pressed);
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.empty-state strong {
+  font-size: 1.0625rem;
+  color: var(--ink);
+}
+
+.empty-state .icon {
+  width: 34px;
+  height: 34px;
+  color: var(--accent);
+}
+
+.detail {
+  padding: 22px;
+}
+
+.detail-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  box-shadow: var(--pressed);
+  color: var(--accent);
+  font-size: 1.375rem;
+  font-weight: 800;
+  flex: none;
+}
+
+.detail-head h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.detail-head p {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.detail-head .icon-button {
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--pressed-sm);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--bad);
+}
+
+.detail-section {
+  margin-top: 22px;
+}
+
+.detail-section h3 {
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.info-item {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--pressed-sm);
+}
+
+.info-item dt {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.info-item dd {
+  font-size: 0.875rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.info-item.wide {
+  grid-column: 1 / -1;
+}
+
+/* Odontograma simplificado (numeración FDI) */
+.odontogram {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--pressed-sm);
+}
+
+.jaw {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.jaw + .jaw {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px dashed var(--dark);
+}
+
+.tooth {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  border-radius: 8px 8px 12px 12px;
+  background: var(--bg);
+  box-shadow: 2px 2px 4px var(--dark), -2px -2px 4px var(--light);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+.jaw--lower .tooth {
+  border-radius: 12px 12px 8px 8px;
+}
+
+.tooth--caries {
+  background: #f3c9c4;
+  color: #8b2b24;
+}
+
+.tooth--filled {
+  background: #c9d8f6;
+  color: #24478f;
+}
+
+.tooth--crown {
+  background: #f1dfae;
+  color: #7a5a10;
+}
+
+.tooth--treatment {
+  background: #bfe6e0;
+  color: #0b625a;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.tooth--missing {
+  box-shadow: var(--pressed-sm);
+  color: #a3adbb;
+  text-decoration: line-through;
+}
+
+.tooth-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.tooth-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooth-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--c);
+}
+
+.plan-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.meter {
+  height: 14px;
+  padding: 3px;
+  border-radius: 999px;
+  box-shadow: var(--pressed-sm);
+}
+
+.meter > span {
+  display: block;
+  width: calc(var(--v) * 1%);
+  max-width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #36b3a5, var(--accent));
+  box-shadow: 1px 1px 3px var(--dark);
+}
+
+.notes {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--pressed-sm);
+  font-size: 0.875rem;
+}
+
+.detail-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.detail-actions .btn:first-child {
+  grid-column: 1 / -1;
+}
+
+/* ---------- 8. Modal de cita ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(228, 233, 240, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: min(940px, 100%);
+  max-height: calc(100vh - 48px);
+  border-radius: 30px;
+  background: var(--bg);
+  box-shadow: 14px 14px 34px var(--dark), -14px -14px 34px var(--light);
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 28px 14px;
+}
+
+.modal-head h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.modal-head p {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.modal-head .icon-button {
+  margin-left: auto;
+}
+
+.modal-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 28px;
+  padding: 10px 28px 24px;
+  overflow-y: auto;
+}
+
+.form-section + .form-section {
+  margin-top: 22px;
+}
+
+.form-section h3 {
+  margin-bottom: 14px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 18px;
+}
+
+.field {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field > label,
+.field > .label {
+  padding-left: 6px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--ink-2);
+}
+
+.req {
+  color: var(--bad);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  box-shadow: var(--pressed-sm);
+  font-weight: 600;
+}
+
+.textarea {
+  min-height: 84px;
+  padding: 12px 18px;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #8c97a8;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  box-shadow: var(--pressed-sm), 0 0 0 2px var(--accent);
+}
+
+.option-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.option-card {
+  position: relative;
+}
+
+.option-card input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.option-card span {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--raised-sm);
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.option-card small {
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.option-card .mini-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: var(--pressed-sm);
+  color: var(--c);
+  font-weight: 800;
+}
+
+.option-card input:checked + span {
+  box-shadow: var(--pressed-sm);
+  color: var(--accent);
+}
+
+.option-card input:focus-visible + span {
+  outline: 2px solid var(--accent);
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.slot {
+  position: relative;
+}
+
+.slot input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.slot span {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 999px;
+  box-shadow: var(--raised-sm);
+  font-size: 0.875rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.slot input:checked + span {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.slot input:disabled + span {
+  box-shadow: var(--pressed-sm);
+  color: #a3adbb;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.slot input:focus-visible + span {
+  outline: 2px solid var(--accent);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.summary {
+  align-self: start;
+  padding: 20px;
+}
+
+.summary h3 {
+  margin-bottom: 14px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.summary dl {
+  display: grid;
+  gap: 12px;
+}
+
+.summary dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.summary dd {
+  font-weight: 800;
+}
+
+.summary .price {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--pressed-sm);
+}
+
+.summary .price dd {
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+.summary-note {
+  margin-top: 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 18px 28px 26px;
+}
+
+/* ---------- 9. Utilidades ---------- */
+/* Los estudiantes alternan esta clase con classList.add / remove / toggle */
+.hidden {
+  display: none !important;
+}
+
+/* ---------- 10. Responsive ---------- */
+@media (max-width: 1440px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) 380px;
+  }
+
+  .left-column {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+@media (max-width: 1180px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    height: auto;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-help {
+    display: none;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-column {
+    position: static;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 16px;
+  }
+
+  .kpis,
+  .left-column,
+  .form-grid,
+  .modal-body,
+  .option-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .appointment .status {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .jaw {
+    gap: 2px;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+}

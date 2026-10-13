@@ -1,0 +1,1199 @@
+/* ==========================================================================
+   Ejercicio 4 · Club Lentejuela — Reservas de eventos para un bar disco
+   Estilo: KITSCH (exceso decorativo, brillos, lunares, animal print,
+   tipografía script, colores saturados y sombras duras).
+   Índice: 1 Tokens · 2 Base · 3 Encabezado · 4 Indicadores · 5 Eventos
+           6 Gráficos · 7 Modal de detalle · 8 Modal de reserva · 9 Utilidades
+           10 Responsive
+   ========================================================================== */
+
+/* ---------- 1. Tokens ---------- */
+:root {
+  --pink: #ff3e9a;
+  --pink-soft: #ff8cc3;
+  --gold: #ffc93c;
+  --turquoise: #19c3b5;
+  --purple: #5b1a7a;
+  --ink: #2b0a3d;
+  --cream: #fff7e8;
+  --cream-2: #ffeccc;
+  --red: #e0263f;
+  --leopard-base: #f2b84b;
+  --leopard-spot: #3a2210;
+
+  --font-display: "Pacifico", "Brush Script MT", cursive;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --radius: 22px;
+  --shadow: 6px 6px 0 var(--ink);
+}
+
+/* ---------- 2. Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.45;
+  background-color: var(--pink);
+  background-image:
+    radial-gradient(var(--pink-soft) 18%, transparent 19%),
+    radial-gradient(var(--pink-soft) 18%, transparent 19%);
+  background-position: 0 0, 14px 14px;
+  background-size: 28px 28px;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 3px dashed var(--purple);
+  outline-offset: 3px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream);
+  font-weight: 700;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px) rotate(-1deg);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn--gold {
+  background: var(--gold);
+}
+
+.btn--turquoise {
+  background: var(--turquoise);
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 3px 3px 0 var(--ink);
+  flex: none;
+}
+
+.icon-button:hover {
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+
+/* Patrones decorativos reutilizables */
+.leopard {
+  background-color: var(--leopard-base);
+  background-image:
+    radial-gradient(ellipse 7px 5px at 20% 30%, var(--leopard-spot) 60%, transparent 62%),
+    radial-gradient(ellipse 6px 4px at 70% 62%, var(--leopard-spot) 60%, transparent 62%),
+    radial-gradient(ellipse 5px 6px at 45% 88%, var(--leopard-spot) 60%, transparent 62%),
+    radial-gradient(ellipse 4px 3px at 88% 18%, var(--leopard-spot) 60%, transparent 62%);
+  background-size: 46px 40px;
+}
+
+.checker {
+  background: repeating-conic-gradient(var(--ink) 0 25%, var(--cream) 0 50%) 0 0 / 18px 18px;
+}
+
+/* ---------- 3. Encabezado ---------- */
+.marquee {
+  height: 18px;
+  border-bottom: 3px solid var(--ink);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 22px 24px 8px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.disco-ball {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background:
+    linear-gradient(rgba(43, 10, 61, 0.35) 1px, transparent 1px) 0 0 / 8px 8px,
+    linear-gradient(90deg, rgba(43, 10, 61, 0.35) 1px, transparent 1px) 0 0 / 8px 8px,
+    radial-gradient(circle at 32% 30%, #ffffff, #c9c9d6 45%, #7d7d92 100%);
+  box-shadow: 3px 3px 0 var(--ink);
+  flex: none;
+}
+
+.disco-ball::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 3px;
+  height: 12px;
+  background: var(--ink);
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 2.125rem;
+  line-height: 1;
+  color: var(--cream);
+  text-shadow: 3px 3px 0 var(--ink), -1px -1px 0 var(--ink), 1px -1px 0 var(--ink), -1px 1px 0 var(--ink);
+}
+
+.brand-tag {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cream);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.nav a {
+  padding: 8px 16px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream);
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.nav a.is-active {
+  background: var(--turquoise);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 24px 64px;
+}
+
+.tonight {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 18px 0 28px;
+  padding: 24px 28px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.tonight-text {
+  padding: 14px 22px;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  background: var(--cream);
+  transform: rotate(-1.5deg);
+}
+
+.tonight-text p {
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.8125rem;
+  color: var(--purple);
+}
+
+.tonight-text h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.starburst {
+  display: grid;
+  place-items: center;
+  width: 128px;
+  height: 128px;
+  background: var(--gold);
+  clip-path: polygon(50% 0%, 61% 18%, 82% 10%, 80% 32%, 100% 40%, 85% 56%, 96% 76%, 74% 78%, 68% 100%, 50% 86%, 32% 100%, 26% 78%, 4% 76%, 15% 56%, 0% 40%, 20% 32%, 18% 10%, 39% 18%);
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.1;
+  transform: rotate(8deg);
+  flex: none;
+}
+
+.starburst strong {
+  display: block;
+  font-size: 1.75rem;
+}
+
+/* ---------- 4. Indicadores ---------- */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.kpi {
+  padding: 18px 20px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--cream);
+  box-shadow: var(--shadow);
+}
+
+.kpi:nth-child(odd) {
+  transform: rotate(-1deg);
+}
+
+.kpi:nth-child(even) {
+  transform: rotate(1deg);
+}
+
+.kpi-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--purple);
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kpi-note {
+  font-size: 0.8125rem;
+}
+
+.kpi--turquoise {
+  background: var(--turquoise);
+}
+
+.kpi--gold {
+  background: var(--gold);
+}
+
+.kpi--turquoise .kpi-label,
+.kpi--gold .kpi-label {
+  color: var(--ink);
+}
+
+/* ---------- 5. Eventos ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 28px;
+  align-items: start;
+}
+
+.section-title {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 4px 18px 8px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: var(--purple);
+  color: var(--cream);
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 400;
+  box-shadow: 4px 4px 0 var(--gold);
+  transform: rotate(-1deg);
+}
+
+.events {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 26px;
+}
+
+/* La tarjeta-boleta: la máscara crea las muescas laterales y los
+   drop-shadow dibujan el contorno siguiendo esa forma. */
+.event-card {
+  cursor: pointer;
+  filter:
+    drop-shadow(3px 0 0 var(--ink)) drop-shadow(-3px 0 0 var(--ink))
+    drop-shadow(0 3px 0 var(--ink)) drop-shadow(0 -3px 0 var(--ink))
+    drop-shadow(6px 6px 0 var(--gold));
+  transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+  transform: rotate(-1.5deg) scale(1.02);
+}
+
+.event-card.is-selected {
+  filter:
+    drop-shadow(3px 0 0 var(--ink)) drop-shadow(-3px 0 0 var(--ink))
+    drop-shadow(0 3px 0 var(--ink)) drop-shadow(0 -3px 0 var(--ink))
+    drop-shadow(6px 6px 0 var(--turquoise));
+}
+
+.ticket {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: var(--cream);
+  overflow: hidden;
+  -webkit-mask:
+    radial-gradient(circle 13px at 0 62%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 13px at 100% 62%, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 13px at 0 62%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 13px at 100% 62%, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.poster {
+  position: relative;
+  min-height: 150px;
+  padding: 18px 18px 16px;
+  background: var(--poster, linear-gradient(135deg, var(--purple), var(--pink)));
+  color: #fff;
+}
+
+.poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 1.5px, transparent 2px) 0 0 / 16px 16px;
+  pointer-events: none;
+}
+
+.poster-genre {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  padding: 2px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.poster-title {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  padding-right: 62px;
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 400;
+  line-height: 1.15;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.date-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+  text-align: center;
+  line-height: 1;
+  transform: rotate(10deg);
+}
+
+.date-badge strong {
+  display: block;
+  font-size: 1.375rem;
+}
+
+.date-badge span {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ticket-body {
+  padding: 16px 20px 18px;
+  border-top: 3px dashed var(--ink);
+}
+
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.875rem;
+}
+
+.ticket-row strong {
+  font-weight: 700;
+}
+
+.capacity {
+  margin-top: 12px;
+}
+
+.capacity-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.meter {
+  --fill: var(--turquoise);
+  height: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream-2);
+  overflow: hidden;
+}
+
+.meter > span {
+  display: block;
+  width: calc(var(--v) * 1%);
+  max-width: 100%;
+  height: 100%;
+  border-right: 2px solid var(--ink);
+  background: var(--fill);
+  background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.35) 0 6px, transparent 6px 12px);
+}
+
+.meter--hot {
+  --fill: var(--pink);
+}
+
+.meter--full {
+  --fill: var(--red);
+}
+
+.sticker {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 3px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transform: rotate(-2deg);
+}
+
+.sticker--hot {
+  background: var(--pink);
+  color: #fff;
+}
+
+.sticker--ok {
+  background: var(--turquoise);
+}
+
+.sticker--soldout {
+  background: var(--red);
+  color: #fff;
+}
+
+/* ---------- 6. Gráficos ---------- */
+.side {
+  display: grid;
+  gap: 26px;
+}
+
+.box {
+  padding: 20px 22px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--cream);
+  box-shadow: var(--shadow);
+}
+
+.box h3 {
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 400;
+}
+
+.box-note {
+  margin-bottom: 16px;
+  font-size: 0.8125rem;
+  color: var(--purple);
+}
+
+.col-chart {
+  --h: 170px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.col-chart .y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(var(--h) + 14px);
+  margin-top: -7px;
+  line-height: 14px;
+  text-align: right;
+}
+
+.col-chart .plot {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: end;
+  justify-items: center;
+  height: var(--h);
+  border-bottom: 3px solid var(--ink);
+  background-image: linear-gradient(rgba(43, 10, 61, 0.18) 1px, transparent 1px);
+  background-size: 100% 33.333%;
+}
+
+.col-chart .bar {
+  position: relative;
+  width: min(32px, 60%);
+  height: calc(var(--v) * 1%);
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: var(--pink-soft);
+}
+
+.col-chart .bar--top {
+  background: var(--pink);
+}
+
+.bar-value {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-bottom: 4px;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.col-chart .x-axis {
+  grid-column: 2;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.hbars {
+  display: grid;
+  gap: 12px;
+}
+
+.hbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  font-size: 0.875rem;
+}
+
+.hbar-track {
+  grid-column: 1 / -1;
+  height: 14px;
+}
+
+.hbar-fill {
+  display: block;
+  width: calc(var(--v) * 1%);
+  height: 100%;
+  border: 2px solid var(--ink);
+  border-radius: 0 8px 8px 0;
+  background: var(--turquoise);
+}
+
+.hbar-fill--top {
+  background: var(--gold);
+}
+
+.hbar-value {
+  font-weight: 700;
+}
+
+/* ---------- 7. Modal de detalle ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle, rgba(255, 201, 60, 0.4) 1.5px, transparent 2px) 0 0 / 22px 22px,
+    rgba(43, 10, 61, 0.78);
+}
+
+.modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(900px, 100%);
+  max-height: calc(100vh - 48px);
+  border: 4px solid var(--ink);
+  border-radius: 28px;
+  background: var(--cream);
+  box-shadow: 10px 10px 0 var(--gold);
+  overflow: hidden;
+}
+
+.modal-poster {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 170px;
+  padding: 24px 28px;
+  border-bottom: 4px solid var(--ink);
+  background: var(--poster, linear-gradient(135deg, var(--purple), var(--pink)));
+  color: #fff;
+}
+
+.modal-poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 1.5px, transparent 2px) 0 0 / 16px 16px;
+  pointer-events: none;
+}
+
+.modal-poster > * {
+  position: relative;
+  z-index: 1;
+}
+
+.modal-poster h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.1;
+  text-shadow: 4px 4px 0 var(--ink);
+}
+
+.modal-poster .icon-button {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+.modal-scroll {
+  overflow-y: auto;
+}
+
+.event-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  padding: 22px 28px;
+}
+
+.fact {
+  padding: 12px 14px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.fact dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.fact dd {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.modal-section {
+  padding: 4px 28px 24px;
+}
+
+.modal-section h3 {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 400;
+}
+
+.description {
+  padding: 14px 18px;
+  border: 3px dashed var(--pink);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.zones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.zone {
+  padding: 14px;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.zone h4 {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.9375rem;
+}
+
+.zone h4 span {
+  font-weight: 500;
+}
+
+.spots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spot {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--turquoise);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.spot.is-reserved {
+  background: var(--pink);
+  color: #fff;
+  text-decoration: line-through;
+}
+
+.spot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.spot-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spot-legend i {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--turquoise);
+}
+
+.spot-legend i.reserved {
+  background: var(--pink);
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  font-size: 0.875rem;
+}
+
+.table th {
+  padding: 10px 14px;
+  background: var(--ink);
+  color: var(--cream);
+  text-align: left;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 10px 14px;
+  border-top: 2px dashed rgba(43, 10, 61, 0.25);
+}
+
+.table tr:nth-child(even) td {
+  background: var(--cream);
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.pill--confirmed {
+  background: var(--turquoise);
+}
+
+.pill--pending {
+  background: var(--gold);
+}
+
+.pill--birthday {
+  background: var(--pink);
+  color: #fff;
+}
+
+.modal-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 28px;
+  border-top: 4px solid var(--ink);
+}
+
+/* ---------- 8. Modal de reserva (formulario) ---------- */
+.modal--form .modal-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 28px;
+  border-bottom: 4px solid var(--ink);
+}
+
+.modal--form .modal-head h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 400;
+}
+
+.modal--form .modal-head p {
+  font-size: 0.875rem;
+}
+
+.modal--form .modal-head .icon-button {
+  margin-left: auto;
+}
+
+.form-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 24px;
+  padding: 20px 28px;
+  overflow-y: auto;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field label,
+.field .label {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.req {
+  color: var(--red);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.textarea {
+  min-height: 80px;
+  padding: 10px 14px;
+  resize: vertical;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  box-shadow: 4px 4px 0 var(--pink);
+}
+
+.chip-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-option {
+  position: relative;
+}
+
+.chip-option input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+}
+
+.chip-option span {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chip-option input:checked + span {
+  background: var(--turquoise);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.chip-option input:focus-visible + span {
+  outline: 3px dashed var(--purple);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--pink);
+}
+
+.receipt {
+  align-self: start;
+  padding: 18px;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 5px 5px 0 var(--pink);
+}
+
+.receipt h3 {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 400;
+}
+
+.receipt dl {
+  display: grid;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.receipt dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.receipt dd {
+  font-weight: 700;
+}
+
+.receipt .total {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 3px dashed var(--ink);
+  font-size: 1.125rem;
+}
+
+.receipt-note {
+  margin-top: 10px;
+  font-size: 0.75rem;
+}
+
+/* ---------- 9. Utilidades ---------- */
+/* Los estudiantes alternan esta clase con classList.add / remove / toggle */
+.hidden {
+  display: none !important;
+}
+
+/* ---------- 10. Responsive ---------- */
+@media (max-width: 1040px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .event-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .header,
+  .page {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .nav {
+    margin-left: 0;
+  }
+
+  .side,
+  .zones,
+  .form-body,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .starburst {
+    width: 104px;
+    height: 104px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

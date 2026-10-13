@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel financiero</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 1 · Dashboard bento fintech
+    ----------------------------------------------------------------------
+    Esta página trae TODAS las vistas de detalle (.modal-overlay) ya
+    construidas y visibles. Al abrir el archivo verás las 7 apiladas una
+    encima de otra: esa es la tarea del estudiante.
+
+    Tarea: con JavaScript, ocultar todas las vistas al iniciar y mostrar
+    solo la que corresponda al hacer clic en una tarjeta del bento.
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <!-- Iconos reutilizables (se usan con <use href="#i-...">) -->
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M16 15h2"/><path d="M6 6l9-3 2 3"/></symbol>
+    <symbol id="i-flow" viewBox="0 0 24 24"><path d="M7 17V7"/><path d="M3 11l4-4 4 4"/><path d="M17 7v10"/><path d="M13 13l4 4 4-4"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></symbol>
+    <symbol id="i-pie" viewBox="0 0 24 24"><path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
+  </svg>
+
+  <div class="app">
+
+    <!-- ===================== CABECERA ===================== -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">K</span>
+        <span>Kora</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="chip-select">
+          <svg class="icon icon-sm"><use href="#i-calendar"/></svg>
+          Octubre 2026
+        </span>
+        <button type="button" class="icon-button" aria-label="Notificaciones">
+          <svg class="icon"><use href="#i-bell"/></svg>
+        </button>
+        <span class="avatar" aria-label="Valentina Rincón">VR</span>
+      </div>
+    </header>
+
+    <div class="page-head">
+      <h1>Hola, Valentina</h1>
+      <p>Así van tus finanzas a 13 de octubre de 2026. Toca una tarjeta para ver el detalle.</p>
+    </div>
+
+    <!-- ===================== GRILLA BENTO ===================== -->
+    <main class="bento" id="bento-grid">
+
+      <!-- 1 · Saldo total (hero) -->
+      <article class="bento-tile tile-balance" id="tile-balance" data-view="view-balance" role="button" tabindex="0" aria-label="Ver detalle del saldo total">
+        <header class="tile-head">
+          <span class="tile-icon"><svg class="icon"><use href="#i-wallet"/></svg></span>
+          <h2 class="tile-title">Saldo total</h2>
+          <svg class="icon tile-go"><use href="#i-arrow-up-right"/></svg>
+        </header>
+        <div>
+          <p class="hero-number num">$48.250.300<small>COP</small></p>
+          <p style="margin-top:10px">
+            <span class="delta delta--up"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>4,8 %</span>
+            <span class="tile-caption">&nbsp;frente a septiembre</span>
+          </p>
+        </div>
+        <div class="tile-foot">
+          <div class="sparkline" role="img" aria-label="Saldo de los últimos 12 meses, de 31,2 a 48,3 millones de pesos">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path class="area" style="fill:var(--s1);fill-opacity:.14" d="M4.17,100 L4.17,94 L12.5,85 L20.83,89.5 L29.17,73 L37.5,66 L45.83,57.5 L54.17,60.5 L62.5,44 L70.83,35 L79.17,27 L87.5,19.8 L95.83,8.75 L95.83,100 Z"/>
+              <path d="M4.17,94 L12.5,85 L20.83,89.5 L29.17,73 L37.5,66 L45.83,57.5 L54.17,60.5 L62.5,44 L70.83,35 L79.17,27 L87.5,19.8 L95.83,8.75" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+            </svg>
+          </div>
+          <p class="tile-caption" style="display:flex;justify-content:space-between;margin-top:8px">
+            <span>nov 2025</span><span>oct 2026</span>
+          </p>
+        </div>
+      </article>
+
+      <!-- 2 · Ingresos vs. gastos -->
+      <article class="bento-tile tile-flow" id="tile-flow" data-view="view-flow" role="button" tabindex="0" aria-label="Ver detalle de ingresos y gastos">
+        <header class="tile-head">
+          <span class="tile-icon"><svg class="icon"><use href="#i-flow"/></svg></span>
+          <h2 class="tile-title">Ingresos vs. gastos</h2>
+          <svg class="icon tile-go"><use href="#i-arrow-up-right"/></svg>
+        </header>
+        <div class="tile-split">
+          <div class="split-stats">
+            <div>
+              <p class="stat-label"><span class="swatch" style="--c:var(--s1)"></span>Ingresos</p>
+              <p class="stat-value num">$9.850.000</p>
+            </div>
+            <div>
+              <p class="stat-label"><span class="swatch" style="--c:var(--s2)"></span>Gastos</p>
+              <p class="stat-value num">$6.420.000</p>
+            </div>
+          </div>
+          <div class="col-chart col-chart--mini" role="img" aria-label="Ingresos y gastos de mayo a octubre">
+            <div class="plot">
+              <div class="group"><div class="bar" style="--v:74;--c:var(--s1)"></div><div class="bar" style="--v:51;--c:var(--s2)"></div></div>
+              <div class="group"><div class="bar" style="--v:77;--c:var(--s1)"></div><div class="bar" style="--v:57;--c:var(--s2)"></div></div>
+              <div class="group"><div class="bar" style="--v:75;--c:var(--s1)"></div><div class="bar" style="--v:53;--c:var(--s2)"></div></div>
+              <div class="group"><div class="bar" style="--v:79;--c:var(--s1)"></div><div class="bar" style="--v:59;--c:var(--s2)"></div></div>
+              <div class="group"><div class="bar" style="--v:78;--c:var(--s1)"></div><div class="bar" style="--v:50;--c:var(--s2)"></div></div>
+              <div class="group"><div class="bar" style="--v:82;--c:var(--s1)"></div><div class="bar" style="--v:54;--c:var(--s2)"></div></div>
+            </div>
+            <div class="x-axis"><span>may</span><span>jun</span><span>jul</span><span>ago</span><span>sep</span><span>oct</span></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 3 · Inversiones -->
+      <article class="bento-tile tile-invest" id="tile-invest" data-view="view-invest" role="button" tabindex="0" aria-label="Ver detalle de inversiones">
+        <header class="tile-head">
+          <span class="tile-icon"><svg class="icon"><use href="#i-trend"/></svg></span>
+          <h2 class="tile-title">Inversiones</h2>
+          <svg class="icon tile-go"><use href="#i-arrow-up-right"/></svg>
+        </header>
+        <div>
+          <p class="tile-value num">$12.480.000</p>
+          <p style="margin-top:4px">
+            <span class="delta delta--up"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>7,2 %</span>
+            <span class="tile-caption">&nbsp;en 12 meses</span>
+          </p>
+        </div>
+        <div class="tile-foot">
+          <div class="stacked stacked--thin" role="img" aria-label="Portafolio: 40 % CDT, 30 % fondos, 20 % acciones, 10 % dólares">
+            <span style="--w:40;--c:var(--s1)"></span>
+            <span style="--w:30;--c:var(--s2)"></span>
+            <span style="--w:20;--c:var(--s3)"></span>
+            <span style="--w:10;--c:var(--s4)"></span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4 · Tarjetas -->
+      <article class="bento-tile tile-cards" id="tile-cards" data-view="view-cards" role="button" tabindex="0" aria-label="Ver detalle de tarjetas">
+        <header class="tile-head">
+          <span class="tile-icon"><svg class="icon"><use href="#i-card"/></svg></span>
+          <h2 class="tile-title">Tarjetas</h2>
+          <svg class="icon tile-go"><use href="#i-arrow-up-right"/></svg>
+        </header>
+        <div>
+          <p class="tile-value num">62 %</p>
+          <p class="tile-caption">del cupo utilizado</p>
+        </div>
+        <div class="tile-foot">
+          <div class="meter" role="img" aria-label="62 % del cupo utilizado"><span style="--v:62"></span></div>
+          <p class="tile-caption num" style="margin-top:8px">$9,3 M de $15 M</p>
+        </div>
+      </article>
+
+      <!-- 5 · Transferencias -->
+      <article class="bento-tile tile-transfers" id="tile-transfers" data-view="view-transfers" role="button" tabindex="0" aria-label="Ver detalle de transferencias">
+        <header class="tile-head">
+          <span class="tile-icon"><svg class="icon"><use href="#i-send"/></svg></span>
+          <h2 class="tile-title">Transferencias</h2>
+          <svg class="icon tile-go"><use href="#i-arrow-up-right"/></svg>
+        </header>
+        <div>
+          <p class="tile-value num">18</p>
+          <p class="tile-caption num">movimientos · $3,87 M enviados</p>
+        </div>
+        <div class="tile-foot">
+          <div class="col-chart col-chart--mini" style="--h:36px" role="img" aria-label="Volumen enviado por semana">
+            <div class="plot" style="background-image:none">
+              <div class="group"><div class="bar bar--muted" style="--v:77;--c:var(--s1)"></div></div>
+              <div class="group"><div class="bar bar--muted" style="--v:94;--c:var(--s1)"></div></div>
+              <div class="group"><div class="bar bar--muted" style="--v:60;--c:var(--s1)"></div></div>
+              <div class="group"><div class="bar" style="--v:100;--c:var(--s1)"></div></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 6 · Presupuesto -->
+      <article class="bento-tile tile-budget" id="tile-budget" data-view="view-budget" role="button" tabindex="0" aria-label="Ver detalle del presupuesto">
+        <header class="tile-head">
+          <span class="tile-icon"><svg class="icon"><use href="#i-pie"/></svg></span>
+          <h2 class="tile-title">Presupuesto de octubre</h2>
+          <svg class="icon tile-go"><use href="#i-arrow-up-right"/></svg>
+        </header>
+        <div class="tile-split" style="grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:center">
+          <div>
+            <p class="tile-value num">$4.270.000</p>
+            <p class="tile-caption num">de $4.750.000 presupuestados</p>
+          </div>
+          <div style="display:grid;gap:12px">
+            <div>
+              <p class="tile-caption" style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Usado</span><strong class="num" style="color:var(--ink)">90 %</strong></p>
+              <div class="meter meter--warn" role="img" aria-label="90 % del presupuesto usado"><span style="--v:90"></span></div>
+            </div>
+            <p class="status status--warn" style="justify-self:start">
+              <svg class="icon icon-sm"><use href="#i-alert"/></svg>1 categoría excedida
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- 7 · Metas -->
+      <article class="bento-tile tile-goals" id="tile-goals" data-view="view-goals" role="button" tabindex="0" aria-label="Ver detalle de metas de ahorro">
+        <header class="tile-head">
+          <span class="tile-icon"><svg class="icon"><use href="#i-target"/></svg></span>
+          <h2 class="tile-title">Metas</h2>
+          <svg class="icon tile-go"><use href="#i-arrow-up-right"/></svg>
+        </header>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:auto">
+          <div class="ring ring--sm" style="--v:75;--fill:var(--s3)"><span>75%</span></div>
+          <div>
+            <p class="tile-caption">3 metas activas</p>
+            <p style="font-size:.875rem;font-weight:600">Fondo de emergencia</p>
+          </div>
+        </div>
+      </article>
+
+    </main>
+  </div>
+
+
+  <!-- ======================================================================
+       VISTAS DE DETALLE (una por cada tarjeta del bento)
+       Cada .modal-overlay corresponde al data-view de su tarjeta.
+       ====================================================================== -->
+
+  <!-- ===== Vista 1 · Saldo total ===== -->
+  <div class="modal-overlay" id="view-balance">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-balance-title">
+      <header class="modal-head">
+        <span class="tile-icon"><svg class="icon"><use href="#i-wallet"/></svg></span>
+        <div>
+          <h2 class="modal-title" id="view-balance-title">Saldo total</h2>
+          <p class="modal-sub">Todas tus cuentas · noviembre 2025 – octubre 2026</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="hero-row">
+        <p class="hero-number num">$48.250.300<small>COP</small></p>
+        <p>
+          <span class="delta delta--up"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>4,8 %</span>
+          <span class="tile-caption">&nbsp;frente a septiembre ($46.040.000)</span>
+        </p>
+      </div>
+
+      <div class="modal-grid">
+        <div class="panel span-2">
+          <div class="panel-head">
+            <h3 class="panel-title">Evolución del saldo</h3>
+            <span class="panel-note">Millones de COP</span>
+          </div>
+          <div class="line-chart" style="--rows:4;--h:200px" role="img" aria-label="Saldo mensual: de 31,2 millones en noviembre a 48,3 millones en octubre">
+            <div class="y-axis"><span>50</span><span>45</span><span>40</span><span>35</span><span>30</span></div>
+            <div class="plot">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path class="area" d="M4.17,100 L4.17,94 L12.5,85 L20.83,89.5 L29.17,73 L37.5,66 L45.83,57.5 L54.17,60.5 L62.5,44 L70.83,35 L79.17,27 L87.5,19.8 L95.83,8.75 L95.83,100 Z"/>
+                <path class="line" d="M4.17,94 L12.5,85 L20.83,89.5 L29.17,73 L37.5,66 L45.83,57.5 L54.17,60.5 L62.5,44 L70.83,35 L79.17,27 L87.5,19.8 L95.83,8.75"/>
+              </svg>
+              <span class="end-dot" style="--x:95.83;--y:8.75"></span>
+              <span class="end-label num" style="--x:95.83;--y:8.75">$48,3 M</span>
+            </div>
+            <div class="x-axis"><span>nov</span><span>dic</span><span>ene</span><span>feb</span><span>mar</span><span>abr</span><span>may</span><span>jun</span><span>jul</span><span>ago</span><span>sep</span><span>oct</span></div>
+          </div>
+        </div>
+
+        <div class="panel span-2">
+          <div class="panel-head">
+            <h3 class="panel-title">¿Dónde está tu dinero?</h3>
+            <span class="panel-note">Por tipo de cuenta</span>
+          </div>
+          <div class="stacked" role="img" aria-label="61 % cuenta de ahorros, 26 % cuenta corriente, 13 % bolsillos">
+            <span style="--w:61.4;--c:var(--s1)"></span>
+            <span style="--w:25.7;--c:var(--s2)"></span>
+            <span style="--w:12.9;--c:var(--s3)"></span>
+          </div>
+          <ul class="legend legend--stack" style="margin-top:18px">
+            <li><span class="swatch" style="--c:var(--s1)"></span>Cuenta de ahorros<span class="legend-value">$29.600.000</span><span class="legend-pct">61 %</span></li>
+            <li><span class="swatch" style="--c:var(--s2)"></span>Cuenta corriente<span class="legend-value">$12.400.000</span><span class="legend-pct">26 %</span></li>
+            <li><span class="swatch" style="--c:var(--s3)"></span>Bolsillos<span class="legend-value">$6.250.300</span><span class="legend-pct">13 %</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Vista 2 · Ingresos vs. gastos ===== -->
+  <div class="modal-overlay" id="view-flow">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-flow-title">
+      <header class="modal-head">
+        <span class="tile-icon"><svg class="icon"><use href="#i-flow"/></svg></span>
+        <div>
+          <h2 class="modal-title" id="view-flow-title">Ingresos vs. gastos</h2>
+          <p class="modal-sub">Últimos seis meses · octubre a la fecha</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="stat-row" style="margin-bottom:16px">
+        <div class="stat-tile">
+          <p class="stat-label"><span class="swatch" style="--c:var(--s1)"></span>Ingresos</p>
+          <strong class="stat-value num">$9.850.000</strong>
+          <span class="delta delta--up"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>4,8 % <span class="muted" style="font-weight:400">vs. sep</span></span>
+        </div>
+        <div class="stat-tile">
+          <p class="stat-label"><span class="swatch" style="--c:var(--s2)"></span>Gastos</p>
+          <strong class="stat-value num">$6.420.000</strong>
+          <span class="delta delta--warn"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>7,0 % <span class="muted" style="font-weight:400">vs. sep</span></span>
+        </div>
+        <div class="stat-tile">
+          <p class="stat-label">Ahorro neto</p>
+          <strong class="stat-value num">$3.430.000</strong>
+          <span class="tile-caption">35 % de tus ingresos</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3 class="panel-title">Comparativo mensual</h3>
+          <ul class="legend">
+            <li><span class="swatch" style="--c:var(--s1)"></span>Ingresos</li>
+            <li><span class="swatch" style="--c:var(--s2)"></span>Gastos</li>
+          </ul>
+        </div>
+        <div class="col-chart" style="--rows:3;--h:200px" role="img" aria-label="Ingresos y gastos por mes, de mayo a octubre, en millones de pesos">
+          <div class="y-axis"><span>12 M</span><span>8 M</span><span>4 M</span><span>0</span></div>
+          <div class="plot">
+            <div class="group"><div class="bar" style="--v:74;--c:var(--s1)" title="Ingresos mayo: $8,9 M"></div><div class="bar" style="--v:51;--c:var(--s2)" title="Gastos mayo: $6,1 M"></div></div>
+            <div class="group"><div class="bar" style="--v:77;--c:var(--s1)" title="Ingresos junio: $9,2 M"></div><div class="bar" style="--v:57;--c:var(--s2)" title="Gastos junio: $6,8 M"></div></div>
+            <div class="group"><div class="bar" style="--v:75;--c:var(--s1)" title="Ingresos julio: $9,0 M"></div><div class="bar" style="--v:53;--c:var(--s2)" title="Gastos julio: $6,3 M"></div></div>
+            <div class="group"><div class="bar" style="--v:79;--c:var(--s1)" title="Ingresos agosto: $9,5 M"></div><div class="bar" style="--v:59;--c:var(--s2)" title="Gastos agosto: $7,1 M"></div></div>
+            <div class="group"><div class="bar" style="--v:78;--c:var(--s1)" title="Ingresos septiembre: $9,4 M"></div><div class="bar" style="--v:50;--c:var(--s2)" title="Gastos septiembre: $6,0 M"></div></div>
+            <div class="group">
+              <div class="bar" style="--v:82;--c:var(--s1)" title="Ingresos octubre: $9,85 M"><span class="bar-value">9,85</span></div>
+              <div class="bar" style="--v:54;--c:var(--s2)" title="Gastos octubre: $6,42 M"><span class="bar-value">6,42</span></div>
+            </div>
+          </div>
+          <div class="x-axis"><span>may</span><span>jun</span><span>jul</span><span>ago</span><span>sep</span><span>oct</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Vista 3 · Inversiones ===== -->
+  <div class="modal-overlay" id="view-invest">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-invest-title">
+      <header class="modal-head">
+        <span class="tile-icon"><svg class="icon"><use href="#i-trend"/></svg></span>
+        <div>
+          <h2 class="modal-title" id="view-invest-title">Inversiones</h2>
+          <p class="modal-sub">Portafolio de $12.480.000 · rentabilidad de 7,2 % en 12 meses</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="modal-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">Composición</h3>
+            <span class="panel-note">Por tipo de activo</span>
+          </div>
+          <div class="with-donut">
+            <div class="donut" role="img" aria-label="40 % CDT, 30 % fondos de inversión, 20 % acciones, 10 % dólares"
+                 style="background:conic-gradient(var(--surface-2) 0 .3%, var(--s1) .3% 39.7%, var(--surface-2) 39.7% 40.3%, var(--s2) 40.3% 69.7%, var(--surface-2) 69.7% 70.3%, var(--s3) 70.3% 89.7%, var(--surface-2) 89.7% 90.3%, var(--s4) 90.3% 99.7%, var(--surface-2) 99.7% 100%)">
+              <div class="donut-center"><strong class="num">4</strong><span>activos</span></div>
+            </div>
+            <ul class="legend legend--stack">
+              <li><span class="swatch" style="--c:var(--s1)"></span>CDT<span class="legend-value">$4.992.000</span><span class="legend-pct">40 %</span></li>
+              <li><span class="swatch" style="--c:var(--s2)"></span>Fondos<span class="legend-value">$3.744.000</span><span class="legend-pct">30 %</span></li>
+              <li><span class="swatch" style="--c:var(--s3)"></span>Acciones<span class="legend-value">$2.496.000</span><span class="legend-pct">20 %</span></li>
+              <li><span class="swatch" style="--c:var(--s4)"></span>Dólares<span class="legend-value">$1.248.000</span><span class="legend-pct">10 %</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">Rentabilidad acumulada</h3>
+            <span class="panel-note">% en 12 meses</span>
+          </div>
+          <div class="line-chart" style="--rows:4;--h:250px" role="img" aria-label="Rentabilidad acumulada, de 0 % en noviembre a 7,2 % en octubre">
+            <div class="y-axis"><span>8</span><span>6</span><span>4</span><span>2</span><span>0</span></div>
+            <div class="plot">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path class="area" style="--c:var(--s3)" d="M4.17,100 L4.17,100 L12.5,92.5 L20.83,86.25 L29.17,88.75 L37.5,75 L45.83,65 L54.17,61.25 L62.5,51.25 L70.83,42.5 L79.17,32.5 L87.5,21.25 L95.83,10 L95.83,100 Z"/>
+                <path class="line" style="--c:var(--s3)" d="M4.17,100 L12.5,92.5 L20.83,86.25 L29.17,88.75 L37.5,75 L45.83,65 L54.17,61.25 L62.5,51.25 L70.83,42.5 L79.17,32.5 L87.5,21.25 L95.83,10"/>
+              </svg>
+              <span class="end-dot" style="--x:95.83;--y:10;--c:var(--s3)"></span>
+              <span class="end-label num" style="--x:95.83;--y:10">7,2 %</span>
+            </div>
+            <div class="x-axis"><span>n</span><span>d</span><span>e</span><span>f</span><span>m</span><span>a</span><span>m</span><span>j</span><span>j</span><span>a</span><span>s</span><span>o</span></div>
+          </div>
+        </div>
+
+        <div class="panel span-2">
+          <div class="panel-head">
+            <h3 class="panel-title">Tus posiciones</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr><th>Activo</th><th class="right">Valor</th><th class="right">Rentabilidad</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CDT a 360 días</td><td class="right">$4.992.000</td><td class="right"><span class="delta delta--up"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>10,2 % E.A.</span></td></tr>
+              <tr><td>Fondo de renta fija</td><td class="right">$3.744.000</td><td class="right"><span class="delta delta--up"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>6,1 %</span></td></tr>
+              <tr><td>ETF Colombia 20</td><td class="right">$2.496.000</td><td class="right"><span class="delta delta--up"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg>8,4 %</span></td></tr>
+              <tr><td>Dólares (USD 310)</td><td class="right">$1.248.000</td><td class="right"><span class="delta delta--down"><svg class="icon icon-sm"><use href="#i-arrow-down"/></svg>1,2 %</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Vista 4 · Tarjetas ===== -->
+  <div class="modal-overlay" id="view-cards">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-cards-title">
+      <header class="modal-head">
+        <span class="tile-icon"><svg class="icon"><use href="#i-card"/></svg></span>
+        <div>
+          <h2 class="modal-title" id="view-cards-title">Tarjetas</h2>
+          <p class="modal-sub">Cupo total de $15.000.000 · $5.700.000 disponibles</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="credit-cards" style="margin-bottom:16px">
+        <div>
+          <div class="credit-card">
+            <div class="card-top"><span>KORA PLATINO</span><span class="card-chip"></span></div>
+            <div class="card-number num">•••• •••• •••• 4821</div>
+            <div class="card-bottom"><span>VALENTINA RINCÓN</span><span>09/29</span></div>
+          </div>
+          <div class="card-usage">
+            <div class="meter" role="img" aria-label="68 % del cupo utilizado"><span style="--v:68"></span></div>
+            <div class="card-usage-row num"><span>Usado $6.800.000</span><span>Cupo $10.000.000</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="credit-card credit-card--black">
+            <div class="card-top"><span>KORA BLACK</span><span class="card-chip"></span></div>
+            <div class="card-number num">•••• •••• •••• 9034</div>
+            <div class="card-bottom"><span>VALENTINA RINCÓN</span><span>03/28</span></div>
+          </div>
+          <div class="card-usage">
+            <div class="meter" role="img" aria-label="50 % del cupo utilizado"><span style="--v:50"></span></div>
+            <div class="card-usage-row num"><span>Usado $2.500.000</span><span>Cupo $5.000.000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">Gasto del mes por categoría</h3>
+            <span class="panel-note">Millones de COP</span>
+          </div>
+          <ul class="hbars">
+            <li class="hbar"><span class="hbar-label">Mercado</span><span class="hbar-track"><span class="hbar-fill" style="--v:100"></span></span><span class="hbar-value">$1,85 M</span></li>
+            <li class="hbar"><span class="hbar-label">Restaurantes</span><span class="hbar-track"><span class="hbar-fill" style="--v:65"></span></span><span class="hbar-value">$1,20 M</span></li>
+            <li class="hbar"><span class="hbar-label">Otros</span><span class="hbar-track"><span class="hbar-fill" style="--v:51"></span></span><span class="hbar-value">$0,95 M</span></li>
+            <li class="hbar"><span class="hbar-label">Transporte</span><span class="hbar-track"><span class="hbar-fill" style="--v:42"></span></span><span class="hbar-value">$0,78 M</span></li>
+            <li class="hbar"><span class="hbar-label">Suscripciones</span><span class="hbar-track"><span class="hbar-fill" style="--v:23"></span></span><span class="hbar-value">$0,42 M</span></li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">Próximo pago</h3>
+          </div>
+          <div class="callout">
+            <svg class="icon"><use href="#i-calendar"/></svg>
+            <div><strong>28 de octubre · en 15 días</strong>Pago mínimo $465.000 · Pago total $9.300.000</div>
+          </div>
+          <p class="tile-caption" style="margin-top:14px">Pagar el total antes de la fecha límite evita intereses de 2,1 % mensual.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Vista 5 · Transferencias ===== -->
+  <div class="modal-overlay" id="view-transfers">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-transfers-title">
+      <header class="modal-head">
+        <span class="tile-icon"><svg class="icon"><use href="#i-send"/></svg></span>
+        <div>
+          <h2 class="modal-title" id="view-transfers-title">Transferencias</h2>
+          <p class="modal-sub">18 movimientos en octubre</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="stat-row" style="margin-bottom:16px;grid-template-columns:repeat(2,minmax(0,1fr))">
+        <div class="stat-tile">
+          <p class="stat-label">Enviado</p>
+          <strong class="stat-value num">$3.870.000</strong>
+          <span class="tile-caption">13 transferencias</span>
+        </div>
+        <div class="stat-tile">
+          <p class="stat-label">Recibido</p>
+          <strong class="stat-value num">$5.010.000</strong>
+          <span class="tile-caption">5 transferencias</span>
+        </div>
+      </div>
+
+      <div class="modal-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">Enviado por semana</h3>
+            <span class="panel-note">Millones de COP</span>
+          </div>
+          <div class="col-chart" style="--rows:3;--h:230px" role="img" aria-label="Volumen enviado por semana: 0,9; 1,1; 0,7 y 1,17 millones">
+            <div class="y-axis"><span>1,5</span><span>1,0</span><span>0,5</span><span>0</span></div>
+            <div class="plot">
+              <div class="group"><div class="bar bar--muted" style="--v:60;--c:var(--s1)" title="Semana 1: $0,9 M"></div></div>
+              <div class="group"><div class="bar bar--muted" style="--v:73;--c:var(--s1)" title="Semana 2: $1,1 M"></div></div>
+              <div class="group"><div class="bar bar--muted" style="--v:47;--c:var(--s1)" title="Semana 3: $0,7 M"></div></div>
+              <div class="group"><div class="bar" style="--v:78;--c:var(--s1)" title="Semana 4: $1,17 M"><span class="bar-value">1,17</span></div></div>
+            </div>
+            <div class="x-axis"><span>Sem 1</span><span>Sem 2</span><span>Sem 3</span><span>Sem 4</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">Últimos movimientos</h3>
+          </div>
+          <ul class="list">
+            <li class="list-item">
+              <span class="list-icon"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg></span>
+              <span><span class="who">Camila Rojas</span><span class="what">Arriendo · 12 oct</span></span>
+              <span class="amount">−$1.200.000</span>
+            </li>
+            <li class="list-item">
+              <span class="list-icon"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg></span>
+              <span><span class="who">Servicios públicos</span><span class="what">Pago de facturas · 11 oct</span></span>
+              <span class="amount">−$286.500</span>
+            </li>
+            <li class="list-item">
+              <span class="list-icon"><svg class="icon icon-sm"><use href="#i-arrow-up"/></svg></span>
+              <span><span class="who">Diego Pérez</span><span class="what">Préstamo · 9 oct</span></span>
+              <span class="amount">−$350.000</span>
+            </li>
+            <li class="list-item">
+              <span class="list-icon"><svg class="icon icon-sm"><use href="#i-arrow-down"/></svg></span>
+              <span><span class="who">Laura Mendoza</span><span class="what">Cena compartida · 7 oct</span></span>
+              <span class="amount" style="color:var(--good)">+$85.000</span>
+            </li>
+            <li class="list-item">
+              <span class="list-icon"><svg class="icon icon-sm"><use href="#i-arrow-down"/></svg></span>
+              <span><span class="who">Andina Tech S.A.S.</span><span class="what">Nómina · 1 oct</span></span>
+              <span class="amount" style="color:var(--good)">+$4.925.000</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Vista 6 · Presupuesto ===== -->
+  <div class="modal-overlay" id="view-budget">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-budget-title">
+      <header class="modal-head">
+        <span class="tile-icon"><svg class="icon"><use href="#i-pie"/></svg></span>
+        <div>
+          <h2 class="modal-title" id="view-budget-title">Presupuesto de octubre</h2>
+          <p class="modal-sub">$4.270.000 gastados de $4.750.000 · quedan $480.000</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-head">
+          <h3 class="panel-title">Avance general</h3>
+          <strong class="num">90 %</strong>
+        </div>
+        <div class="meter meter--warn" role="img" aria-label="90 % del presupuesto usado"><span style="--v:90"></span></div>
+        <p class="tile-caption" style="margin-top:10px">Faltan 18 días del mes. Vas a un ritmo de $5,2 M: superarías el presupuesto.</p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3 class="panel-title">Por categoría</h3>
+          <ul class="legend">
+            <li><span class="swatch" style="--c:var(--s1)"></span>En rango</li>
+            <li><span class="swatch" style="--c:var(--warn)"></span>Cerca del límite</li>
+            <li><span class="swatch" style="--c:var(--crit)"></span>Excedido</li>
+          </ul>
+        </div>
+        <ul class="budget-list">
+          <li class="budget-row">
+            <div class="budget-row-top"><span class="name">Vivienda</span><span class="figures">$1.500.000 / $1.500.000</span></div>
+            <div class="meter meter--warn"><span style="--v:100"></span></div>
+            <span class="status status--warn" style="justify-self:start"><svg class="icon icon-sm"><use href="#i-alert"/></svg>En el límite · 100 %</span>
+          </li>
+          <li class="budget-row">
+            <div class="budget-row-top"><span class="name">Mercado</span><span class="figures">$1.080.000 / $1.200.000</span></div>
+            <div class="meter meter--warn"><span style="--v:90"></span></div>
+          </li>
+          <li class="budget-row">
+            <div class="budget-row-top"><span class="name">Ocio</span><span class="figures">$680.000 / $600.000</span></div>
+            <div class="meter meter--crit"><span style="--v:100"></span></div>
+            <span class="status status--crit" style="justify-self:start"><svg class="icon icon-sm"><use href="#i-alert"/></svg>Excedido · 113 %</span>
+          </li>
+          <li class="budget-row">
+            <div class="budget-row-top"><span class="name">Transporte</span><span class="figures">$520.000 / $700.000</span></div>
+            <div class="meter"><span style="--v:74"></span></div>
+          </li>
+          <li class="budget-row">
+            <div class="budget-row-top"><span class="name">Suscripciones</span><span class="figures">$180.000 / $250.000</span></div>
+            <div class="meter"><span style="--v:72"></span></div>
+          </li>
+          <li class="budget-row">
+            <div class="budget-row-top"><span class="name">Salud</span><span class="figures">$310.000 / $500.000</span></div>
+            <div class="meter"><span style="--v:62"></span></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Vista 7 · Metas de ahorro ===== -->
+  <div class="modal-overlay" id="view-goals">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-goals-title">
+      <header class="modal-head">
+        <span class="tile-icon"><svg class="icon"><use href="#i-target"/></svg></span>
+        <div>
+          <h2 class="modal-title" id="view-goals-title">Metas de ahorro</h2>
+          <p class="modal-sub">3 metas activas · $25.700.000 ahorrados en total</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="goal-cards">
+        <article class="goal-card">
+          <div class="ring" style="--v:75;--fill:var(--s3)"><span>75 %</span></div>
+          <h3 class="goal-name">Fondo de emergencia</h3>
+          <dl class="goal-meta">
+            <div><dt>Ahorrado</dt><dd>$9.000.000</dd></div>
+            <div><dt>Meta</dt><dd>$12.000.000</dd></div>
+            <div><dt>Aporte mensual</dt><dd>$750.000</dd></div>
+            <div><dt>Fecha estimada</dt><dd>feb 2027</dd></div>
+          </dl>
+        </article>
+        <article class="goal-card">
+          <div class="ring" style="--v:60;--fill:var(--s1)"><span>60 %</span></div>
+          <h3 class="goal-name">Viaje a San Andrés</h3>
+          <dl class="goal-meta">
+            <div><dt>Ahorrado</dt><dd>$2.700.000</dd></div>
+            <div><dt>Meta</dt><dd>$4.500.000</dd></div>
+            <div><dt>Aporte mensual</dt><dd>$300.000</dd></div>
+            <div><dt>Fecha estimada</dt><dd>abr 2027</dd></div>
+          </dl>
+        </article>
+        <article class="goal-card">
+          <div class="ring" style="--v:28;--fill:var(--s2)"><span>28 %</span></div>
+          <h3 class="goal-name">Cuota inicial vivienda</h3>
+          <dl class="goal-meta">
+            <div><dt>Ahorrado</dt><dd>$14.000.000</dd></div>
+            <div><dt>Meta</dt><dd>$50.000.000</dd></div>
+            <div><dt>Aporte mensual</dt><dd>$1.200.000</dd></div>
+            <div><dt>Fecha estimada</dt><dd>abr 2029</dd></div>
+          </dl>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ruta Andina · Logística</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 9 · Panel de transporte y logística (estilo glassmorfismo)
+    ----------------------------------------------------------------------
+    Todo está construido y visible a propósito. Al abrir el archivo verás:
+      · el modal #shipment-detail (detalle de la guía RA-58214) y
+      · el modal #modal-new-shipment (formulario) encima de todo.
+
+    Tarea del estudiante (JavaScript):
+      1. Al iniciar: ocultar #shipment-detail y #modal-new-shipment.
+      2. Clic en un envío .shipment -> mostrar #shipment-detail con sus data-*
+         y resaltar su ruta en el mapa (#route-…).
+      3. Botón #btn-new-shipment -> mostrar el formulario de nuevo envío.
+
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <span class="blob blob--1" aria-hidden="true"></span>
+  <span class="blob blob--2" aria-hidden="true"></span>
+  <span class="blob blob--3" aria-hidden="true"></span>
+
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-truck" viewBox="0 0 24 24"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+    <symbol id="i-road" viewBox="0 0 24 24"><path d="M5 21L9 3M19 21L15 3M12 5v2M12 11v2M12 17v2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  </svg>
+
+  <!-- ===================== BARRA SUPERIOR ===================== -->
+  <header class="topbar glass">
+    <div class="brand"><span class="brand-mark"><svg class="icon"><use href="#i-truck"/></svg></span>Ruta Andina</div>
+    <nav class="nav" aria-label="Principal">
+      <a href="#" class="is-active" aria-current="page">Envíos</a>
+      <a href="#">Flota</a>
+      <a href="#">Conductores</a>
+      <a href="#">Clientes</a>
+      <a href="#">Facturación</a>
+    </nav>
+    <div class="topbar-actions">
+      <label class="search"><svg class="icon"><use href="#i-search"/></svg><input type="search" id="search-shipment" placeholder="Buscar guía o ciudad" aria-label="Buscar envío"></label>
+      <button type="button" class="btn btn--primary" id="btn-new-shipment"><svg class="icon"><use href="#i-plus"/></svg>Nuevo envío</button>
+      <span class="avatar" aria-label="Natalia Quiroga">NQ</span>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <h1>Centro de control de envíos</h1>
+      <p>Martes 13 de octubre de 2026 · 3:30 p. m. · operación nacional</p>
+    </div>
+
+    <section class="kpis" aria-label="Indicadores">
+      <article class="kpi glass"><p class="kpi-top">Envíos activos<svg class="icon"><use href="#i-box"/></svg></p><p class="kpi-value num">142</p><p class="kpi-note">4 con retraso</p></article>
+      <article class="kpi glass"><p class="kpi-top">Entregas a tiempo<svg class="icon"><use href="#i-clock"/></svg></p><p class="kpi-value num">94,2 %</p><p class="kpi-note"><strong>▲ 1,4 pp</strong> frente a septiembre</p></article>
+      <article class="kpi glass"><p class="kpi-top">Flota en ruta<svg class="icon"><use href="#i-truck"/></svg></p><p class="kpi-value num">38 / 52</p><p class="kpi-note">73 % de los camiones</p></article>
+      <article class="kpi glass"><p class="kpi-top">Km recorridos hoy<svg class="icon"><use href="#i-road"/></svg></p><p class="kpi-value num">18.640</p><p class="kpi-note">Promedio de 490 km por camión</p></article>
+    </section>
+
+    <div class="workspace">
+      <!-- ============ LISTA DE ENVÍOS ============ -->
+      <section class="panel glass" aria-labelledby="shipments-title">
+        <div class="panel-head">
+          <div>
+            <h2 id="shipments-title">Guías en seguimiento</h2>
+            <p>Mostrando 8 de 142</p>
+          </div>
+          <div class="segmented" role="group" aria-label="Filtrar por estado">
+            <button type="button" class="is-active" data-filter="all">Todos</button>
+            <button type="button" data-filter="En tránsito">En tránsito</button>
+            <button type="button" data-filter="Retrasado">Retrasados</button>
+            <button type="button" data-filter="Entregado">Entregados</button>
+          </div>
+        </div>
+        <div class="shipments" id="shipment-list">
+
+            <article class="shipment is-selected st-transit" tabindex="0"
+                     data-code="RA-58214"
+                     data-origin="Bogotá"
+                     data-destination="Barranquilla"
+                     data-route="BOG-BAQ"
+                     data-status="En tránsito"
+                     data-progress="68"
+                     data-eta="14 oct · 6:00 a. m."
+                     data-truck="WPL 482 · Kenworth T800"
+                     data-driver="Jhon Jairo Mosquera"
+                     data-phone="+57 310 556 2041"
+                     data-cargo="Electrodomésticos · 18 estibas"
+                     data-weight="12400"
+                     data-volume="46"
+                     data-value="386000000"
+                     data-client="Almacenes Caribe S.A.S."
+                     data-priority="Express"
+                     data-temperature=""
+                     data-events="12 oct · 6:20 p. m.~Recogida en bodega Bogotá (Montevideo)~done|12 oct · 9:05 p. m.~Salida de Bogotá~done|13 oct · 7:40 a. m.~Paso por Bucaramanga~done|13 oct · 3:10 p. m.~Punto de control en Aguachica~current|14 oct · 6:00 a. m.~Entrega estimada en Barranquilla~pending">
+              <p class="code">RA-58214<small>Express</small></p>
+              <div>
+                <p class="route">Bogotá <svg class="icon"><use href="#i-arrow"/></svg> Barranquilla</p>
+                <p class="cargo">Electrodomésticos · 18 estibas</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>ETA 14 oct · 6:00 a. m.</span><span class="num">68 %</span></p>
+                <div class="progress"><span style="--v:68"></span></div>
+              </div>
+              <span class="pill">En tránsito</span>
+            </article>
+
+            <article class="shipment st-transit" tabindex="0"
+                     data-code="RA-58209"
+                     data-origin="Medellín"
+                     data-destination="Cartagena"
+                     data-route="MDE-CTG"
+                     data-status="En tránsito"
+                     data-progress="42"
+                     data-eta="14 oct · 2:00 p. m."
+                     data-truck="SRT 915 · International 7400"
+                     data-driver="Luis Ángel Pérez"
+                     data-phone="+57 300 812 4470"
+                     data-cargo="Textiles · 240 cajas"
+                     data-weight="8600"
+                     data-volume="38"
+                     data-value="214000000"
+                     data-client="Moda Costeña Ltda."
+                     data-priority="Estándar"
+                     data-temperature=""
+                     data-events="13 oct · 5:00 a. m.~Recogida en Itagüí~done|13 oct · 6:30 a. m.~Salida de Medellín~done|13 oct · 1:15 p. m.~Paso por Caucasia~current|14 oct · 2:00 p. m.~Entrega estimada en Cartagena~pending">
+              <p class="code">RA-58209<small>Estándar</small></p>
+              <div>
+                <p class="route">Medellín <svg class="icon"><use href="#i-arrow"/></svg> Cartagena</p>
+                <p class="cargo">Textiles · 240 cajas</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>ETA 14 oct · 2:00 p. m.</span><span class="num">42 %</span></p>
+                <div class="progress"><span style="--v:42"></span></div>
+              </div>
+              <span class="pill">En tránsito</span>
+            </article>
+
+            <article class="shipment st-delayed" tabindex="0"
+                     data-code="RA-58205"
+                     data-origin="Buenaventura"
+                     data-destination="Bogotá"
+                     data-route="BUN-BOG"
+                     data-status="Retrasado"
+                     data-progress="55"
+                     data-eta="14 oct · 9:00 p. m. (7 h de retraso)"
+                     data-truck="TKG 207 · Freightliner M2"
+                     data-driver="Wilmer Andrés Rentería"
+                     data-phone="+57 312 908 3316"
+                     data-cargo="Contenedor 40 pies · insumos importados"
+                     data-weight="24800"
+                     data-volume="67"
+                     data-value="1250000000"
+                     data-client="Importadora Pacífico S.A."
+                     data-priority="Dedicado"
+                     data-temperature=""
+                     data-events="12 oct · 4:00 p. m.~Retiro del contenedor en el puerto de Buenaventura~done|12 oct · 11:30 p. m.~Paso por Buga~done|13 oct · 9:20 a. m.~Detenido: cierre vial en La Línea por derrumbe~current|14 oct · 9:00 p. m.~Entrega estimada en Bogotá~pending">
+              <p class="code">RA-58205<small>Dedicado</small></p>
+              <div>
+                <p class="route">Buenaventura <svg class="icon"><use href="#i-arrow"/></svg> Bogotá</p>
+                <p class="cargo">Contenedor 40 pies · insumos importados</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>ETA 14 oct · 9:00 p. m.</span><span class="num">55 %</span></p>
+                <div class="progress"><span style="--v:55"></span></div>
+              </div>
+              <span class="pill">Retrasado</span>
+            </article>
+
+            <article class="shipment st-transit" tabindex="0"
+                     data-code="RA-58201"
+                     data-origin="Bogotá"
+                     data-destination="Cali"
+                     data-route="BOG-CLO"
+                     data-status="En tránsito"
+                     data-progress="81"
+                     data-eta="13 oct · 9:30 p. m."
+                     data-truck="FRZ 330 · Hino 500 refrigerado"
+                     data-driver="Diana Marcela Ruiz"
+                     data-phone="+57 315 447 9082"
+                     data-cargo="Medicamentos · cadena de frío 2–8 °C"
+                     data-weight="3200"
+                     data-volume="18"
+                     data-value="540000000"
+                     data-client="Droguerías del Valle"
+                     data-priority="Express"
+                     data-temperature="4,6 °C"
+                     data-events="12 oct · 10:00 p. m.~Cargue refrigerado en Funza~done|13 oct · 6:10 a. m.~Paso por Ibagué~done|13 oct · 2:45 p. m.~Paso por Buga · temperatura estable~current|13 oct · 9:30 p. m.~Entrega estimada en Cali~pending">
+              <p class="code">RA-58201<small>Express</small></p>
+              <div>
+                <p class="route">Bogotá <svg class="icon"><use href="#i-arrow"/></svg> Cali</p>
+                <p class="cargo">Medicamentos · cadena de frío 2–8 °C</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>ETA 13 oct · 9:30 p. m.</span><span class="num">81 %</span></p>
+                <div class="progress"><span style="--v:81"></span></div>
+              </div>
+              <span class="pill">En tránsito</span>
+            </article>
+
+            <article class="shipment st-warehouse" tabindex="0"
+                     data-code="RA-58197"
+                     data-origin="Cali"
+                     data-destination="Buenaventura"
+                     data-route="CLO-BUN"
+                     data-status="En bodega"
+                     data-progress="5"
+                     data-eta="14 oct · 11:00 a. m."
+                     data-truck="BNV 118 · Kenworth T370"
+                     data-driver="Óscar Iván Caicedo"
+                     data-phone="+57 318 220 7765"
+                     data-cargo="Azúcar para exportación · 640 bultos"
+                     data-weight="32000"
+                     data-volume="40"
+                     data-value="98000000"
+                     data-client="Ingenio La Esperanza"
+                     data-priority="Estándar"
+                     data-temperature=""
+                     data-events="13 oct · 4:30 p. m.~Cargue en bodega Acopi (Yumbo)~current|14 oct · 5:00 a. m.~Salida programada de Cali~pending|14 oct · 11:00 a. m.~Entrega estimada en el puerto de Buenaventura~pending">
+              <p class="code">RA-58197<small>Estándar</small></p>
+              <div>
+                <p class="route">Cali <svg class="icon"><use href="#i-arrow"/></svg> Buenaventura</p>
+                <p class="cargo">Azúcar para exportación · 640 bultos</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>ETA 14 oct · 11:00 a. m.</span><span class="num">5 %</span></p>
+                <div class="progress"><span style="--v:5"></span></div>
+              </div>
+              <span class="pill">En bodega</span>
+            </article>
+
+            <article class="shipment st-delivered" tabindex="0"
+                     data-code="RA-58190"
+                     data-origin="Bogotá"
+                     data-destination="Medellín"
+                     data-route="BOG-MDE"
+                     data-status="Entregado"
+                     data-progress="100"
+                     data-eta="Entregado el 13 oct · 10:15 a. m."
+                     data-truck="PQR 664 · Chevrolet NPR"
+                     data-driver="Camilo Andrés Suárez"
+                     data-phone="+57 301 778 1290"
+                     data-cargo="Repuestos automotrices · 85 cajas"
+                     data-weight="2900"
+                     data-volume="14"
+                     data-value="156000000"
+                     data-client="Autopartes Antioquia"
+                     data-priority="Express"
+                     data-temperature=""
+                     data-events="12 oct · 8:00 p. m.~Salida de Bogotá~done|13 oct · 4:30 a. m.~Paso por Puerto Triunfo~done|13 oct · 10:15 a. m.~Entregado en Medellín · firmó Andrea Gil~done">
+              <p class="code">RA-58190<small>Express</small></p>
+              <div>
+                <p class="route">Bogotá <svg class="icon"><use href="#i-arrow"/></svg> Medellín</p>
+                <p class="cargo">Repuestos automotrices · 85 cajas</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>Completado</span><span class="num">100 %</span></p>
+                <div class="progress"><span style="--v:100"></span></div>
+              </div>
+              <span class="pill">Entregado</span>
+            </article>
+
+            <article class="shipment st-transit" tabindex="0"
+                     data-code="RA-58188"
+                     data-origin="Barranquilla"
+                     data-destination="Bucaramanga"
+                     data-route="BGA-BAQ"
+                     data-status="En tránsito"
+                     data-progress="30"
+                     data-eta="14 oct · 4:00 p. m."
+                     data-truck="XTD 451 · Volvo FH"
+                     data-driver="Rafael Enrique Daza"
+                     data-phone="+57 304 665 2218"
+                     data-cargo="Materiales de construcción · cemento y varilla"
+                     data-weight="28000"
+                     data-volume="30"
+                     data-value="72000000"
+                     data-client="Constructora Santander"
+                     data-priority="Estándar"
+                     data-temperature=""
+                     data-events="13 oct · 6:00 a. m.~Cargue en zona industrial de Barranquilla~done|13 oct · 11:40 a. m.~Paso por Bosconia~current|14 oct · 4:00 p. m.~Entrega estimada en Bucaramanga~pending">
+              <p class="code">RA-58188<small>Estándar</small></p>
+              <div>
+                <p class="route">Barranquilla <svg class="icon"><use href="#i-arrow"/></svg> Bucaramanga</p>
+                <p class="cargo">Materiales de construcción · cemento y varilla</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>ETA 14 oct · 4:00 p. m.</span><span class="num">30 %</span></p>
+                <div class="progress"><span style="--v:30"></span></div>
+              </div>
+              <span class="pill">En tránsito</span>
+            </article>
+
+            <article class="shipment st-delivered" tabindex="0"
+                     data-code="RA-58183"
+                     data-origin="Medellín"
+                     data-destination="Pereira"
+                     data-route="MDE-PEI"
+                     data-status="Entregado"
+                     data-progress="100"
+                     data-eta="Entregado el 12 oct · 5:40 p. m."
+                     data-truck="JHL 732 · Foton Aumark"
+                     data-driver="Sandra Milena Arango"
+                     data-phone="+57 320 114 5579"
+                     data-cargo="Alimentos procesados · 120 cajas"
+                     data-weight="4100"
+                     data-volume="20"
+                     data-value="63000000"
+                     data-client="Supermercados del Eje"
+                     data-priority="Estándar"
+                     data-temperature=""
+                     data-events="12 oct · 9:00 a. m.~Salida de Medellín~done|12 oct · 1:20 p. m.~Paso por La Pintada~done|12 oct · 5:40 p. m.~Entregado en Pereira · firmó Jorge Castaño~done">
+              <p class="code">RA-58183<small>Estándar</small></p>
+              <div>
+                <p class="route">Medellín <svg class="icon"><use href="#i-arrow"/></svg> Pereira</p>
+                <p class="cargo">Alimentos procesados · 120 cajas</p>
+              </div>
+              <div>
+                <p class="progress-line"><span>Completado</span><span class="num">100 %</span></p>
+                <div class="progress"><span style="--v:100"></span></div>
+              </div>
+              <span class="pill">Entregado</span>
+            </article>
+        </div>
+        <p class="list-foot">Actualizado hace 2 minutos por GPS</p>
+      </section>
+
+      <!-- ============ MAPA Y GRÁFICO ============ -->
+      <aside class="side">
+        <section class="panel glass" aria-labelledby="map-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="map-title">Mapa de rutas</h2>
+              <p>Corredores activos en Colombia</p>
+            </div>
+          </div>
+          <div class="map">
+            <svg viewBox="-34 0 394 360" role="img" aria-label="Mapa esquemático de rutas entre ciudades de Colombia">
+              <g id="map-routes">
+                <polyline class="map-route is-active" id="route-BOG-BAQ" points="225,250 250,168 200,40"/>
+                <polyline class="map-route" id="route-BGA-BAQ" points="250,168 200,40"/>
+                <polyline class="map-route" id="route-MDE-CTG" points="150,200 140,130 165,62"/>
+                <polyline class="map-route" id="route-BUN-BOG" points="60,300 115,285 175,275 225,250"/>
+                <polyline class="map-route" id="route-BOG-CLO" points="225,250 170,292 110,310"/>
+                <polyline class="map-route" id="route-CLO-BUN" points="110,310 60,300"/>
+                <polyline class="map-route" id="route-BOG-MDE" points="225,250 185,215 150,200"/>
+                <polyline class="map-route" id="route-MDE-PEI" points="150,200 140,258"/>
+              </g>
+              <g id="map-cities">
+                <g class="map-city" data-city="BAQ"><circle cx="200" cy="40" r="5"/><text x="210" y="44" text-anchor="start">Barranquilla</text></g>
+                <g class="map-city" data-city="CTG"><circle cx="165" cy="62" r="5"/><text x="155" y="66" text-anchor="end">Cartagena</text></g>
+                <g class="map-city" data-city="BGA"><circle cx="250" cy="168" r="5"/><text x="260" y="172" text-anchor="start">Bucaramanga</text></g>
+                <g class="map-city is-hub" data-city="MDE"><circle cx="150" cy="200" r="7"/><text x="140" y="204" text-anchor="end">Medellín</text></g>
+                <g class="map-city is-hub" data-city="BOG"><circle cx="225" cy="250" r="7"/><text x="235" y="254" text-anchor="start">Bogotá</text></g>
+                <g class="map-city" data-city="PEI"><circle cx="140" cy="258" r="5"/><text x="130" y="262" text-anchor="end">Pereira</text></g>
+                <g class="map-city is-hub" data-city="CLO"><circle cx="110" cy="310" r="7"/><text x="110" y="332" text-anchor="middle">Cali</text></g>
+                <g class="map-city" data-city="BUN"><circle cx="60" cy="300" r="5"/><text x="50" y="304" text-anchor="end">Buenaventura</text></g>
+              </g>
+              <g id="map-trucks">
+                <circle class="map-truck" data-shipment="RA-58214" cx="226" cy="106.5" r="6"><title>RA-58214 · 68 %</title></circle>
+                <circle class="map-truck" data-shipment="RA-58209" cx="141.5" cy="140.5" r="6"><title>RA-58209 · 42 %</title></circle>
+                <circle class="map-truck map-truck--delayed" data-shipment="RA-58205" cx="153" cy="278.7" r="6"><title>RA-58205 · 55 %</title></circle>
+                <circle class="map-truck" data-shipment="RA-58201" cx="134" cy="302.8" r="6"><title>RA-58201 · 81 %</title></circle>
+                <circle class="map-truck" data-shipment="RA-58197" cx="107.5" cy="309.5" r="6"><title>RA-58197 · 5 %</title></circle>
+                <circle class="map-truck" data-shipment="RA-58188" cx="215" cy="78.4" r="6"><title>RA-58188 · 30 %</title></circle>
+              </g>
+            </svg>
+          </div>
+          <p class="map-legend">
+            <span><i style="--c:var(--cyan)"></i>Camión en ruta</span>
+            <span><i style="--c:var(--coral)"></i>Camión retrasado</span>
+            <span><i style="--c:var(--violet)"></i>Centro de distribución</span>
+          </p>
+        </section>
+
+        <section class="panel glass" aria-labelledby="deliveries-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="deliveries-title">Entregas por día</h2>
+              <p>Últimos 7 días · hoy hasta las 3:30 p. m.</p>
+            </div>
+          </div>
+          <div class="col-chart" role="img" aria-label="Entregas por día: mié 31, jue 36, vie 42, sáb 24, dom 9, lun 38, mar 27">
+            <div class="y-axis"><span>50</span><span>25</span><span>0</span></div>
+            <div class="plot">
+              <div class="bar" style="--v:62" title="mié: 31 entregas"></div>
+              <div class="bar" style="--v:72" title="jue: 36 entregas"></div>
+              <div class="bar" style="--v:84" title="vie: 42 entregas"><span class="bar-value">42</span></div>
+              <div class="bar" style="--v:48" title="sáb: 24 entregas"></div>
+              <div class="bar" style="--v:18" title="dom: 9 entregas"></div>
+              <div class="bar" style="--v:76" title="lun: 38 entregas"></div>
+              <div class="bar bar--current" style="--v:54" title="mar: 27 entregas"><span class="bar-value">27</span></div>
+            </div>
+            <div class="x-axis"><span>mié</span><span>jue</span><span>vie</span><span>sáb</span><span>dom</span><span>lun</span><span>mar</span></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+
+  <!-- ======================================================================
+       MODAL · DETALLE DEL ENVÍO (datos de ejemplo: RA-58214)
+       ====================================================================== -->
+  <div class="modal-overlay" id="shipment-detail">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-code">
+      <header class="modal-head">
+        <div>
+          <p class="mono" style="color:var(--text-2)">Guía</p>
+          <h2 class="mono" id="detail-code">RA-58214</h2>
+        </div>
+        <div>
+          <p class="route" style="font-size:1.125rem" id="detail-route">Bogotá <svg class="icon"><use href="#i-arrow"/></svg> Barranquilla</p>
+          <p id="detail-client">Almacenes Caribe S.A.S.</p>
+        </div>
+        <span class="pill st-transit" id="detail-status">En tránsito</span>
+        <button type="button" class="icon-button" id="btn-close-detail" aria-label="Cerrar detalle"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="modal-body">
+        <div>
+          <div class="box">
+            <h3>Progreso del viaje</h3>
+            <div class="big-progress"><strong class="num" id="detail-progress">68 %</strong><span>Llegada estimada<b id="detail-eta">14 oct · 6:00 a. m.</b></span></div>
+            <div class="progress st-transit"><span id="detail-progress-bar" style="--v:68"></span></div>
+          </div>
+          <div class="box">
+            <h3>Seguimiento</h3>
+            <ol class="timeline" id="detail-timeline">
+              <li class="event is-done"><span class="event-dot"></span><div><p>Recogida en bodega Bogotá (Montevideo)</p><small>12 oct · 6:20 p. m.</small></div></li>
+              <li class="event is-done"><span class="event-dot"></span><div><p>Salida de Bogotá</p><small>12 oct · 9:05 p. m.</small></div></li>
+              <li class="event is-done"><span class="event-dot"></span><div><p>Paso por Bucaramanga</p><small>13 oct · 7:40 a. m.</small></div></li>
+              <li class="event is-current"><span class="event-dot"></span><div><p>Punto de control en Aguachica</p><small>13 oct · 3:10 p. m.</small></div></li>
+              <li class="event"><span class="event-dot"></span><div><p>Entrega estimada en Barranquilla</p><small>14 oct · 6:00 a. m.</small></div></li>
+            </ol>
+          </div>
+        </div>
+
+        <div>
+          <div class="box">
+            <h3>Carga</h3>
+            <dl class="info-grid">
+              <div class="wide"><dt>Descripción</dt><dd id="detail-cargo">Electrodomésticos · 18 estibas</dd></div>
+              <div><dt>Peso</dt><dd class="num" id="detail-weight">12.400 kg</dd></div>
+              <div><dt>Volumen</dt><dd class="num" id="detail-volume">46 m³</dd></div>
+              <div><dt>Valor declarado</dt><dd class="num" id="detail-value">$386.000.000</dd></div>
+              <div><dt>Servicio</dt><dd id="detail-priority">Express</dd></div>
+              <div class="wide" id="detail-temp-row"><dt>Temperatura del furgón</dt><dd id="detail-temperature">No aplica</dd></div>
+            </dl>
+          </div>
+          <div class="box">
+            <h3>Vehículo y conductor</h3>
+            <div class="driver">
+              <span class="avatar" id="detail-driver-initials">JJ</span>
+              <div>
+                <strong id="detail-driver">Jhon Jairo Mosquera</strong>
+                <span id="detail-truck">WPL 482 · Kenworth T800</span><br>
+                <span class="mono" id="detail-phone">+57 310 556 2041</span>
+              </div>
+              <button type="button" class="icon-button" id="btn-call-driver" aria-label="Llamar al conductor"><svg class="icon"><use href="#i-phone"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-foot">
+        <button type="button" class="btn" id="btn-report-incident"><svg class="icon"><use href="#i-alert"/></svg>Reportar novedad</button>
+        <button type="button" class="btn btn--primary" id="btn-share-tracking"><svg class="icon"><use href="#i-share"/></svg>Compartir seguimiento</button>
+      </footer>
+    </section>
+  </div>
+
+
+  <!-- ======================================================================
+       MODAL · NUEVO ENVÍO
+       ====================================================================== -->
+  <div class="modal-overlay" id="modal-new-shipment">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="new-title">
+      <header class="modal-head">
+        <div>
+          <h2 id="new-title">Nuevo envío</h2>
+          <p>Crea la guía y obtén la cotización al instante.</p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-modal" aria-label="Cerrar formulario"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <form id="new-shipment-form" style="display:contents">
+        <div class="modal-body" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">
+          <div>
+            <div class="form-section">
+              <h3>Remitente y destinatario</h3>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="sh-sender">Empresa remitente <span class="req">*</span></label>
+                  <input class="input" type="text" id="sh-sender" name="sender" placeholder="Ej. Autopartes Antioquia" required>
+                </div>
+                <div class="field">
+                  <label for="sh-nit">NIT <span class="req">*</span></label>
+                  <input class="input" type="text" id="sh-nit" name="nit" placeholder="900.123.456-7" required>
+                </div>
+                <div class="field">
+                  <label for="sh-receiver">Destinatario <span class="req">*</span></label>
+                  <input class="input" type="text" id="sh-receiver" name="receiver" placeholder="Nombre o empresa" required>
+                </div>
+                <div class="field">
+                  <label for="sh-phone">Teléfono de contacto</label>
+                  <input class="input" type="tel" id="sh-phone" name="phone" placeholder="+57 300 000 0000">
+                </div>
+                <div class="field field--full">
+                  <label for="sh-address">Dirección de entrega <span class="req">*</span></label>
+                  <input class="input" type="text" id="sh-address" name="address" placeholder="Calle 10 # 43-21, bodega 4" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Ruta y carga</h3>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="sh-origin">Origen <span class="req">*</span></label>
+                  <select class="select" id="sh-origin" name="origin" required><option>Barranquilla</option><option>Cartagena</option><option>Bucaramanga</option><option>Medellín</option><option selected>Bogotá</option><option>Pereira</option><option>Cali</option><option>Buenaventura</option></select>
+                </div>
+                <div class="field">
+                  <label for="sh-destination">Destino <span class="req">*</span></label>
+                  <select class="select" id="sh-destination" name="destination" required><option>Barranquilla</option><option>Cartagena</option><option>Bucaramanga</option><option selected>Medellín</option><option>Bogotá</option><option>Pereira</option><option>Cali</option><option>Buenaventura</option></select>
+                </div>
+                <div class="field">
+                  <label for="sh-cargo-type">Tipo de carga</label>
+                  <select class="select" id="sh-cargo-type" name="cargoType">
+                    <option>Carga general</option>
+                    <option>Refrigerada</option>
+                    <option>Frágil</option>
+                    <option>Mercancía peligrosa</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="sh-pickup">Fecha de recogida <span class="req">*</span></label>
+                  <input class="input" type="date" id="sh-pickup" name="pickup" value="2026-10-14" required>
+                </div>
+                <div class="field">
+                  <label for="sh-weight">Peso (kg) <span class="req">*</span></label>
+                  <input class="input" type="number" id="sh-weight" name="weight" min="1" value="3200" required>
+                </div>
+                <div class="field">
+                  <label for="sh-volume">Volumen (m³)</label>
+                  <input class="input" type="number" id="sh-volume" name="volume" min="0" step="0.5" value="16">
+                </div>
+                <div class="field field--full">
+                  <label for="sh-value">Valor declarado (COP) <span class="req">*</span></label>
+                  <input class="input" type="number" id="sh-value" name="value" min="0" step="100000" value="80000000" required>
+                </div>
+                <div class="field field--full">
+                  <span class="label" id="sh-priority-label">Tipo de servicio</span>
+                  <div class="choice-group" role="radiogroup" aria-labelledby="sh-priority-label">
+                    <label class="choice"><input type="radio" name="priority" value="Estándar"><span>Estándar<small>2 a 3 días</small></span></label>
+                    <label class="choice"><input type="radio" name="priority" value="Express" checked><span>Express<small>24 horas · +25 %</small></span></label>
+                    <label class="choice"><input type="radio" name="priority" value="Dedicado"><span>Dedicado<small>Exclusivo · +60 %</small></span></label>
+                  </div>
+                </div>
+                <div class="field field--full">
+                  <label class="check"><input type="checkbox" id="sh-insurance" name="insurance" checked> Asegurar la carga (0,5 % del valor declarado)</label>
+                  <label class="check"><input type="checkbox" id="sh-cold" name="coldChain"> Requiere cadena de frío</label>
+                </div>
+                <div class="field field--full">
+                  <label for="sh-notes">Instrucciones especiales</label>
+                  <textarea class="textarea" id="sh-notes" name="notes" placeholder="Horario de recibo, montacargas disponible, contacto en portería…"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="box quote" style="align-self:start" aria-labelledby="quote-title">
+            <h3 id="quote-title">Cotización</h3>
+            <dl>
+              <div><dt>Ruta</dt><dd id="quote-route">Bogotá → Medellín</dd></div>
+              <div><dt>Distancia</dt><dd class="num" id="quote-distance">415 km</dd></div>
+              <div><dt>Tarifa base</dt><dd class="num" id="quote-base">$1.850.000</dd></div>
+              <div><dt>Recargo Express</dt><dd class="num" id="quote-priority">$462.500</dd></div>
+              <div><dt>Seguro</dt><dd class="num" id="quote-insurance">$400.000</dd></div>
+              <div><dt>Entrega estimada</dt><dd id="quote-eta">15 oct 2026</dd></div>
+              <div class="total"><dt>Total</dt><dd class="num" id="quote-total">$2.712.500</dd></div>
+            </dl>
+            <p class="quote-note">Valores de ejemplo: calcúlalos con JavaScript según la ruta, el servicio y el seguro.</p>
+          </aside>
+        </div>
+
+        <footer class="modal-foot">
+          <button type="button" class="btn" id="btn-cancel-shipment">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btn-save-shipment">Crear guía</button>
+        </footer>
+      </form>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

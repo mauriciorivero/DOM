@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Club Lentejuela · Reservas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pacifico&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!--
+    EJERCICIO 4 · Reservas de eventos de un bar disco (estilo kitsch)
+    ----------------------------------------------------------------------
+    Todo está construido y visible a propósito. Al abrir el archivo verás:
+      · el modal #event-detail (detalle del evento 1) y
+      · el modal #modal-new-reservation (formulario) encima de todo.
+
+    Tarea del estudiante (JavaScript):
+      1. Al iniciar: ocultar #event-detail y #modal-new-reservation.
+      2. Clic en una tarjeta .event-card -> mostrar #event-detail con los datos
+         de ese evento (están en los atributos data-* de la tarjeta).
+      3. Botón #btn-new-reservation (o #btn-reserve-event) -> mostrar el
+         formulario de reserva.
+      4. Cerrar los modales y leer los datos del formulario.
+
+    Pista: la clase .hidden (ver styles.css) oculta cualquier elemento.
+  -->
+
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></symbol>
+  </svg>
+
+  <div class="marquee checker" aria-hidden="true"></div>
+
+  <!-- ===================== ENCABEZADO ===================== -->
+  <header class="header">
+    <div class="brand">
+      <span class="disco-ball" aria-hidden="true"></span>
+      <div>
+        <p class="brand-name">Club Lentejuela</p>
+        <p class="brand-tag">Bar disco · Medellín</p>
+      </div>
+    </div>
+    <nav class="nav" aria-label="Principal">
+      <a href="#" class="is-active" aria-current="page">Eventos</a>
+      <a href="#">Reservas</a>
+      <a href="#">Clientes</a>
+      <a href="#">Carta</a>
+    </nav>
+    <button type="button" class="btn btn--gold" id="btn-new-reservation">
+      <svg class="icon"><use href="#i-plus"/></svg>Nueva reservación
+    </button>
+  </header>
+
+  <main class="page">
+
+    <section class="tonight leopard" aria-label="Evento destacado">
+      <div class="tonight-text">
+        <p>Este viernes en la pista</p>
+        <h1>Disco Inferno 70s ✦</h1>
+      </div>
+      <div class="starburst"><span><strong>82 %</strong>vendido</span></div>
+    </section>
+
+    <!-- ===================== INDICADORES ===================== -->
+    <section class="kpis" aria-label="Indicadores">
+      <article class="kpi kpi--gold">
+        <p class="kpi-label">Reservas esta semana</p>
+        <p class="kpi-value num">176</p>
+        <p class="kpi-note">▲ 14 % frente a la semana pasada</p>
+      </article>
+      <article class="kpi">
+        <p class="kpi-label">Aforo reservado</p>
+        <p class="kpi-value num">63 %</p>
+        <p class="kpi-note">Promedio de los próximos 6 eventos</p>
+      </article>
+      <article class="kpi kpi--turquoise">
+        <p class="kpi-label">Cover recaudado en octubre</p>
+        <p class="kpi-value num">$18,45 M</p>
+        <p class="kpi-note">Pagado en reservas anticipadas</p>
+      </article>
+      <article class="kpi">
+        <p class="kpi-label">Mesas VIP libres</p>
+        <p class="kpi-value num">15</p>
+        <p class="kpi-note">De 36 en los próximos eventos</p>
+      </article>
+    </section>
+
+    <div class="layout">
+
+      <!-- ===================== EVENTOS ===================== -->
+      <section aria-labelledby="events-title">
+        <h2 class="section-title" id="events-title">Próximos eventos</h2>
+        <div class="events" id="event-list">
+
+          <article class="event-card is-selected" tabindex="0"
+                   data-id="1"
+                   data-title="Disco Inferno 70s"
+                   data-date="2026-10-16"
+                   data-time="9:00 p.m. – 3:00 a.m."
+                   data-artist="DJ Lola Brillos"
+                   data-genre="Disco / Funk"
+                   data-cover="40000"
+                   data-capacity="280"
+                   data-reserved="230"
+                   data-vip-total="6"
+                   data-vip-free="1"
+                   data-dress-code="Lentejuelas y bota campana"
+                   data-poster="linear-gradient(135deg, #ff3e9a, #5b1a7a)"
+                   data-description="Una noche de bola disco, pista iluminada y clásicos de los setenta. Concurso de baile a la medianoche con premio de botella de champaña.">
+            <div class="ticket">
+              <div class="poster" style="--poster:linear-gradient(135deg, #ff3e9a, #5b1a7a)">
+                <span class="poster-genre">Disco / Funk</span>
+                <h3 class="poster-title">Disco Inferno 70s</h3>
+                <span class="date-badge"><span><strong>16</strong>oct</span></span>
+              </div>
+              <div class="ticket-body">
+                <p class="ticket-row"><span>Viernes · 9:00 p.m.</span><strong>$40.000</strong></p>
+                <div class="capacity">
+                  <p class="capacity-label"><span>Aforo reservado</span><span class="num">230 / 280</span></p>
+                  <div class="meter meter--hot"><span style="--v:82"></span></div>
+                </div>
+                <span class="sticker sticker--hot">¡Se está llenando!</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="event-card" tabindex="0"
+                   data-id="2"
+                   data-title="Salsa Brava"
+                   data-date="2026-10-17"
+                   data-time="8:00 p.m. – 3:00 a.m."
+                   data-artist="Orquesta La Sabrosura"
+                   data-genre="Salsa en vivo"
+                   data-cover="35000"
+                   data-capacity="280"
+                   data-reserved="196"
+                   data-vip-total="6"
+                   data-vip-free="2"
+                   data-dress-code="Elegante tropical"
+                   data-poster="linear-gradient(135deg, #e0263f, #ffc93c)"
+                   data-description="Orquesta en vivo con tres tandas de salsa brava y clases gratis de 8:00 a 9:00 p.m. para quienes lleguen temprano.">
+            <div class="ticket">
+              <div class="poster" style="--poster:linear-gradient(135deg, #e0263f, #ffc93c)">
+                <span class="poster-genre">Salsa en vivo</span>
+                <h3 class="poster-title">Salsa Brava</h3>
+                <span class="date-badge"><span><strong>17</strong>oct</span></span>
+              </div>
+              <div class="ticket-body">
+                <p class="ticket-row"><span>Sábado · 8:00 p.m.</span><strong>$35.000</strong></p>
+                <div class="capacity">
+                  <p class="capacity-label"><span>Aforo reservado</span><span class="num">196 / 280</span></p>
+                  <div class="meter"><span style="--v:70"></span></div>
+                </div>
+                <span class="sticker sticker--ok">Hay cupos</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="event-card" tabindex="0"
+                   data-id="3"
+                   data-title="Karaoke de Divas"
+                   data-date="2026-10-22"
+                   data-time="8:00 p.m. – 1:00 a.m."
+                   data-artist="La Tigresa del Micrófono"
+                   data-genre="Karaoke"
+                   data-cover="20000"
+                   data-capacity="160"
+                   data-reserved="88"
+                   data-vip-total="6"
+                   data-vip-free="4"
+                   data-dress-code="Brillo obligatorio"
+                   data-poster="linear-gradient(135deg, #19c3b5, #5b1a7a)"
+                   data-description="Canta tus baladas favoritas en tarima con luces y humo. Las tres mejores divas de la noche ganan cover gratis para el próximo evento.">
+            <div class="ticket">
+              <div class="poster" style="--poster:linear-gradient(135deg, #19c3b5, #5b1a7a)">
+                <span class="poster-genre">Karaoke</span>
+                <h3 class="poster-title">Karaoke de Divas</h3>
+                <span class="date-badge"><span><strong>22</strong>oct</span></span>
+              </div>
+              <div class="ticket-body">
+                <p class="ticket-row"><span>Jueves · 8:00 p.m.</span><strong>$20.000</strong></p>
+                <div class="capacity">
+                  <p class="capacity-label"><span>Aforo reservado</span><span class="num">88 / 160</span></p>
+                  <div class="meter"><span style="--v:55"></span></div>
+                </div>
+                <span class="sticker sticker--ok">Hay cupos</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="event-card" tabindex="0"
+                   data-id="4"
+                   data-title="Perreo Old School"
+                   data-date="2026-10-23"
+                   data-time="10:00 p.m. – 3:00 a.m."
+                   data-artist="DJ Kike Bling"
+                   data-genre="Reggaetón"
+                   data-cover="45000"
+                   data-capacity="280"
+                   data-reserved="252"
+                   data-vip-total="6"
+                   data-vip-free="0"
+                   data-dress-code="Urbano 2005"
+                   data-poster="linear-gradient(135deg, #2b0a3d, #ff3e9a)"
+                   data-description="Los clásicos del reggaetón de 2003 a 2010, sin interrupciones. Zona de fotos con decorado de época.">
+            <div class="ticket">
+              <div class="poster" style="--poster:linear-gradient(135deg, #2b0a3d, #ff3e9a)">
+                <span class="poster-genre">Reggaetón</span>
+                <h3 class="poster-title">Perreo Old School</h3>
+                <span class="date-badge"><span><strong>23</strong>oct</span></span>
+              </div>
+              <div class="ticket-body">
+                <p class="ticket-row"><span>Viernes · 10:00 p.m.</span><strong>$45.000</strong></p>
+                <div class="capacity">
+                  <p class="capacity-label"><span>Aforo reservado</span><span class="num">252 / 280</span></p>
+                  <div class="meter meter--full"><span style="--v:90"></span></div>
+                </div>
+                <span class="sticker sticker--soldout">VIP agotado</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="event-card" tabindex="0"
+                   data-id="5"
+                   data-title="Glam Rock Halloween"
+                   data-date="2026-10-31"
+                   data-time="9:00 p.m. – 3:00 a.m."
+                   data-artist="Banda Purpurina"
+                   data-genre="Glam rock"
+                   data-cover="60000"
+                   data-capacity="300"
+                   data-reserved="141"
+                   data-vip-total="6"
+                   data-vip-free="3"
+                   data-dress-code="Disfraz obligatorio"
+                   data-poster="linear-gradient(135deg, #ff7a00, #2b0a3d)"
+                   data-description="Fiesta de disfraces con banda en vivo y concurso del disfraz más brillante. Premio: mesa VIP para seis personas.">
+            <div class="ticket">
+              <div class="poster" style="--poster:linear-gradient(135deg, #ff7a00, #2b0a3d)">
+                <span class="poster-genre">Glam rock</span>
+                <h3 class="poster-title">Glam Rock Halloween</h3>
+                <span class="date-badge"><span><strong>31</strong>oct</span></span>
+              </div>
+              <div class="ticket-body">
+                <p class="ticket-row"><span>Sábado · 9:00 p.m.</span><strong>$60.000</strong></p>
+                <div class="capacity">
+                  <p class="capacity-label"><span>Aforo reservado</span><span class="num">141 / 300</span></p>
+                  <div class="meter"><span style="--v:47"></span></div>
+                </div>
+                <span class="sticker sticker--ok">Hay cupos</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="event-card" tabindex="0"
+                   data-id="6"
+                   data-title="Noche Vallenata"
+                   data-date="2026-11-07"
+                   data-time="8:00 p.m. – 2:00 a.m."
+                   data-artist="Los Acordeones de Oro"
+                   data-genre="Vallenato"
+                   data-cover="30000"
+                   data-capacity="280"
+                   data-reserved="84"
+                   data-vip-total="6"
+                   data-vip-free="5"
+                   data-dress-code="Sombrero vueltiao opcional"
+                   data-poster="linear-gradient(135deg, #ffc93c, #19c3b5)"
+                   data-description="Parranda vallenata con conjunto en vivo, piqueria de acordeones y picada típica incluida con cada mesa.">
+            <div class="ticket">
+              <div class="poster" style="--poster:linear-gradient(135deg, #ffc93c, #19c3b5)">
+                <span class="poster-genre">Vallenato</span>
+                <h3 class="poster-title">Noche Vallenata</h3>
+                <span class="date-badge"><span><strong>7</strong>nov</span></span>
+              </div>
+              <div class="ticket-body">
+                <p class="ticket-row"><span>Sábado · 8:00 p.m.</span><strong>$30.000</strong></p>
+                <div class="capacity">
+                  <p class="capacity-label"><span>Aforo reservado</span><span class="num">84 / 280</span></p>
+                  <div class="meter"><span style="--v:30"></span></div>
+                </div>
+                <span class="sticker sticker--ok">Hay cupos</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===================== GRÁFICOS ===================== -->
+      <aside class="side">
+        <div class="box">
+          <h3>Reservas por día</h3>
+          <p class="box-note">Semana del 14 al 18 de octubre</p>
+          <div class="col-chart" role="img" aria-label="Reservas por día: miércoles 12, jueves 26, viernes 58, sábado 71, domingo 9">
+            <div class="y-axis"><span>75</span><span>50</span><span>25</span><span>0</span></div>
+            <div class="plot">
+              <div class="bar" style="--v:16" title="Miércoles: 12"></div>
+              <div class="bar" style="--v:35" title="Jueves: 26"></div>
+              <div class="bar" style="--v:77" title="Viernes: 58"></div>
+              <div class="bar bar--top" style="--v:95" title="Sábado: 71"><span class="bar-value">71</span></div>
+              <div class="bar" style="--v:12" title="Domingo: 9"></div>
+            </div>
+            <div class="x-axis"><span>mié</span><span>jue</span><span>vie</span><span>sáb</span><span>dom</span></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Paquetes más pedidos</h3>
+          <p class="box-note">Reservas de octubre</p>
+          <ul class="hbars">
+            <li class="hbar"><span>Balde de cervezas</span><span class="hbar-value num">84</span><span class="hbar-track"><span class="hbar-fill hbar-fill--top" style="--v:100"></span></span></li>
+            <li class="hbar"><span>Botella + mesa VIP</span><span class="hbar-value num">52</span><span class="hbar-track"><span class="hbar-fill" style="--v:62"></span></span></li>
+            <li class="hbar"><span>Combo cumpleañero</span><span class="hbar-value num">41</span><span class="hbar-track"><span class="hbar-fill" style="--v:49"></span></span></li>
+            <li class="hbar"><span>Coctelería glitter</span><span class="hbar-value num">37</span><span class="hbar-track"><span class="hbar-fill" style="--v:44"></span></span></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+
+  <!-- ======================================================================
+       MODAL · DETALLE DEL EVENTO (datos de ejemplo: evento 1)
+       ====================================================================== -->
+  <div class="modal-overlay" id="event-detail">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="event-title">
+      <header class="modal-poster" id="event-poster" style="--poster:linear-gradient(135deg, #ff3e9a, #5b1a7a)">
+        <div>
+          <span class="poster-genre" id="event-genre">Disco / Funk</span>
+          <h2 id="event-title">Disco Inferno 70s</h2>
+        </div>
+        <div class="starburst" style="width:110px;height:110px;margin-right:56px;color:var(--ink)"><span><strong id="event-capacity-pct">82 %</strong>vendido</span></div>
+        <button type="button" class="icon-button" id="btn-close-event" aria-label="Cerrar detalle del evento"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="modal-scroll">
+        <dl class="event-facts">
+          <div class="fact"><dt>Fecha</dt><dd id="event-date">Viernes 16 de octubre</dd></div>
+          <div class="fact"><dt>Horario</dt><dd id="event-time">9:00 p.m. – 3:00 a.m.</dd></div>
+          <div class="fact"><dt>Artista</dt><dd id="event-artist">DJ Lola Brillos</dd></div>
+          <div class="fact"><dt>Cover</dt><dd class="num" id="event-cover">$40.000</dd></div>
+        </dl>
+
+        <div class="modal-section">
+          <h3>De qué se trata</h3>
+          <p class="description" id="event-description">Una noche de bola disco, pista iluminada y clásicos de los setenta. Concurso de baile a la medianoche con premio de botella de champaña.</p>
+          <p style="margin-top:12px"><strong>Código de vestuario:</strong> <span id="event-dress-code">Lentejuelas y bota campana</span></p>
+          <div class="capacity">
+            <p class="capacity-label"><span>Aforo reservado</span><span class="num" id="event-capacity-text">230 de 280 personas</span></p>
+            <div class="meter meter--hot"><span id="event-capacity-bar" style="--v:82"></span></div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h3>Mapa de mesas</h3>
+          <div class="zones">
+            <div class="zone">
+              <h4>VIP <span class="num">Libres: 1/6</span></h4>
+              <div class="spots" id="zone-vip"><span class="spot is-reserved" data-spot="V1" title="V1 · reservada">V1</span><span class="spot is-reserved" data-spot="V2" title="V2 · reservada">V2</span><span class="spot" data-spot="V3" title="V3 · libre">V3</span><span class="spot is-reserved" data-spot="V4" title="V4 · reservada">V4</span><span class="spot is-reserved" data-spot="V5" title="V5 · reservada">V5</span><span class="spot is-reserved" data-spot="V6" title="V6 · reservada">V6</span></div>
+            </div>
+            <div class="zone">
+              <h4>Pista <span class="num">Libres: 2/10</span></h4>
+              <div class="spots" id="zone-dance"><span class="spot is-reserved" data-spot="P1" title="P1 · reservada">P1</span><span class="spot is-reserved" data-spot="P2" title="P2 · reservada">P2</span><span class="spot" data-spot="P3" title="P3 · libre">P3</span><span class="spot is-reserved" data-spot="P4" title="P4 · reservada">P4</span><span class="spot is-reserved" data-spot="P5" title="P5 · reservada">P5</span><span class="spot is-reserved" data-spot="P6" title="P6 · reservada">P6</span><span class="spot is-reserved" data-spot="P7" title="P7 · reservada">P7</span><span class="spot is-reserved" data-spot="P8" title="P8 · reservada">P8</span><span class="spot" data-spot="P9" title="P9 · libre">P9</span><span class="spot is-reserved" data-spot="P10" title="P10 · reservada">P10</span></div>
+            </div>
+            <div class="zone">
+              <h4>Balcón <span class="num">Libres: 2/8</span></h4>
+              <div class="spots" id="zone-balcony"><span class="spot is-reserved" data-spot="B1" title="B1 · reservada">B1</span><span class="spot is-reserved" data-spot="B2" title="B2 · reservada">B2</span><span class="spot is-reserved" data-spot="B3" title="B3 · reservada">B3</span><span class="spot" data-spot="B4" title="B4 · libre">B4</span><span class="spot is-reserved" data-spot="B5" title="B5 · reservada">B5</span><span class="spot is-reserved" data-spot="B6" title="B6 · reservada">B6</span><span class="spot is-reserved" data-spot="B7" title="B7 · reservada">B7</span><span class="spot" data-spot="B8" title="B8 · libre">B8</span></div>
+            </div>
+          </div>
+          <p class="spot-legend"><span><i></i>Libre</span><span><i class="reserved"></i>Reservada</span></p>
+        </div>
+
+        <div class="modal-section">
+          <h3>Reservas del evento</h3>
+          <table class="table">
+            <thead><tr><th>Cliente</th><th>Personas</th><th>Zona</th><th>Mesa</th><th>Paquete</th><th>Estado</th></tr></thead>
+            <tbody id="event-reservations">
+              <tr><td><strong>Mariana López</strong></td><td class="num">6</td><td>VIP</td><td>V2</td><td>Botella + mesa VIP</td><td><span class="pill pill--confirmed">Confirmada</span></td></tr>
+              <tr><td><strong>Daniela Ruiz</strong></td><td class="num">10</td><td>Pista</td><td>P4</td><td>Combo cumpleañero</td><td><span class="pill pill--birthday">Cumpleaños</span></td></tr>
+              <tr><td><strong>Andrés Gómez</strong></td><td class="num">4</td><td>Balcón</td><td>B1</td><td>Balde de cervezas</td><td><span class="pill pill--confirmed">Confirmada</span></td></tr>
+              <tr><td><strong>Luisa Fernanda Ríos</strong></td><td class="num">2</td><td>Pista</td><td>P7</td><td>Sin paquete</td><td><span class="pill pill--pending">Pendiente</span></td></tr>
+              <tr><td><strong>Camilo Torres</strong></td><td class="num">8</td><td>VIP</td><td>V5</td><td>Botella + mesa VIP</td><td><span class="pill pill--confirmed">Confirmada</span></td></tr>
+              <tr><td><strong>Sara Montoya</strong></td><td class="num">5</td><td>Balcón</td><td>B6</td><td>Coctelería glitter</td><td><span class="pill pill--pending">Pendiente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="modal-foot">
+        <button type="button" class="btn btn--turquoise" id="btn-reserve-event"><svg class="icon"><use href="#i-star"/></svg>Reservar para este evento</button>
+      </footer>
+    </section>
+  </div>
+
+
+  <!-- ======================================================================
+       MODAL · NUEVA RESERVACIÓN
+       ====================================================================== -->
+  <div class="modal-overlay" id="modal-new-reservation">
+    <section class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="reservation-title">
+      <header class="modal-head leopard">
+        <div style="padding:8px 16px;border:3px solid var(--ink);border-radius:16px;background:var(--cream)">
+          <h2 id="reservation-title">Nueva reservación</h2>
+          <p>Aparta la mesa y el cover para el evento.</p>
+        </div>
+        <button type="button" class="icon-button" id="btn-close-reservation" aria-label="Cerrar formulario"><svg class="icon"><use href="#i-x"/></svg></button>
+      </header>
+
+      <form id="new-reservation-form" style="display:contents">
+        <div class="form-body">
+          <div class="form-grid">
+            <div class="field field--full">
+              <label for="res-name">Nombre de quien reserva <span class="req">*</span></label>
+              <input class="input" type="text" id="res-name" name="name" placeholder="Ej. Daniela Ruiz" required>
+            </div>
+            <div class="field">
+              <label for="res-phone">Celular <span class="req">*</span></label>
+              <input class="input" type="tel" id="res-phone" name="phone" placeholder="+57 300 000 0000" required>
+            </div>
+            <div class="field">
+              <label for="res-birth">Fecha de nacimiento <span class="req">*</span></label>
+              <input class="input" type="date" id="res-birth" name="birthDate" required>
+            </div>
+            <div class="field field--full">
+              <label for="res-email">Correo electrónico</label>
+              <input class="input" type="email" id="res-email" name="email" placeholder="nombre@correo.com">
+            </div>
+            <div class="field field--full">
+              <label for="res-event">Evento <span class="req">*</span></label>
+              <select class="select" id="res-event" name="event" required>
+                <option value="1" selected>Disco Inferno 70s · 16 oct · $40.000</option>
+                <option value="2">Salsa Brava · 17 oct · $35.000</option>
+                <option value="3">Karaoke de Divas · 22 oct · $20.000</option>
+                <option value="4">Perreo Old School · 23 oct · $45.000</option>
+                <option value="5">Glam Rock Halloween · 31 oct · $60.000</option>
+                <option value="6">Noche Vallenata · 7 nov · $30.000</option>
+              </select>
+            </div>
+            <div class="field field--full">
+              <span class="label" id="res-zone-label">Zona</span>
+              <div class="chip-options" role="radiogroup" aria-labelledby="res-zone-label">
+                <label class="chip-option"><input type="radio" name="zone" value="Pista" checked><span>Pista</span></label>
+                <label class="chip-option"><input type="radio" name="zone" value="Balcón"><span>Balcón</span></label>
+                <label class="chip-option"><input type="radio" name="zone" value="VIP"><span>VIP ✦</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="res-people">Número de personas <span class="req">*</span></label>
+              <input class="input" type="number" id="res-people" name="people" min="1" max="12" value="4" required>
+            </div>
+            <div class="field">
+              <label for="res-package">Paquete</label>
+              <select class="select" id="res-package" name="package">
+                <option value="none" data-price="0">Sin paquete</option>
+                <option value="beer" selected data-price="120000">Balde de cervezas · $120.000</option>
+                <option value="cocktails" data-price="140000">Coctelería glitter · $140.000</option>
+                <option value="birthday" data-price="220000">Combo cumpleañero · $220.000</option>
+                <option value="vip" data-price="480000">Botella + mesa VIP · $480.000</option>
+              </select>
+            </div>
+            <div class="field field--full">
+              <label class="check"><input type="checkbox" id="res-birthday" name="birthday"> ¡Es un cumpleaños! (incluye torta y canción)</label>
+            </div>
+            <div class="field">
+              <label for="res-birthday-name">Nombre del cumpleañero</label>
+              <input class="input" type="text" id="res-birthday-name" name="birthdayName" placeholder="Ej. Sara">
+            </div>
+            <div class="field">
+              <label for="res-arrival">Hora de llegada</label>
+              <input class="input" type="time" id="res-arrival" name="arrival" value="21:30">
+            </div>
+            <div class="field field--full">
+              <label for="res-notes">Notas especiales</label>
+              <textarea class="textarea" id="res-notes" name="notes" placeholder="Alergias, decoración, peticiones al DJ…"></textarea>
+            </div>
+          </div>
+
+          <aside class="receipt" aria-labelledby="receipt-title">
+            <h3 id="receipt-title">Tu cuenta</h3>
+            <dl>
+              <div><dt>Evento</dt><dd id="receipt-event">Disco Inferno 70s</dd></div>
+              <div><dt>Cover (<span id="receipt-people">4</span> × $40.000)</dt><dd class="num" id="receipt-cover">$160.000</dd></div>
+              <div><dt>Paquete</dt><dd class="num" id="receipt-package">$120.000</dd></div>
+              <div class="total"><dt>Total</dt><dd class="num" id="receipt-total">$280.000</dd></div>
+            </dl>
+            <p class="receipt-note">Valores de ejemplo: calcúlalos con JavaScript según el evento, las personas y el paquete.</p>
+          </aside>
+        </div>
+
+        <footer class="modal-foot">
+          <button type="button" class="btn" id="btn-cancel-reservation">Cancelar</button>
+          <button type="submit" class="btn btn--gold" id="btn-save-reservation">Confirmar reservación</button>
+        </footer>
+      </form>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
