@@ -9,16 +9,17 @@
 <body>
     <header class="encabezado">
         <div class="encabezado__logo">Mi Sitio</div>
-        <nav class="encabezado__navegacion">
+        <nav id="navegacion" class="encabezado__navegacion">
             <a href="#" class="encabezado__enlace">Inicio</a>
             <a href="#" class="encabezado__enlace">Servicios</a>
             <a href="#" class="encabezado__enlace">Contacto</a>
-            <button class="encabezado__boton">Registrarse</button>
+            <button id="btn-registro" class="encabezado__boton">Registrarse</button>
         </nav>
+        <button id="btn-exit" class="encabezado__boton">Salir</button>
     </header>
     <main>
         <!-- Panel Bento Dashboard -->
-        <section class="panel-bento">
+        <section id="dashboard" class="panel-bento">
             <div class="contenedor-bento">
                 <h2 class="titulo-panel">Panel de Control</h2>
 
@@ -120,7 +121,7 @@
             </div>
         </section>
 
-        <section class="seccion-registro">
+        <section id="formulario-registro" class="seccion-registro">
             <div class="contenedor-formulario">
                 <h2 class="titulo-formulario">Registro de Usuario</h2>
                 <form class="formulario-registro">
@@ -161,5 +162,6 @@
         </section>
     </main>
     <footer></footer>
+    <script src="js/control.js"></script>
 </body>
 </html>
