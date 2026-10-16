@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground · Eventos del DOM</title>
+
+  <!-- Aplica el tema guardado ANTES de pintar para evitar el destello claro/oscuro -->
+  <script>
+    try {
+      var savedTheme = localStorage.getItem("eventosdom.theme");
+      document.documentElement.dataset.theme =
+        savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    } catch (error) {
+      document.documentElement.dataset.theme = "light";
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-mode="completo">
+
+  <!--
+    PLAYGROUND · EVENTOS DEL DOM (Material Design 3)
+    ------------------------------------------------------------------
+    Cada tarjeta enseña un evento: explicación, zona de prueba, contador,
+    inspector del último evento y el código. A la derecha está el
+    registro global (lo más reciente arriba).
+
+    Dos versiones del JavaScript (al final del archivo, deja activa UNA y
+    comenta la otra):
+      · js/control.js         → versión COMPLETA, todo funciona (docente).
+      · js/control-retos.js   → listeners vacíos con retos (estudiantes).
+    En ambas, js/base.js se carga primero: trae el registro, los contadores,
+    el inspector y el tema. No hay que modificarlo.
+
+    Secciones:
+      Navegación (9): click, submit, hashchange, popstate, DOMContentLoaded,
+                      load, beforeunload, scroll, resize.
+      Datos (14):     input, change, focus/blur, keydown/keyup, submit,
+                      invalid, dragstart/dragover/drop, paste, abort,
+                      error, load, visibilitychange.
+  -->
+
+  <noscript>Este playground necesita JavaScript para funcionar.</noscript>
+
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><path d="M12 19h8"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+    <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><path d="M21 12H9"/></symbol>
+  </svg>
+
+  <div class="app">
+
+    <!-- ===================== RIEL DE NAVEGACIÓN ===================== -->
+    <nav class="rail" aria-label="Secciones del playground">
+      <div class="rail__logo" aria-hidden="true"><svg class="icon"><use href="#i-code"/></svg></div>
+      <button type="button" class="rail-item is-active" data-panel-target="nav" aria-current="page">
+        <span class="rail-indicator"><svg class="icon"><use href="#i-compass"/></svg></span>
+        Navegación
+      </button>
+      <button type="button" class="rail-item" data-panel-target="data">
+        <span class="rail-indicator"><svg class="icon"><use href="#i-database"/></svg></span>
+        Datos
+      </button>
+    </nav>
+
+    <div class="main">
+
+      <!-- ===================== BARRA SUPERIOR ===================== -->
+      <header class="top-app-bar">
+        <h1 class="top-app-bar__title">Playground de eventos del DOM</h1>
+        <span class="mode-badge">Modo retos</span>
+        <button type="button" class="icon-button" id="btn-theme" aria-label="Cambiar entre tema claro y oscuro" title="Cambiar tema">
+          <svg class="icon icon--when-light"><use href="#i-moon"/></svg>
+          <svg class="icon icon--when-dark"><use href="#i-sun"/></svg>
+        </button>
+        <button type="button" class="icon-button top-app-bar__log" id="btn-log-open" aria-label="Abrir el registro de eventos" title="Registro de eventos">
+          <svg class="icon"><use href="#i-terminal"/></svg>
+          <span class="badge" id="log-badge" hidden>0</span>
+        </button>
+      </header>
+
+      <main>
+
+        <!-- =====================================================================
+             SECCIÓN 1 · EVENTOS DE NAVEGACIÓN
+             ===================================================================== -->
+        <section class="panel" id="panel-nav" data-panel="nav" aria-labelledby="title-nav">
+          <header class="panel-head">
+            <p class="panel-head__eyebrow">Sección 1 de 2</p>
+            <h2 class="panel-head__title" id="title-nav">Eventos de navegación</h2>
+            <p class="panel-head__text">Describen cómo el usuario y el navegador se mueven: clics, envíos, historial, ciclo de vida de la página, desplazamiento y tamaño de la ventana.</p>
+            <ol class="howto">
+              <li>Interactúa con la zona de prueba.</li>
+              <li>Mira el contador y el inspector.</li>
+              <li>Revisa el orden en el registro.</li>
+            </ol>
+            <nav class="jump" aria-label="Ir a un evento de navegación">
+              <button type="button" class="chip" data-jump="card-click"><code>click</code></button>
+              <button type="button" class="chip" data-jump="card-submit-nav"><code>submit</code></button>
+              <button type="button" class="chip" data-jump="card-hashchange"><code>hashchange</code></button>
+              <button type="button" class="chip" data-jump="card-popstate"><code>popstate</code></button>
+              <button type="button" class="chip" data-jump="card-domcontentloaded"><code>DOMContentLoaded</code></button>
+              <button type="button" class="chip" data-jump="card-load-window"><code>load</code></button>
+              <button type="button" class="chip" data-jump="card-beforeunload"><code>beforeunload</code></button>
+              <button type="button" class="chip" data-jump="card-scroll"><code>scroll</code></button>
+              <button type="button" class="chip" data-jump="card-resize"><code>resize</code></button>
+            </nav>
+          </header>
+
+          <div class="cards">
+
+            <!-- ---------- 1 · click ---------- -->
+            <article class="event-card" id="card-click" data-card="click">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>click</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="click"><code>click</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">PointerEvent</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+              </div>
+              <p class="event-card__about">Se dispara al presionar y soltar el botón principal sobre un elemento, o al activar un botón con Enter o Espacio. Como <strong>burbujea</strong>, un solo listener en el contenedor atiende a todos sus hijos (<em>delegación de eventos</em>): <code>target</code> es quien recibió el clic y <code>currentTarget</code> quien tiene el listener.</p>
+
+              <div class="demo" id="click-demo">
+                <div class="row">
+                  <button type="button" class="btn btn--filled btn--sm" data-action="guardar">Guardar</button>
+                  <button type="button" class="btn btn--tonal btn--sm" data-action="compartir">Compartir</button>
+                  <button type="button" class="btn btn--outlined btn--sm" data-action="eliminar">Eliminar</button>
+                </div>
+                <div class="pad" id="click-pad">Haz clic en cualquier parte del recuadro</div>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>const demo = document.getElementById("click-demo");
+
+// Un solo listener atiende a todos los hijos (delegación)
+demo.addEventListener("click", (event) =&gt; {
+  console.log(event.target);        // el elemento exacto donde se hizo clic
+  console.log(event.currentTarget); // el elemento que tiene el listener
+  console.log(event.clientX, event.clientY, event.detail);
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 2 · submit (navegación) ---------- -->
+            <article class="event-card" id="card-submit-nav" data-card="submit-nav">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>submit</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="submit"><code>submit</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">SubmitEvent</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+                <span class="chip chip--static">Objetivo: &lt;form&gt;</span>
+              </div>
+              <p class="event-card__about">Se dispara en el <code>&lt;form&gt;</code> al enviarlo (botón submit o Enter) y solo si pasó la validación. Por defecto el navegador <strong>navega</strong> a la URL de <code>action</code> y recarga la página; <code>preventDefault()</code> lo evita para que lo manejes con JavaScript.</p>
+
+              <form class="demo stack" id="nav-form" action="" method="get">
+                <div class="field">
+                  <input class="field__input" id="nav-q" name="q" type="search" placeholder=" " autocomplete="off">
+                  <label class="field__label" for="nav-q">Buscar</label>
+                  <p class="field__support">Escribe algo y presiona Enter</p>
+                </div>
+                <div class="row row--between">
+                  <label class="switch">
+                    <input type="checkbox" id="nav-prevent" checked>
+                    <span class="switch__track"><span class="switch__thumb"></span></span>
+                    <span><code>preventDefault()</code></span>
+                  </label>
+                  <button type="submit" class="btn btn--filled btn--sm">Enviar</button>
+                </div>
+                <p class="note" id="nav-form-result">Con el interruptor apagado la página se recarga y verás <code>?q=…</code> en la URL. El registro se conserva.</p>
+              </form>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>const form = document.getElementById("nav-form");
+
+form.addEventListener("submit", (event) =&gt; {
+  event.preventDefault();                 // sin esto, la página se recarga
+  const q = new FormData(form).get("q");
+  console.log("Buscando:", q);
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 3 · hashchange ---------- -->
+            <article class="event-card" id="card-hashchange" data-card="hashchange">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>hashchange</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="hashchange"><code>hashchange</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">HashChangeEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: no</span>
+                <span class="chip chip--static">Objetivo: window</span>
+              </div>
+              <p class="event-card__about">Se dispara en <code>window</code> cuando cambia el <code>#fragmento</code> de la URL: por un enlace <code>&lt;a href="#…"&gt;</code>, por <code>location.hash</code> o por los botones atrás/adelante. Es la base de los routers más simples de una SPA. Trae <code>oldURL</code> y <code>newURL</code>.</p>
+              <p class="tip"><svg class="icon icon-sm"><use href="#i-info"/></svg><span>Navegar a un <code>#fragmento</code> también dispara <code>popstate</code>, justo antes de <code>hashchange</code>. Míralo en el registro y en la tarjeta de popstate.</span></p>
+
+              <div class="demo stack">
+                <div class="row">
+                  <a class="btn btn--tonal btn--sm hash-link" href="#/inicio">#/inicio</a>
+                  <a class="btn btn--tonal btn--sm hash-link" href="#/perfil">#/perfil</a>
+                  <a class="btn btn--tonal btn--sm hash-link" href="#/ajustes">#/ajustes</a>
+                  <button type="button" class="btn btn--outlined btn--sm" id="btn-random-hash">location.hash = …</button>
+                </div>
+                <div class="view" id="hash-view" aria-live="polite">
+                  <h4 class="view__title">Vista</h4>
+                  <p class="view__text">Elige un enlace.</p>
+                </div>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>window.addEventListener("hashchange", (event) =&gt; {
+  console.log("Antes:", event.oldURL);
+  console.log("Ahora:", event.newURL);
+  showView(location.hash);            // "#/perfil" → vista de perfil
+});
+
+// También se dispara al asignar el hash por código
+location.hash = "#/ajustes";</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 4 · popstate ---------- -->
+            <article class="event-card" id="card-popstate" data-card="popstate">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>popstate</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="popstate"><code>popstate</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">PopStateEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: no</span>
+                <span class="chip chip--static">Objetivo: window</span>
+              </div>
+              <p class="event-card__about">Se dispara en <code>window</code> cuando el usuario recorre el historial (atrás/adelante, <code>history.back()</code>, <code>history.go()</code>) entre entradas del mismo documento. Trae <code>event.state</code>, el objeto guardado con <code>pushState</code>.</p>
+              <p class="tip"><svg class="icon icon-sm"><use href="#i-info"/></svg><span><code>pushState()</code> agrega una entrada <strong>sin recargar y sin disparar popstate</strong>: el evento llega al volver a ella.</span></p>
+
+              <div class="demo stack">
+                <ol class="stepper" id="pop-stepper" aria-label="Pasos del asistente">
+                  <li class="stepper__step">1</li>
+                  <li class="stepper__step">2</li>
+                  <li class="stepper__step">3</li>
+                  <li class="stepper__step">4</li>
+                </ol>
+                <p class="view__text"><strong id="pop-label">Paso 1 de 4</strong> · URL: <code id="pop-url">—</code></p>
+                <div class="row">
+                  <button type="button" class="btn btn--filled btn--sm" id="btn-push">pushState → siguiente</button>
+                  <button type="button" class="btn btn--tonal btn--sm" id="btn-back"><svg class="icon"><use href="#i-arrow-left"/></svg>back()</button>
+                  <button type="button" class="btn btn--tonal btn--sm" id="btn-forward">forward()<svg class="icon"><use href="#i-arrow-right"/></svg></button>
+                </div>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>// Agregar una entrada al historial: NO dispara popstate
+history.pushState({ step: 2 }, "", "?step=2");
+
+// Se dispara al volver o avanzar en el historial
+window.addEventListener("popstate", (event) =&gt; {
+  const step = event.state?.step ?? 1;   // state es null en la entrada inicial
+  showStep(step);
+});
+
+history.back();     // retrocede una entrada
+history.forward();  // avanza una entrada</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 5 · DOMContentLoaded ---------- -->
+            <article class="event-card" id="card-domcontentloaded" data-card="domcontentloaded">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>DOMContentLoaded</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="DOMContentLoaded"><code>DOMContentLoaded</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: no</span>
+                <span class="chip chip--static">Objetivo: document</span>
+              </div>
+              <p class="event-card__about">Se dispara en <code>document</code> cuando el HTML ya se leyó y el árbol DOM está construido, <strong>sin esperar</strong> hojas de estilo, imágenes ni subframes. Es el momento seguro para usar <code>getElementById</code> o <code>querySelector</code>. Si el script va al final del <code>&lt;body&gt;</code> o usa <code>defer</code>, no lo necesitas.</p>
+              <p class="tip"><svg class="icon icon-sm"><use href="#i-info"/></svg><span>Ocurre una sola vez, al cargar: <strong>recarga la página</strong> para verlo de nuevo en el registro.</span></p>
+
+              <div class="demo stack">
+                <dl class="facts">
+                  <div class="facts__row"><dt>document.readyState</dt><dd id="dcl-state">—</dd></div>
+                  <div class="facts__row"><dt>Tipo de navegación</dt><dd id="dcl-nav">—</dd></div>
+                </dl>
+                <div class="row">
+                  <button type="button" class="btn btn--tonal btn--sm" id="btn-late-dcl">Escuchar ahora (tarde)</button>
+                  <button type="button" class="btn btn--outlined btn--sm" data-action="reload"><svg class="icon"><use href="#i-refresh"/></svg>Recargar página</button>
+                </div>
+                <p class="note" id="dcl-late-status">Registra el listener ahora y comprueba que ya no llega.</p>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>// Patrón seguro: funciona aunque el script cargue antes o después
+function init() {
+  console.log("DOM listo:", document.readyState);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();   // el evento ya ocurrió: ejecutar de inmediato
+}</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 6 · load (window) ---------- -->
+            <article class="event-card" id="card-load-window" data-card="load-window">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>load</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="load"><code>load</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: no</span>
+                <span class="chip chip--static">Objetivo: window</span>
+              </div>
+              <p class="event-card__about">Se dispara en <code>window</code> cuando <strong>todo</strong> terminó de cargar: HTML, estilos, fuentes, imágenes y subframes. Llega <strong>después</strong> de <code>DOMContentLoaded</code>. Úsalo para medidas finales (tamaño de imágenes) o para ocultar un indicador de carga.</p>
+
+              <div class="demo stack">
+                <ul class="timeline" id="load-timeline">
+                  <li class="timeline__row" data-mark="script">
+                    <span class="timeline__name">Script ejecutado</span><span class="timeline__time num">— ms</span>
+                    <span class="progress"><span class="progress__bar"></span></span>
+                  </li>
+                  <li class="timeline__row" data-mark="dcl">
+                    <span class="timeline__name">DOMContentLoaded</span><span class="timeline__time num">— ms</span>
+                    <span class="progress"><span class="progress__bar"></span></span>
+                  </li>
+                  <li class="timeline__row" data-mark="load">
+                    <span class="timeline__name">load</span><span class="timeline__time num">— ms</span>
+                    <span class="progress"><span class="progress__bar"></span></span>
+                  </li>
+                </ul>
+                <button type="button" class="btn btn--outlined btn--sm" data-action="reload"><svg class="icon"><use href="#i-refresh"/></svg>Recargar página</button>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>window.addEventListener("load", () =&gt; {
+  // Aquí las imágenes y estilos ya están disponibles
+  const ms = Math.round(performance.now());
+  console.log(`Página completa en ${ms} ms`);
+  hideSpinner();
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 7 · beforeunload ---------- -->
+            <article class="event-card" id="card-beforeunload" data-card="beforeunload">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>beforeunload</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="beforeunload"><code>beforeunload</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">BeforeUnloadEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+                <span class="chip chip--static">Objetivo: window</span>
+              </div>
+              <p class="event-card__about">Se dispara en <code>window</code> justo antes de cerrar o recargar la pestaña, o de salir hacia otra página. Si el listener llama a <code>preventDefault()</code>, el navegador pide confirmación. Úsalo solo para proteger <strong>cambios sin guardar</strong>.</p>
+              <p class="tip"><svg class="icon icon-sm"><use href="#i-info"/></svg><span>El texto del aviso es fijo (los navegadores ignoran el personalizado) y solo aparece si hubo interacción previa con la página.</span></p>
+
+              <div class="demo stack">
+                <label class="switch">
+                  <input type="checkbox" id="unload-toggle">
+                  <span class="switch__track"><span class="switch__thumb"></span></span>
+                  <span>Proteger la salida</span>
+                </label>
+                <p class="note" id="unload-status">Desarmado: no hay listener registrado.</p>
+                <div class="row">
+                  <button type="button" class="btn btn--tonal btn--sm" data-action="reload"><svg class="icon"><use href="#i-refresh"/></svg>Recargar página</button>
+                  <a class="btn btn--outlined btn--sm" id="unload-link" href="https://developer.mozilla.org/es/docs/Web/API/Window/beforeunload_event"><svg class="icon"><use href="#i-log-out"/></svg>Salir a MDN</a>
+                </div>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>function warnBeforeLeaving(event) {
+  event.preventDefault();   // pide confirmación al navegador
+  event.returnValue = "";   // algunos navegadores lo exigen
+}
+
+toggle.addEventListener("change", () =&gt; {
+  if (toggle.checked) {
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+  } else {
+    window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 8 · scroll ---------- -->
+            <article class="event-card" id="card-scroll" data-card="scroll">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>scroll</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="scroll"><code>scroll</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event</span>
+                <span class="chip chip--static">Burbujea: no en elementos</span>
+                <span class="chip chip--static">Cancelable: no</span>
+              </div>
+              <p class="event-card__about">Se dispara cada vez que cambia el desplazamiento de un elemento con <code>overflow</code> o de la página. Ocurre decenas de veces por segundo: evita trabajo pesado en el listener y usa <code>{ passive: true }</code>. En la página completa el <code>target</code> es <code>document</code> y el evento llega a <code>window</code>.</p>
+
+              <div class="demo stack">
+                <div class="scroll-box" id="scroll-box" tabindex="0" aria-label="Caja con desplazamiento">
+                  <ol class="scroll-box__list">
+                    <li>Fila 1 · desplázame</li>
+                    <li>Fila 2</li>
+                    <li>Fila 3</li>
+                    <li>Fila 4</li>
+                    <li>Fila 5</li>
+                    <li>Fila 6</li>
+                    <li>Fila 7</li>
+                    <li>Fila 8</li>
+                    <li>Fila 9</li>
+                    <li>Fila 10</li>
+                    <li>Fila 11</li>
+                    <li>Fila 12 · fin</li>
+                  </ol>
+                </div>
+                <div class="progress" role="presentation"><span class="progress__bar" id="scroll-bar"></span></div>
+                <p class="note"><span id="scroll-label">Caja: 0 %</span> · <span id="scroll-page-label">Página: 0 %</span> — desplaza la caja <em>y</em> la página.</p>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>box.addEventListener("scroll", () =&gt; {
+  const max = box.scrollHeight - box.clientHeight;
+  const percent = Math.round((box.scrollTop / max) * 100);
+  bar.style.setProperty("--v", percent);
+}, { passive: true });
+
+window.addEventListener("scroll", () =&gt; {
+  console.log("Página:", Math.round(window.scrollY));
+}, { passive: true });</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 9 · resize ---------- -->
+            <article class="event-card" id="card-resize" data-card="resize">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>resize</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="resize"><code>resize</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">UIEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: no</span>
+                <span class="chip chip--static">Objetivo: window</span>
+              </div>
+              <p class="event-card__about">Se dispara en <code>window</code> cuando cambia el tamaño del viewport: arrastrar el borde de la ventana, girar el dispositivo o abrir las DevTools. Solo ocurre en <code>window</code>; para observar el tamaño de un <strong>elemento</strong> usa <code>ResizeObserver</code>.</p>
+
+              <div class="demo stack">
+                <p class="big num" id="resize-size">— × — px</p>
+                <div class="row">
+                  <span class="chip chip--tonal chip--static" id="resize-class">—</span>
+                  <span class="note" id="resize-dpr"></span>
+                </div>
+                <div class="ruler">
+                  <div class="progress" role="presentation"><span class="progress__bar" id="resize-ruler"></span></div>
+                  <span class="ruler__tick" style="--at: 31.25"><i>600</i></span>
+                  <span class="ruler__tick" style="--at: 43.75"><i>840</i></span>
+                  <span class="ruler__tick" style="--at: 62.5"><i>1200</i></span>
+                  <span class="ruler__tick" style="--at: 83.33"><i>1600</i></span>
+                </div>
+                <p class="note">Cambia el tamaño de la ventana. Marcas: clases de ventana de Material 3.</p>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>window.addEventListener("resize", () =&gt; {
+  const { innerWidth: width, innerHeight: height } = window;
+  output.textContent = `${width} × ${height} px`;
+
+  const sizeClass = width &lt; 600 ? "Compact" : width &lt; 840 ? "Medium" : "Expanded";
+  chip.textContent = sizeClass;
+});</code></pre>
+              </details>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- =====================================================================
+             SECCIÓN 2 · EVENTOS DE MANEJO DE DATOS
+             ===================================================================== -->
+        <section class="panel" id="panel-data" data-panel="data" aria-labelledby="title-data" hidden>
+          <header class="panel-head">
+            <p class="panel-head__eyebrow">Sección 2 de 2</p>
+            <h2 class="panel-head__title" id="title-data">Eventos de manejo de datos</h2>
+            <p class="panel-head__text">Describen cómo entran, cambian y se validan los datos: escribir, elegir, enfocar, pulsar teclas, enviar formularios, arrastrar, pegar y cargar recursos.</p>
+            <ol class="howto">
+              <li>Interactúa con la zona de prueba.</li>
+              <li>Mira el contador y el inspector.</li>
+              <li>Revisa el orden en el registro.</li>
+            </ol>
+            <nav class="jump" aria-label="Ir a un evento de datos">
+              <button type="button" class="chip" data-jump="card-input"><code>input</code></button>
+              <button type="button" class="chip" data-jump="card-change"><code>change</code></button>
+              <button type="button" class="chip" data-jump="card-focus"><code>focus / blur</code></button>
+              <button type="button" class="chip" data-jump="card-keyboard"><code>keydown / keyup</code></button>
+              <button type="button" class="chip" data-jump="card-submit-data"><code>submit</code></button>
+              <button type="button" class="chip" data-jump="card-invalid"><code>invalid</code></button>
+              <button type="button" class="chip" data-jump="card-drag"><code>dragstart / dragover / drop</code></button>
+              <button type="button" class="chip" data-jump="card-paste"><code>paste</code></button>
+              <button type="button" class="chip" data-jump="card-abort"><code>abort</code></button>
+              <button type="button" class="chip" data-jump="card-error"><code>error</code></button>
+              <button type="button" class="chip" data-jump="card-load-resource"><code>load</code></button>
+              <button type="button" class="chip" data-jump="card-visibility"><code>visibilitychange</code></button>
+            </nav>
+          </header>
+
+          <div class="cards">
+
+            <!-- ---------- 10 · input ---------- -->
+            <article class="event-card" id="card-input" data-card="input">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>input</code></h3>
+                <div class="event-card__counters">
+                  <span class="counter" data-type="input"><code>input</code><b>0</b></span>
+                  <span class="counter" data-type="change"><code>change</code><b>0</b></span>
+                </div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">InputEvent</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: no</span>
+              </div>
+              <p class="event-card__about">Se dispara <strong>cada vez</strong> que cambia el valor de un campo mientras el usuario escribe, pega, borra o mueve un control deslizante. Úsalo para contadores, validación y vistas previas en vivo. Compáralo con <code>change</code>: espera a que el usuario confirme (Enter o salir del campo).</p>
+
+              <div class="demo stack">
+                <div class="field">
+                  <input class="field__input" id="input-text" type="text" maxlength="60" placeholder=" " autocomplete="off">
+                  <label class="field__label" for="input-text">Mensaje</label>
+                  <p class="field__support"><output id="input-counter">0 / 60</output> · prueba escribir y luego salir del campo</p>
+                </div>
+                <p class="note">Eco en vivo: <strong id="input-echo">…</strong></p>
+                <label class="range">
+                  <span>Volumen</span>
+                  <input type="range" id="input-range" min="0" max="100" value="40">
+                  <output id="input-range-out" class="num">40</output>
+                </label>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>field.addEventListener("input", (event) =&gt; {
+  counter.textContent = `${field.value.length} / ${field.maxLength}`;
+  echo.textContent = field.value;
+  console.log(event.inputType, event.data);   // "insertText", "a"
+});
+
+// change solo llega al confirmar (Enter o perder el foco)
+field.addEventListener("change", () =&gt; {
+  console.log("Valor confirmado:", field.value);
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 11 · change ---------- -->
+            <article class="event-card" id="card-change" data-card="change">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>change</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="change"><code>change</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: no</span>
+              </div>
+              <p class="event-card__about">Se dispara cuando el usuario <strong>confirma</strong> un valor nuevo: al elegir una opción de un <code>&lt;select&gt;</code>, marcar un checkbox o radio, o salir de un campo de texto cuyo contenido cambió. Como burbujea, un solo listener en el <code>&lt;form&gt;</code> atiende a todos los controles.</p>
+
+              <form class="demo stack" id="change-form">
+                <div class="field field--select">
+                  <select class="field__input" id="change-plan" name="plan">
+                    <option value="Básico">Básico</option>
+                    <option value="Pro" selected>Pro</option>
+                    <option value="Empresa">Empresa</option>
+                  </select>
+                  <label class="field__label" for="change-plan">Plan</label>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="change-news" name="news">
+                  <span class="switch__track"><span class="switch__thumb"></span></span>
+                  <span>Recibir novedades</span>
+                </label>
+                <fieldset class="choices">
+                  <legend>Entrega</legend>
+                  <label class="choice"><input type="radio" name="delivery" value="Normal" checked>Normal</label>
+                  <label class="choice"><input type="radio" name="delivery" value="Express">Express</label>
+                </fieldset>
+                <p class="note" id="change-summary">—</p>
+              </form>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>form.addEventListener("change", (event) =&gt; {
+  const control = event.target;    // el control que cambió
+  const value = control.type === "checkbox" ? control.checked : control.value;
+  console.log(control.name, value);
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 12 · focus / blur ---------- -->
+            <article class="event-card" id="card-focus" data-card="focus">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>focus / blur</code></h3>
+                <div class="event-card__counters">
+                  <span class="counter" data-type="focus"><code>focus</code><b>0</b></span>
+                  <span class="counter" data-type="blur"><code>blur</code><b>0</b></span>
+                </div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">FocusEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: no</span>
+              </div>
+              <p class="event-card__about"><code>focus</code> llega cuando un elemento recibe el foco (clic, Tab o <code>.focus()</code>) y <code>blur</code> cuando lo pierde. <strong>Ninguno burbujea</strong>: para delegar usa <code>focusin</code>/<code>focusout</code> o escucha en fase de captura (<code>true</code>). <code>relatedTarget</code> indica el otro elemento involucrado.</p>
+
+              <form class="demo stack" id="focus-form">
+                <div class="field">
+                  <input class="field__input" id="focus-name" name="name" type="text" placeholder=" " autocomplete="off">
+                  <label class="field__label" for="focus-name">Nombre</label>
+                </div>
+                <div class="field">
+                  <input class="field__input" id="focus-email" name="email" type="email" placeholder=" " autocomplete="off">
+                  <label class="field__label" for="focus-email">Correo</label>
+                </div>
+                <div class="field">
+                  <textarea class="field__input" id="focus-message" name="message" rows="2" placeholder=" "></textarea>
+                  <label class="field__label" for="focus-message">Mensaje</label>
+                </div>
+                <p class="note">Campo con foco: <strong id="focus-active">ninguno</strong> · usa Tab y clic.</p>
+              </form>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>// focus y blur NO burbujean: se capturan con el tercer argumento (true)
+form.addEventListener("focus", (event) =&gt; {
+  event.target.closest(".field").classList.add("is-focused");
+}, true);
+
+form.addEventListener("blur", (event) =&gt; {
+  event.target.closest(".field").classList.remove("is-focused");
+  console.log("Pasa el foco a:", event.relatedTarget);
+}, true);</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 13 · keydown / keyup ---------- -->
+            <article class="event-card" id="card-keyboard" data-card="keyboard">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>keydown / keyup</code></h3>
+                <div class="event-card__counters">
+                  <span class="counter" data-type="keydown"><code>keydown</code><b>0</b></span>
+                  <span class="counter" data-type="keyup"><code>keyup</code><b>0</b></span>
+                </div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">KeyboardEvent</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+              </div>
+              <p class="event-card__about"><code>keydown</code> se dispara al presionar una tecla y <strong>se repite</strong> mientras se mantiene pulsada (<code>event.repeat</code>); <code>keyup</code> al soltarla. Usa <code>event.key</code> para el valor y <code>event.code</code> para la tecla física. Para atajos revisa <code>ctrlKey</code>, <code>shiftKey</code>, <code>altKey</code> y <code>metaKey</code>.</p>
+
+              <div class="demo">
+                <div class="keypad" id="key-pad" tabindex="0" aria-label="Zona de captura de teclado">
+                  <kbd class="keycap" id="key-cap">?</kbd>
+                  <dl class="facts facts--center">
+                    <div class="facts__row"><dt>key</dt><dd id="key-key">—</dd></div>
+                    <div class="facts__row"><dt>code</dt><dd id="key-code">—</dd></div>
+                    <div class="facts__row"><dt>repeat</dt><dd id="key-repeat">—</dd></div>
+                  </dl>
+                  <div class="mods">
+                    <span class="mod" data-mod="ctrlKey">Ctrl</span>
+                    <span class="mod" data-mod="shiftKey">Shift</span>
+                    <span class="mod" data-mod="altKey">Alt</span>
+                    <span class="mod" data-mod="metaKey">Meta</span>
+                  </div>
+                  <p class="note">Haz clic aquí y presiona teclas. Mantén una pulsada para ver <code>repeat</code>.</p>
+                </div>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>pad.addEventListener("keydown", (event) =&gt; {
+  if (event.key === " ") event.preventDefault();   // evita el scroll de la página
+  console.log(event.key, event.code, event.repeat);
+
+  // Atajo: Ctrl + K
+  if (event.ctrlKey &amp;&amp; event.key.toLowerCase() === "k") {
+    openSearch();
+  }
+});
+
+pad.addEventListener("keyup", () =&gt; {
+  cap.classList.remove("is-down");
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 14 · submit (datos) ---------- -->
+            <article class="event-card" id="card-submit-data" data-card="submit-data">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>submit</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="submit"><code>submit</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">SubmitEvent</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+                <span class="chip chip--static">Objetivo: &lt;form&gt;</span>
+              </div>
+              <p class="event-card__about">Aquí <code>submit</code> sirve para <strong>leer los datos</strong>: <code>new FormData(form)</code> recoge todos los campos con <code>name</code>, y <code>event.submitter</code> dice cuál botón envió el formulario. Si un campo no cumple la validación (<code>required</code>, <code>type="email"</code>…), <code>submit</code> <strong>no se dispara</strong>.</p>
+
+              <form class="demo stack" id="data-form" action="">
+                <div class="field">
+                  <input class="field__input" id="data-name" name="name" type="text" placeholder=" " required autocomplete="off">
+                  <label class="field__label" for="data-name">Nombre (obligatorio)</label>
+                </div>
+                <div class="field">
+                  <input class="field__input" id="data-email" name="email" type="email" placeholder=" " required autocomplete="off">
+                  <label class="field__label" for="data-email">Correo (obligatorio)</label>
+                </div>
+                <div class="field field--select">
+                  <select class="field__input" id="data-plan" name="plan">
+                    <option value="basico">Básico</option>
+                    <option value="pro">Pro</option>
+                    <option value="empresa">Empresa</option>
+                  </select>
+                  <label class="field__label" for="data-plan">Plan</label>
+                </div>
+                <label class="choice"><input type="checkbox" name="terms" value="yes">Acepto los términos</label>
+                <div class="row">
+                  <button type="submit" class="btn btn--filled btn--sm" name="action" value="save">Guardar</button>
+                  <button type="submit" class="btn btn--tonal btn--sm" name="action" value="new">Guardar y nuevo</button>
+                </div>
+                <pre class="result" id="data-result">Los datos enviados aparecerán aquí.</pre>
+              </form>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>form.addEventListener("submit", (event) =&gt; {
+  event.preventDefault();
+
+  // El segundo argumento incluye el botón que envió el formulario
+  const data = Object.fromEntries(new FormData(form, event.submitter));
+  console.log(data);   // { name: "Ana", email: "...", action: "save" }
+
+  if (event.submitter.value === "new") form.reset();
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 15 · invalid ---------- -->
+            <article class="event-card" id="card-invalid" data-card="invalid">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>invalid</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="invalid"><code>invalid</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+                <span class="chip chip--static">Objetivo: el campo</span>
+              </div>
+              <p class="event-card__about">Se dispara en <strong>cada campo</strong> que no cumple sus restricciones (<code>required</code>, <code>minlength</code>, <code>pattern</code>, <code>type="email"</code>, <code>min</code>/<code>max</code>) al intentar enviar el formulario o llamar a <code>checkValidity()</code>. Cancelarlo con <code>preventDefault()</code> oculta el globo nativo para mostrar tu propio mensaje.</p>
+              <p class="tip"><svg class="icon icon-sm"><use href="#i-info"/></svg><span><code>invalid</code> no burbujea: se captura desde el <code>&lt;form&gt;</code> con <code>true</code>. Mientras haya campos inválidos, <code>submit</code> no se dispara.</span></p>
+
+              <form class="demo stack" id="invalid-form" action="">
+                <div class="field">
+                  <input class="field__input" id="invalid-user" name="user" type="text" placeholder=" " required minlength="4" maxlength="16" pattern="[a-z0-9_]+" title="Solo minúsculas, números y guion bajo" autocomplete="off">
+                  <label class="field__label" for="invalid-user">Usuario</label>
+                  <p class="field__support">Mín. 4 · minúsculas, números y _</p>
+                </div>
+                <div class="field">
+                  <input class="field__input" id="invalid-age" name="age" type="number" placeholder=" " required min="18" max="99">
+                  <label class="field__label" for="invalid-age">Edad</label>
+                  <p class="field__support">Entre 18 y 99</p>
+                </div>
+                <div class="field">
+                  <input class="field__input" id="invalid-email" name="email" type="email" placeholder=" " required autocomplete="off">
+                  <label class="field__label" for="invalid-email">Correo</label>
+                  <p class="field__support">Debe incluir @</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="invalid-custom" checked>
+                  <span class="switch__track"><span class="switch__thumb"></span></span>
+                  <span>Mis mensajes (<code>preventDefault()</code>)</span>
+                </label>
+                <div class="row">
+                  <button type="submit" class="btn btn--filled btn--sm">Validar y enviar</button>
+                  <button type="button" class="btn btn--outlined btn--sm" id="btn-check-validity">checkValidity()</button>
+                </div>
+                <p class="note" id="invalid-status">Deja campos vacíos o inválidos y envía.</p>
+              </form>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>form.addEventListener("invalid", (event) =&gt; {
+  event.preventDefault();               // oculta el globo nativo
+  const control = event.target;         // el campo inválido
+  const box = control.closest(".field");
+  box.classList.add("is-invalid");
+  box.querySelector(".field__support").textContent = control.validationMessage;
+  console.log(control.validity.valueMissing, control.validity.patternMismatch);
+}, true);                                // invalid no burbujea: se captura</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 16 · dragstart / dragover / drop ---------- -->
+            <article class="event-card event-card--wide" id="card-drag" data-card="drag">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>dragstart / dragover / drop</code></h3>
+                <div class="event-card__counters">
+                  <span class="counter" data-type="dragstart"><code>dragstart</code><b>0</b></span>
+                  <span class="counter" data-type="dragover"><code>dragover</code><b>0</b></span>
+                  <span class="counter" data-type="drop"><code>drop</code><b>0</b></span>
+                </div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">DragEvent</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+              </div>
+              <p class="event-card__about"><code>dragstart</code> se dispara en el elemento <code>draggable="true"</code> al empezar a arrastrarlo; ahí se guarda el dato con <code>dataTransfer.setData()</code>. <code>dragover</code> se repite sobre el destino mientras el puntero está encima. <code>drop</code> ocurre al soltar y es donde se lee el dato con <code>getData()</code>.</p>
+              <p class="tip"><svg class="icon icon-sm"><use href="#i-info"/></svg><span>Si <code>dragover</code> <strong>no</strong> llama a <code>preventDefault()</code>, el destino rechaza el elemento y <code>drop</code> nunca se dispara. Prueba arrastrar un archivo del escritorio a la zona <em>Archivos</em>.</span></p>
+
+              <div class="demo drag-board" id="drag-board">
+                <section class="dropzone" data-zone="todo" data-accepts="text/plain" aria-label="Por hacer">
+                  <h4 class="dropzone__title">Por hacer</h4>
+                  <div class="dropzone__items">
+                    <div class="drag-chip" id="chip-design" draggable="true"><svg class="icon"><use href="#i-grip"/></svg>Diseñar la interfaz</div>
+                    <div class="drag-chip" id="chip-code" draggable="true"><svg class="icon"><use href="#i-grip"/></svg>Escribir el código</div>
+                    <div class="drag-chip" id="chip-test" draggable="true"><svg class="icon"><use href="#i-grip"/></svg>Probar los eventos</div>
+                    <div class="drag-chip" id="chip-publish" draggable="true"><svg class="icon"><use href="#i-grip"/></svg>Publicar</div>
+                  </div>
+                </section>
+                <section class="dropzone" data-zone="done" data-accepts="text/plain" aria-label="Hecho">
+                  <h4 class="dropzone__title">Hecho</h4>
+                  <div class="dropzone__items"></div>
+                </section>
+                <section class="dropzone dropzone--files" data-zone="files" data-accepts="Files" aria-label="Archivos">
+                  <h4 class="dropzone__title">Archivos</h4>
+                  <p class="dropzone__hint" id="drag-files-hint">Arrastra aquí archivos desde tu escritorio</p>
+                  <ul class="dropzone__list" id="drag-files"></ul>
+                </section>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>board.addEventListener("dragstart", (event) =&gt; {
+  event.dataTransfer.setData("text/plain", event.target.id);
+  event.dataTransfer.effectAllowed = "move";
+});
+
+zone.addEventListener("dragover", (event) =&gt; {
+  event.preventDefault();            // obligatorio: permite soltar aquí
+});
+
+zone.addEventListener("drop", (event) =&gt; {
+  event.preventDefault();
+  const id = event.dataTransfer.getData("text/plain");
+  zone.append(document.getElementById(id));
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 17 · paste ---------- -->
+            <article class="event-card" id="card-paste" data-card="paste">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>paste</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="paste"><code>paste</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">ClipboardEvent</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: sí</span>
+              </div>
+              <p class="event-card__about">Se dispara cuando el usuario pega (Ctrl/⌘ + V o menú contextual) en un elemento editable. <code>event.clipboardData</code> da acceso a lo pegado: <code>getData("text")</code> para texto y <code>files</code> para imágenes. Con <code>preventDefault()</code> cancelas el pegado nativo y lo transformas tú.</p>
+
+              <div class="demo stack">
+                <div class="field">
+                  <textarea class="field__input" id="paste-field" rows="3" placeholder=" "></textarea>
+                  <label class="field__label" for="paste-field">Pega aquí texto o una imagen</label>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="paste-upper">
+                  <span class="switch__track"><span class="switch__thumb"></span></span>
+                  <span>Texto en MAYÚSCULAS (<code>preventDefault()</code>)</span>
+                </label>
+                <div class="paste-preview" id="paste-preview">Lo pegado se muestra aquí. Copia una captura de pantalla para probar con imágenes.</div>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>field.addEventListener("paste", (event) =&gt; {
+  const text = event.clipboardData.getData("text");
+  const image = event.clipboardData.files[0];
+  if (image) showPreview(URL.createObjectURL(image));
+
+  if (onlyUppercase) {
+    event.preventDefault();             // cancela el pegado normal
+    field.setRangeText(text.toUpperCase(), field.selectionStart, field.selectionEnd, "end");
+  }
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 18 · abort ---------- -->
+            <article class="event-card" id="card-abort" data-card="abort">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>abort</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="abort"><code>abort</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event / ProgressEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: no</span>
+              </div>
+              <p class="event-card__about">Se dispara cuando una operación se <strong>cancela</strong> antes de terminar y sin que haya un fallo: <code>AbortController.abort()</code> (la señal que se pasa a <code>fetch</code>), <code>xhr.abort()</code>, <code>reader.abort()</code> de <code>FileReader</code> o una carga de audio/video interrumpida. No es lo mismo que <code>error</code>.</p>
+
+              <div class="demo stack">
+                <div class="progress" role="presentation"><span class="progress__bar" id="abort-bar"></span></div>
+                <p class="note" id="abort-status">Descarga simulada de 5 segundos. Cancélala a mitad de camino.</p>
+                <div class="row">
+                  <button type="button" class="btn btn--filled btn--sm" id="btn-abort-start"><svg class="icon"><use href="#i-play"/></svg>Iniciar</button>
+                  <button type="button" class="btn btn--tonal btn--sm" id="btn-abort-cancel" disabled><svg class="icon"><use href="#i-x"/></svg>Cancelar</button>
+                  <button type="button" class="btn btn--outlined btn--sm" id="btn-abort-reader">FileReader: leer y cancelar</button>
+                </div>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>const controller = new AbortController();
+
+controller.signal.addEventListener("abort", () =&gt; {
+  status.textContent = "Cancelado";
+});
+
+fetch(url, { signal: controller.signal });   // la petición queda ligada a la señal
+cancelButton.onclick = () =&gt; controller.abort();
+
+// FileReader también emite abort
+reader.addEventListener("abort", () =&gt; console.log("lectura cancelada"));
+reader.readAsText(file);
+reader.abort();</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 19 · error ---------- -->
+            <article class="event-card" id="card-error" data-card="error">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>error</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="error"><code>error</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event / ErrorEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: solo en window</span>
+              </div>
+              <p class="event-card__about">Se dispara cuando algo <strong>falla</strong>. En un <code>&lt;img&gt;</code>, <code>&lt;script&gt;</code> o <code>&lt;link&gt;</code> indica que el recurso no se pudo cargar (el evento va al elemento y no burbujea). En <code>window</code> indica una excepción sin capturar (<code>ErrorEvent</code> con <code>message</code>, <code>filename</code> y <code>lineno</code>).</p>
+
+              <div class="demo stack">
+                <div class="row row--top">
+                  <figure class="thumb thumb--sm" id="error-thumb">
+                    <svg class="icon thumb__placeholder"><use href="#i-image"/></svg>
+                    <img id="error-img" alt="Imagen de prueba">
+                  </figure>
+                  <div class="stack stack--tight">
+                    <button type="button" class="btn btn--tonal btn--sm" id="btn-error-img">Imagen inexistente</button>
+                    <button type="button" class="btn btn--outlined btn--sm" id="btn-error-throw"><svg class="icon"><use href="#i-alert"/></svg>Lanzar excepción</button>
+                  </div>
+                </div>
+                <p class="note" id="error-status">La excepción también aparecerá en rojo en la consola de DevTools.</p>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>// Recurso que falla: el evento llega al propio elemento
+image.addEventListener("error", () =&gt; {
+  image.src = "img/no-image.svg";      // imagen alternativa
+});
+
+// Excepción sin capturar en cualquier parte del código
+window.addEventListener("error", (event) =&gt; {
+  console.log(event.message, event.filename, event.lineno);
+});</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 20 · load (recurso) ---------- -->
+            <article class="event-card" id="card-load-resource" data-card="load-resource">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>load</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="load"><code>load</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event / ProgressEvent</span>
+                <span class="chip chip--static">Burbujea: no</span>
+                <span class="chip chip--static">Cancelable: no</span>
+              </div>
+              <p class="event-card__about">En <code>&lt;img&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;iframe&gt;</code> y en <code>FileReader</code> indica que la carga terminó <strong>con éxito</strong>. Registra el listener <strong>antes</strong> de asignar <code>src</code>; si no, la carga podría terminar primero y te perderías el evento. En un <code>&lt;img&gt;</code> ya puedes leer <code>naturalWidth</code> y <code>naturalHeight</code>.</p>
+
+              <div class="demo stack">
+                <figure class="thumb" id="load-thumb">
+                  <svg class="icon thumb__placeholder"><use href="#i-image"/></svg>
+                  <img id="load-img" alt="Vista previa cargada">
+                </figure>
+                <div class="row">
+                  <button type="button" class="btn btn--tonal btn--sm" id="btn-load-image">Generar imagen</button>
+                  <label class="btn btn--outlined btn--sm">
+                    <svg class="icon"><use href="#i-upload"/></svg>Elegir archivo
+                    <input class="visually-hidden" type="file" id="load-file" accept="image/*">
+                  </label>
+                </div>
+                <p class="note">Con un archivo verás <strong>dos</strong> <code>load</code>: el de <code>FileReader</code> y el del <code>&lt;img&gt;</code>.</p>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>const image = document.getElementById("preview");
+
+image.addEventListener("load", () =&gt; {              // 1) primero el listener
+  console.log(image.naturalWidth, image.naturalHeight);
+});
+image.src = "photo.jpg";                              // 2) después el src
+
+// FileReader termina con load
+reader.addEventListener("load", () =&gt; {
+  image.src = reader.result;                          // data: URL
+});
+reader.readAsDataURL(file);</code></pre>
+              </details>
+            </article>
+
+            <!-- ---------- 21 · visibilitychange ---------- -->
+            <article class="event-card" id="card-visibility" data-card="visibility">
+              <header class="event-card__header">
+                <h3 class="event-card__title"><code>visibilitychange</code></h3>
+                <div class="event-card__counters"><span class="counter" data-type="visibilitychange"><code>visibilitychange</code><b>0</b></span></div>
+              </header>
+              <div class="event-card__meta">
+                <span class="chip chip--static">Event</span>
+                <span class="chip chip--static">Burbujea: sí</span>
+                <span class="chip chip--static">Cancelable: no</span>
+                <span class="chip chip--static">Objetivo: document</span>
+              </div>
+              <p class="event-card__about">Se dispara en <code>document</code> cuando la pestaña pasa a <strong>oculta</strong> o <strong>visible</strong>: cambiar de pestaña, minimizar o bloquear la pantalla. Lee <code>document.visibilityState</code> (<code>"visible"</code> o <code>"hidden"</code>). Es el lugar correcto para pausar videos, animaciones o sondeos, y para guardar borradores.</p>
+
+              <div class="demo stack">
+                <div class="vis" id="visibility-state" data-state="visible">
+                  <span class="vis__dot"></span>
+                  <span class="vis__label">visible</span>
+                </div>
+                <dl class="facts">
+                  <div class="facts__row"><dt>Veces oculta</dt><dd id="visibility-count">0</dd></div>
+                  <div class="facts__row"><dt>Última vez oculta durante</dt><dd id="visibility-time">—</dd></div>
+                </dl>
+                <p class="note">Cambia a otra pestaña y regresa: el registro mostrará ambos cambios con su hora.</p>
+              </div>
+
+              <div class="inspector">
+                <h4 class="inspector__title">Último evento</h4>
+                <dl class="inspector__list"><div class="inspector__empty">Aún no se ha disparado.</div></dl>
+              </div>
+
+              <details class="code">
+                <summary><svg class="icon icon-sm"><use href="#i-code"/></svg>Ver código<svg class="icon icon-sm code__chevron"><use href="#i-chevron"/></svg></summary>
+<pre><code>document.addEventListener("visibilitychange", () =&gt; {
+  if (document.visibilityState === "hidden") {
+    pauseAnimation();
+    saveDraft();
+  } else {
+    resumeAnimation();
+  }
+});</code></pre>
+              </details>
+            </article>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- ===================== REGISTRO GLOBAL DE EVENTOS ===================== -->
+    <aside class="log-sheet" id="log-sheet" aria-label="Registro de eventos">
+      <header class="log-sheet__head">
+        <h2 class="log-sheet__title">Registro</h2>
+        <button type="button" class="icon-button" id="btn-log-pause" aria-pressed="false" aria-label="Pausar el registro" title="Pausar el registro">
+          <svg class="icon icon--when-off"><use href="#i-pause"/></svg>
+          <svg class="icon icon--when-on"><use href="#i-play"/></svg>
+        </button>
+        <button type="button" class="icon-button" id="btn-log-clear" aria-label="Limpiar el registro" title="Limpiar el registro">
+          <svg class="icon"><use href="#i-trash"/></svg>
+        </button>
+        <button type="button" class="icon-button log-sheet__close" id="btn-log-close" aria-label="Cerrar el registro" title="Cerrar">
+          <svg class="icon"><use href="#i-x"/></svg>
+        </button>
+      </header>
+      <div class="log-sheet__filters" role="group" aria-label="Filtrar el registro">
+        <button type="button" class="chip is-selected" data-filter="all" aria-pressed="true"><svg class="icon icon-sm"><use href="#i-check"/></svg>Todos</button>
+        <button type="button" class="chip" data-filter="nav" aria-pressed="false"><svg class="icon icon-sm"><use href="#i-check"/></svg>Navegación</button>
+        <button type="button" class="chip" data-filter="data" aria-pressed="false"><svg class="icon icon-sm"><use href="#i-check"/></svg>Datos</button>
+      </div>
+      <ol class="log" id="log" data-filter="all" role="log" aria-live="off"></ol>
+      <p class="log-empty" id="log-empty">Aún no hay eventos. Interactúa con cualquier tarjeta.</p>
+      <footer class="log-sheet__foot">
+        <span id="log-total">0 registros</span> · lo más reciente arriba · se conserva al recargar
+      </footer>
+    </aside>
+    <div class="scrim" id="log-scrim"></div>
+
+  </div>
+
+  <!-- 1) Infraestructura compartida: registro, contadores, inspector, tema. No se modifica. -->
+  <script src="js/base.js"></script>
+  <!-- 2) Elige UNA versión: completa (docente) o con retos (estudiantes). -->
+  <script src="js/control.js"></script>
+  <!-- <script src="js/control-retos.js"></script> -->
+</body>
+</html>
